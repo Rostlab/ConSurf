@@ -1761,17 +1761,17 @@ Minimal E-value cutoff for Blast search. default = B<0.001>
 
 =item Basic Build MSA mode (using defaults parameters) 
 
-C<perl ConSurf.pl --PDB  __pkgdatadir__/MY_PDB_FILE.pdb --CHAIN MY_CHAIN_ID --Out_Dir /tmp/$USER/consurf -m>
+C<perl ConSurf.pl --PDB  __pkgdatadir__/example/pdb2vaa.ent --CHAIN A --Out_Dir /tmp/$USER/consurf -m>
 
 =item using build MSA mode and advanced options: 
 
-C<perl ConSurf.pl --PDB __pkgdatadir__/MY_PDB_FILE.pdb --CHAIN A --Out_Dir /tmp/$USER/consurf --m --MSAprogram CLUSTALW --DB "SWISS-PROT" --MaxHomol 100 --Iterat 2 --ESCORE 0.00001 --Algorithm LikelihoodML --Matrix Dayhoff>
+C<perl ConSurf.pl --PDB  __pkgdatadir__/example/pdb2vaa.ent --CHAIN A --Out_Dir /tmp/$USER/consurf --m --MSAprogram CLUSTALW --DB "SWISS-PROT" --MaxHomol 100 --Iterat 2 --ESCORE 0.00001 --Algorithm LikelihoodML --Matrix Dayhoff>
 
 Will run Consurf in: building MSA mode (--m) for Chain A (--CHAIN) of PDB file: /groups/bioseq.home/1ENV.pdb (--PDB). The sequences for the MSA will be chosen according 2  iterations of PSI-Blast (--Iterat) against SwissProt Database (--DB "SWISS-PROT"), with E value cutoff of 0.00001 (--ESCORE), considering maximum 100 homologues (MaxHomol). The Rate4Site will use Maximum Liklihood algorithm (--Algorithm) and Dayhoff model (--Matrix)
 
 =item Simple Run With prepared MSA. 
 
-C<perl ConSurf.pl --PDB __pkgdatadir__/MY_PDB_FILE.pdb --CHAIN A --Out_Dir /tmp/$USER/consurf --MSA MY_MSA_FILE --SEQ_NAME MY_SEQ_NAME>	
+C<perl ConSurf.pl --PDB  __pkgdatadir__/example/pdb2vaa.ent --CHAIN A --Out_Dir /tmp/$USER/consurf --MSA MY_MSA_FILE --SEQ_NAME MY_SEQ_NAME>	
 
 =back
 
