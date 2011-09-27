@@ -21,19 +21,19 @@ use constant SWISSPROT_DB =>        "/biodb/BLAST/Proteins/swissprot";
 use constant UNIPROT_DB =>          "/biodb/BLAST/Proteins/uniprot";
 use constant RCSB_WGET =>           "wget ftp://ftp.wwpdb.org/pub/pdb/data/structures/all/pdb/";
 
-#external programs
-	#replace /usr/local/bin/muscle with the location of your muscle instalation
-use constant MUSCLE =>              "/usr/local/bin/muscle"; 
-	# replace /usr/local/bin/clustalw with your locationion of your clustalw istalation
-use constant CLUSTALW =>            "/usr/local/bin/clustalw"; 
-	# replace /db1/Local/src/Rate4SiteSource/r4s_Nov_06_dev/rate4site.exe with the location of your rate4site instalation
-use constant RATE4SITE =>           "/db1/Local/src/Rate4SiteSource/r4s_Nov_06_dev/rate4site.exe";
-	#replace /db1/Local/src/Rate4SiteSource/r4s_Nov_06_dev/rate4siteSlow.exe with the location of your rate4site_Slow instalation
-use constant RATE4SITE_SLOW =>      "/db1/Local/src/Rate4SiteSource/r4s_Nov_06_dev/rate4siteSlow.exe";
-	#replace /db1/Local/src/cd-hit_redundency/ with the directory containing your instalation of CD-HIT
-use constant CD_HIT_DIR =>          "/db1/Local/src/cd-hit_redundency/";
-	#replace /usr/local/bin/blastpgp with the location of your blastpgp instalation
-use constant BLASTPGP => 	    "/usr/local/bin/blastpgp";
+##external programs
+#	#replace /usr/local/bin/muscle with the location of your muscle instalation
+#use constant MUSCLE =>              "muscle"; 
+#	# replace /usr/local/bin/clustalw with your locationion of your clustalw istalation
+#use constant CLUSTALW =>            "clustalw"; 
+#	# replace /db1/Local/src/Rate4SiteSource/r4s_Nov_06_dev/rate4site.exe with the location of your rate4site instalation
+#use constant RATE4SITE =>           "rate4site.exe";
+#	#replace /db1/Local/src/Rate4SiteSource/r4s_Nov_06_dev/rate4siteSlow.exe with the location of your rate4site_Slow instalation
+#use constant RATE4SITE_SLOW =>      "rate4siteSlow";
+#	#replace /db1/Local/src/cd-hit_redundency/ with the directory containing your instalation of CD-HIT
+#use constant CD_HIT_DIR =>          "cd-hit_redundency/";
+#	#replace /usr/local/bin/blastpgp with the location of your blastpgp instalation
+#use constant BLASTPGP => 	    "blastpgp";
 # constant values
 use constant BLAST_MAX_HOMOLOGUES_TO_DISPLAY => 500;
 
