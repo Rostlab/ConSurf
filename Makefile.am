@@ -10,7 +10,6 @@ dist_pkgdata_DATA = \
 	prepareMSA.pm \
 	TREE_parser.pm
 
-dist_pkgdata_SCRIPTS =
 
 # lkajan: CentOS 5 autoconf does not define docdir
 docdir = $(datadir)/doc/$(PACKAGE)
