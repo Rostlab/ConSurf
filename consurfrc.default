@@ -7,6 +7,7 @@ PDB_DIVIDED =/biodb/PDB/data/structures/divided/pdb/
 SWISSPROT_DB=/biodb/BLAST/Proteins/swissprot
 UNIPROT_DB=/biodb/BLAST/Proteins/uniprot
 RCSB_WGET=wget ftp://ftp.wwpdb.org/pub/pdb/data/structures/all/pdb/
+CD_HIT_DIR=cd-hit_redundency/
 
 [params]
 BLAST_MAX_HOMOLOGUES_TO_DISPLAY=500

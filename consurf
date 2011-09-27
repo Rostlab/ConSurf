@@ -33,10 +33,10 @@ use Getopt::Long;
 
 our $config;
 my $consurf_utildir;
+our $VERSION = "__PACKAGE_VERSION__";
 
 BEGIN {
 	use Config::IniFiles;
-	our $VERSION = "__PACKAGE_VERSION__";
 
 	my ( $defaultconfig, $etcconfig );
 	if ( -e "__pkgdatadir__/consurfrc.default" ) {
@@ -50,7 +50,7 @@ BEGIN {
 		);
 	}
 	else { $etcconfig = $defaultconfig; }
-	if ( ( $ENV{SNAPFUNCONF} && -e "$ENV{CONSURFCONF}" )
+	if ( ( $ENV{CONSURFCONF} && -e "$ENV{CONSURFCONF}" )
 		|| -e "$ENV{HOME}/.consurfrc" )
 	{
 		$config = Config::IniFiles->new(
@@ -67,7 +67,7 @@ use lib glob($consurf_utildir);
 
 #use lib "/groups/bioseq.home/HAIM/ConSurf_Exec";
 
-use CONSURF_CONSTANTS;
+#use CONSURF_CONSTANTS;
 use CONSURF_FUNCTIONS;
 use prepareMSA;
 use MSA_parser;
@@ -124,7 +124,7 @@ if ( $VARS{working_dir} ) {
 		#if (!(-e $workdir)){die "doesnt exist"}
 		# not fully qualified, so turn it into that:
 
-		$VARS{working_dir} = Cwd::realpath($workdir);
+		$VARS{working_dir} = Cwd::realpath($VARS{working_dir});
 	}
 }
 else {
@@ -264,8 +264,8 @@ my ( $seq3d_grades_isd, $seq3d_grades );
 my ( $length_of_seqres, $length_of_atom );
 
 # programs
-my $rate4s      = CONSURF_CONSTANTS::RATE4SITE;
-my $rate4s_slow = CONSURF_CONSTANTS::RATE4SITE_SLOW;
+my $rate4s      = "rate4site ";
+my $rate4s_slow = "rate4site_slow ";
 
 # outputs
 $VARS{r4s_log}               = "$FORM{pdb_ID}_$FORM{chain}_r4s.log";
@@ -327,7 +327,7 @@ if (   $VARS{running_mode} eq "_mode_pdb_no_msa"
 	  "$FORM{pdb_ID}_$FORM{chain}.last_round.blast"
 	  ;    # file to hold blast output, last round
 	$VARS{max_homologues_to_display} =
-	  $config->val( 'databases', 'BLAST_MAX_HOMOLOGUES_TO_DISPLAY' )
+	    $config->val( 'databases', 'BLAST_MAX_HOMOLOGUES_TO_DISPLAY' );
 
 	  #$VARS{protein_db} = CONSURF_CONSTANTS::SWISSPROT_DB;
 	  $VARS{protein_db} = $config->val( 'databases', 'UNIPROT_DB' );
@@ -483,7 +483,7 @@ sub analyse_seqres_atom {
 			and length( $VARS{SEQRES_seq} ) > 0
 			and ( $VARS{pdb_file}->get("MODIFIED_COUNT$FORM{chain}.raw") /
 				length( $VARS{SEQRES_seq} ) >
-				CONSURF_CONSTANTS::MAXIMUM_MODIFIED_PERCENT )
+			        $config->val( 'databases', 'MAXIMUM_MODIFIED_PERCENT' ))
 		  )
 		{
 			&exit_on_error( 'user_error',
@@ -567,7 +567,7 @@ sub compare_atom_seqres_or_msa {
 
 	my $command = "cd "
 	  . $VARS{working_dir} . "; "
-	  . CONSURF_CONSTANTS::CLUSTALW
+	  . "clustalw "
 	  . " -INFILE="
 	  . $VARS{working_dir} . "/"
 	  . $two_fastas
@@ -653,11 +653,11 @@ sub run_blast {
 
 	my $cmd =
 	    "cd $VARS{working_dir}; "
-	  . CONSURF_CONSTANTS::BLASTPGP
+	  . "blastpgp "
 	  . " -i $VARS{working_dir}/$VARS{protein_seq} -e $FORM{ESCORE} -d $VARS{protein_db} -o $VARS{working_dir}/$VARS{BLAST_out_file} -j $FORM{iterations} -v $VARS{max_homologues_to_display} -b $VARS{max_homologues_to_display} -F F";
 	print LOG "run_blast : running: $cmd\n";
 
-	system(@cmd) && die( "'@cmd' failed: " . ( $? >> 8 ) );
+	system($cmd) && die( "'$cmd' failed: " . ( $? >> 8 ) );
 
 	#my $ans = `$cmd`;
 	#print LOG "run_blast : ans from blast run: $ans\n" if $ans ne "";
@@ -713,7 +713,7 @@ sub extract_round_from_blast {
 		{
 			my $cmd = "mv $VARS{BLAST_last_round} $VARS{BLAST_out_file}";
 			chdir $VARS{working_dir};
-			system(@cmd) && die( "'@cmd' failed: " . ( $? >> 8 ) );
+			system($cmd) && die( "'$cmd' failed: " . ( $? >> 8 ) );
 
 			#`$cmd`;
 		}
@@ -768,7 +768,8 @@ sub cluster_homologoues {
 	my @ans = prepareMSA::create_cd_hit_output(
 		"$VARS{working_dir}/",         $VARS{HITS_fasta_file},
 		$VARS{cd_hit_out_file},        $VARS{hit_redundancy} / 100,
-		CONSURF_CONSTANTS::CD_HIT_DIR, $ref_cd_hit_hash,
+		$config->val( 'databases', 'CD_HIT_DIR' )
+	    , $ref_cd_hit_hash,
 		"from_ibis"
 	);
 	if ( $ans[0] eq "sys" ) {
@@ -1203,17 +1204,17 @@ sub create_MSA {
 	chdir $VARS{working_dir};
 	if ( $FORM{MSAprogram} eq 'CLUSTALW' ) {
 		$cmd =
-		  CONSURF_CONSTANTS::CLUSTALW
+		   "clustalw "
 		  . " -INFILE=$VARS{FINAL_sequences} -OUTFILE=$VARS{protein_MSA}";
 	}
 	else {
 		$cmd =
-		  CONSURF_CONSTANTS::MUSCLE
+		    "muscle "
 		  . " -in $VARS{FINAL_sequences} -out $VARS{protein_MSA} -clwstrict -quiet";
 	}
 	print LOG "create_MSA : run $cmd\n";
 	chdir $VARS{working_dir};
-	system(@cmd) && die( "'@cmd' failed: " . ( $? >> 8 ) );
+	system($cmd) && die( "'$cmd' failed: " . ( $? >> 8 ) );
 
 	#`$cmd`;
 	if ( !-e "$VARS{working_dir}/$VARS{protein_MSA}"
@@ -1228,7 +1229,7 @@ sub create_MSA {
 	# remove the dnd file
 	$cmd = "rm *.dnd";
 	chdir $VARS{working_dir};
-	system(@cmd) && die( "'@cmd' failed: " . ( $? >> 8 ) );
+	system($cmd) && die( "'$cmd' failed: " . ( $? >> 8 ) );
 
 	#`$cmd`;
 }
@@ -1628,13 +1629,19 @@ consurf [OPTION]
 
 =head1 DESCRIPTION
 
-The ConSurf system identifies of functional regions in proteins. It is mainly Based on the Rate4Site Algorithm for detecting conserved amino-acid sites by computing the relative evolutionary rate for each site in the multiple sequence alignment (MSA).
+The ConSurf system identifies functional regions in proteins. It is mainly based on the Rate4Site algorithm for detecting conserved amino-acid sites by computing the relative evolutionary rate for each site in the multiple sequence alignment (MSA).
 
 The ConSurf work in several modes
 
-1. Given Protein PDB File.
-2. Given Multiple Sequence Alignment (MSA) and Protein PDB File.
-3. Given Multiple Sequence Alignment (MSA), Phylogenetic Tree, and PDB File.
+=over
+
+=item 1. Given Protein PDB File.
+
+=item 2. Given Multiple Sequence Alignment (MSA) and Protein PDB File.
+
+=item 3. Given Multiple Sequence Alignment (MSA), Phylogenetic Tree, and PDB File.
+
+=back
 
 The script is using the user provided MSA (and Phylogenetic tree if available) to calculate the conservation score for each position in the MSA based on the Rate4Site algorithm (Mayrose, I., Graur, D., Ben-Tal, N., and Pupko, T. 2004. Comparison of site-specific rate-inference methods: Bayesian methods are superior. Mol Biol Evol 21: 1781-1791).
 
@@ -1760,7 +1767,7 @@ C<perl ConSurf.pl --PDB  __pkgdatadir__/MY_PDB_FILE.pdb --CHAIN MY_CHAIN_ID --Ou
 
 C<perl ConSurf.pl --PDB __pkgdatadir__/MY_PDB_FILE.pdb --CHAIN A --Out_Dir /tmp/$USER/consurf --m --MSAprogram CLUSTALW --DB "SWISS-PROT" --MaxHomol 100 --Iterat 2 --ESCORE 0.00001 --Algorithm LikelihoodML --Matrix Dayhoff>
 
-Will run Consurf in: building MSA mode (-m) for Chain A (-CHAIN) of PDB file: /groups/bioseq.home/1ENV.pdb (-PDB). The sequences for the MSA will be chosen according 2  iterations of PSI-Blast (-Iterat) against SwissProt Database (-DB "SWISS-PROT"), with E value cutoff of 0.00001 (-ESCORE), considering maximum 100 homologues (MaxHomol). The Rate4Site will use Maximum Liklihood algorithm (-Algorithm) and Dayhoff model (-Matrix)
+Will run Consurf in: building MSA mode (--m) for Chain A (--CHAIN) of PDB file: /groups/bioseq.home/1ENV.pdb (--PDB). The sequences for the MSA will be chosen according 2  iterations of PSI-Blast (--Iterat) against SwissProt Database (--DB "SWISS-PROT"), with E value cutoff of 0.00001 (--ESCORE), considering maximum 100 homologues (MaxHomol). The Rate4Site will use Maximum Liklihood algorithm (--Algorithm) and Dayhoff model (--Matrix)
 
 =item Simple Run With prepared MSA. 
 
@@ -1804,6 +1811,10 @@ If this environment variable is set F<~/.consurfrc> is disregarded and the value
 
 Landau M., Mayrose I., Rosenberg Y., Glaser F., Martz E., Pupko T., and Ben-Tal N.
 
+=head1 BUGS
+
+Please report bugs at L<bioSequence@tauex.tau.ac.il>
+
 =head1 COPYRIGHT AND LICENSE
 
 (C) Copyright 2003, Nir Ben-Tal et al.
@@ -1841,10 +1852,6 @@ c. IN NO EVENT SHALL LICENSEE BE LIABLE TO LICENSOR FOR ANY LOST PROFITS, LOST O
 =head1 SEE ALSO
 
 rate4site(1), clustalw(1), muscle(1)
-
-=head1 HELP
-
-For any questions or suggestions please contact: L<bioSequence@tauex.tau.ac.il>
 
 =cut
 
