@@ -1,0 +1,44 @@
+--------- ConSurf Log /mnt/project/consurf/package/ConSurf_TEST/output//_A_ConSurf.log.log -------------
+Begin Time: 11:52:09 31-07-2013
+run_blast : running: cd /mnt/project/consurf/package/ConSurf_TEST/output/; blastpgp -i /mnt/project/consurf/package/ConSurf_TEST/output//_A_protein_seq.fas -e 0.001 -d /mnt/home/gcelniker/ConSurf_TEST/DB/uniprot -o /mnt/project/consurf/package/ConSurf_TEST/output//_A.protein_query.blast -j 1 -v 50 -b 50 -F F
+choose_homologoues_from_blast : running prepareMSA::choose_homologoues_from_blast
+cluster_homologoues : running prepareMSA::create_cd_hit_output
+create_MSA : run /mnt/home/gcelniker/ConSurf_TEST/DB/muscle -in _A.final_homolougs.fas -out _A_query_msa.aln -clwstrict -quiet
+run_rate4site : running command: /mnt/project/consurf/package/ConSurf_TEST/rate4site -ib -a 'Input_pdb_SEQRES_A' -s _A_query_msa.aln -zn -Mj  -bn -l _A_r4s.log -o _A_r4s.res -x _A_Tree.txt
+assign_colors_according_to_r4s_layers : /mnt/project/consurf/package/ConSurf_TEST/output//_A_r4s.res
+read_residue_variety : Calling: MSA_parser::read_residue_variety(/mnt/project/consurf/package/ConSurf_TEST/output//_A_query_msa.aln, Input_pdb_SEQRES_A, clustalw, HASH(0x29d4b08), HASH(0x29d4b50))
+create_atom_position_file : calling CONSURF_FUNCTIONS::create_atom_position_file(/mnt/project/consurf/package/ConSurf_TEST/output/1.pdb,/mnt/project/consurf/package/ConSurf_TEST/output//_A_atom_pos.txt,A,%output)
+run_blast : running: cd /mnt/project/consurf/package/ConSurf_TEST/output/; blastpgp -i /mnt/project/consurf/package/ConSurf_TEST/output//_A_protein_seq.fas -e 0.001 -d /mnt/home/gcelniker/ConSurf_TEST/DB/uniprot -o /mnt/project/consurf/package/ConSurf_TEST/output//_A.protein_query.blast -j 1 -v 50 -b 50 -F F
+choose_homologoues_from_blast : running prepareMSA::choose_homologoues_from_blast
+cluster_homologoues : running prepareMSA::create_cd_hit_output
+create_MSA : run /mnt/home/gcelniker/ConSurf_TEST/DB/muscle -in _A.final_homolougs.fas -out _A_query_msa.aln -clwstrict -quiet
+run_rate4site : running command: /mnt/project/consurf/package/ConSurf_TEST/rate4site -ib -a 'Input_pdb_SEQRES_A' -s _A_query_msa.aln -zn -Mj  -bn -l _A_r4s.log -o _A_r4s.res -x _A_Tree.txt
+assign_colors_according_to_r4s_layers : /mnt/project/consurf/package/ConSurf_TEST/output//_A_r4s.res
+read_residue_variety : Calling: MSA_parser::read_residue_variety(/mnt/project/consurf/package/ConSurf_TEST/output//_A_query_msa.aln, Input_pdb_SEQRES_A, clustalw, HASH(0x2f3c9b8), HASH(0x2f3ca00))
+create_atom_position_file : calling CONSURF_FUNCTIONS::create_atom_position_file(/mnt/project/consurf/package/ConSurf_TEST/output/1.pdb,/mnt/project/consurf/package/ConSurf_TEST/output//_A_atom_pos.txt,A,%output)
+run_blast : running: cd /mnt/project/consurf/package/ConSurf_TEST/output/; blastpgp -i /mnt/project/consurf/package/ConSurf_TEST/output//_A_protein_seq.fas -e 0.001 -d /mnt/home/gcelniker/ConSurf_TEST/DB/uniprot -o /mnt/project/consurf/package/ConSurf_TEST/output//_A.protein_query.blast -j 1 -v 50 -b 50 -F F
+choose_homologoues_from_blast : running prepareMSA::choose_homologoues_from_blast
+cluster_homologoues : running prepareMSA::create_cd_hit_output
+create_MSA : run /mnt/home/gcelniker/ConSurf_TEST/DB/muscle -in _A.final_homolougs.fas -out _A_query_msa.aln -clwstrict -quiet
+run_rate4site : running command: /mnt/project/consurf/package/ConSurf_TEST/rate4site -ib -a 'Input_pdb_SEQRES_A' -s _A_query_msa.aln -zn -Mj  -bn -l _A_r4s.log -o _A_r4s.res -x _A_Tree.txt
+assign_colors_according_to_r4s_layers : /mnt/project/consurf/package/ConSurf_TEST/output//_A_r4s.res
+read_residue_variety : Calling: MSA_parser::read_residue_variety(/mnt/project/consurf/package/ConSurf_TEST/output//_A_query_msa.aln, Input_pdb_SEQRES_A, clustalw, HASH(0x16269b8), HASH(0x1626a00))
+create_atom_position_file : calling CONSURF_FUNCTIONS::create_atom_position_file(/mnt/project/consurf/package/ConSurf_TEST/output/1.pdb,/mnt/project/consurf/package/ConSurf_TEST/output//_A_atom_pos.txt,A,%output)
+run_blast : running: cd /mnt/project/consurf/package/ConSurf_TEST/output/; blastpgp -i /mnt/project/consurf/package/ConSurf_TEST/output//_A_protein_seq.fas -e 0.001 -d /mnt/home/gcelniker/ConSurf_TEST/DB/uniprot -o /mnt/project/consurf/package/ConSurf_TEST/output//_A.protein_query.blast -j 1 -v 50 -b 50 -F F
+choose_homologoues_from_blast : running prepareMSA::choose_homologoues_from_blast
+cluster_homologoues : running prepareMSA::create_cd_hit_output
+create_MSA : run /mnt/home/gcelniker/ConSurf_TEST/DB/muscle -in _A.final_homolougs.fas -out _A_query_msa.aln -clwstrict -quiet
+run_rate4site : running command: /mnt/project/consurf/package/ConSurf_TEST/rate4site -ib -a 'Input_pdb_SEQRES_A' -s _A_query_msa.aln -zn -Mj  -bn -l _A_r4s.log -o _A_r4s.res -x _A_Tree.txt
+assign_colors_according_to_r4s_layers : /mnt/project/consurf/package/ConSurf_TEST/output//_A_r4s.res
+read_residue_variety : Calling: MSA_parser::read_residue_variety(/mnt/project/consurf/package/ConSurf_TEST/output//_A_query_msa.aln, Input_pdb_SEQRES_A, clustalw, HASH(0x1df0a48), HASH(0x1df0a90))
+create_atom_position_file : calling CONSURF_FUNCTIONS::create_atom_position_file(/mnt/project/consurf/package/ConSurf_TEST/output/1.pdb,/mnt/project/consurf/package/ConSurf_TEST/output//_A_atom_pos.txt,A,%output)
+compare_atom_seqres_or_msa : run clustalw to see the match between ATOM and SEQRES sequences
+compare_atom_seqres_or_msa : run cd /mnt/project/consurf/package/ConSurf_TEST/output/; clustalw -INFILE=/mnt/project/consurf/package/ConSurf_TEST/output//PDB_SEQRES__A.fasta2 -GAPOPEN=1 -OUTFILE=/mnt/project/consurf/package/ConSurf_TEST/output//PDB_SEQRES__A.aln > /mnt/project/consurf/package/ConSurf_TEST/output//PDB_SEQRES__A.out
+run_blast : running: cd /mnt/project/consurf/package/ConSurf_TEST/output/; blastpgp -i /mnt/project/consurf/package/ConSurf_TEST/output//_A_protein_seq.fas -e 0.001 -d /mnt/home/gcelniker/ConSurf_TEST/DB/uniprot -o /mnt/project/consurf/package/ConSurf_TEST/output//_A.protein_query.blast -j 1 -v 50 -b 50 -F F
+choose_homologoues_from_blast : running prepareMSA::choose_homologoues_from_blast
+cluster_homologoues : running prepareMSA::create_cd_hit_output
+create_MSA : run /mnt/home/gcelniker/ConSurf_TEST/DB/muscle -in _A.final_homolougs.fas -out _A_query_msa.aln -clwstrict -quiet
+run_rate4site : running command: /mnt/project/consurf/package/ConSurf_TEST/rate4site -ib -a 'Input_pdb_SEQRES_A' -s _A_query_msa.aln -zn -Mj  -bn -l _A_r4s.log -o _A_r4s.res -x _A_Tree.txt
+assign_colors_according_to_r4s_layers : /mnt/project/consurf/package/ConSurf_TEST/output//_A_r4s.res
+read_residue_variety : Calling: MSA_parser::read_residue_variety(/mnt/project/consurf/package/ConSurf_TEST/output//_A_query_msa.aln, Input_pdb_SEQRES_A, clustalw, HASH(0x28739b8), HASH(0x2873a00))
+create_atom_position_file : calling CONSURF_FUNCTIONS::create_atom_position_file(/mnt/project/consurf/package/ConSurf_TEST/output/1.pdb,/mnt/project/consurf/package/ConSurf_TEST/output//_A_atom_pos.txt,A,%output)
