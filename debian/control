@@ -1,0 +1,29 @@
+Source: consurf
+Section: science
+Priority: extra
+Maintainer: Guy Yachdav <gyachdav@rostlab.org> 
+Uploaders: Guy Yachdav <gyachdav@rostlab.org>
+Build-Depends: debhelper (>= 7), perl, po-debconf
+Standards-Version: 3.9.1
+Homepage: http://consurf.tau.ac.il/
+
+Package: consurf
+Architecture: all
+Pre-Depends: debconf (>= 0.5)
+Depends: ${perl:Depends}, ${shlibs:Depends}, ${misc:Depends}, blast2, clustalw, muscle, rate4site
+Recommends: pp-popularity-contest
+Description: identifies functional sites on the protein surface 
+ The ConSurf system identifies functional regions in proteins. It is mainly based on the Rate4Site algorithm 
+ for detecting conserved amino-acid sites by computing the relative evolutionary rate for
+ each site in the multiple sequence alignment (MSA).
+ .
+ The ConSurf work in several modes
+ .
+ 1. Given Protein PDB File.
+ 2. Given Multiple Sequence Alignment (MSA) and Protein PDB File.
+ 3. Given Multiple Sequence Alignment (MSA), Phylogenetic Tree, and PDB File.
+ .
+ The script is using the user provided MSA (and Phylogenetic tree if available) to calculate the conservation score for each position in the MSA based on the Rate4Site algorithm (Mayrose, I.,
+ Graur, D., Ben-Tal, N., and Pupko, T. 2004. Comparison of site-specific rate-inference methods: Bayesian methods are superior. Mol Biol Evol 21: 1781-1791).
+ .
+ When running in the first mode the scripts the MSA is automatically build the MSA for the given protein based on ConSurf protocol.
