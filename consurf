@@ -25,29 +25,60 @@
 
 
 # perl cn_2202a.pl -PDB 1.pdb -CHAIN A -Out_Dir /bioseq/Gershon/ConSurf_Exec/test -m
-
-
 use strict;
-
 use Storable;
-
 use Bio::SeqIO;
 use Bio::AlignIO;
 use Bio::Align::AlignI;
 use Getopt::Long;
 
-#use lib "/groups/bioseq.home/HAIM/ConSurf_Exec";
+
+our $config;
+my $consurf_utildir;
+our $VERSION = "__PACKAGE_VERSION__";
+
+BEGIN {
+    use Config::IniFiles;
+
+    my ( $defaultconfig, $etcconfig );
+    if ( -e "__pkgdatadir__/consurfrc.default" ) {
+        $defaultconfig =
+          Config::IniFiles->new( -file => "__pkgdatadir__/consurfrc.default" );
+    }
+    if ( -e "__sysconfdir__/consurfrc" ) {
+        $etcconfig = Config::IniFiles->new(
+            -file   => "__sysconfdir__/consurfrc",
+            -import => $defaultconfig
+        );
+    }
+    else { $etcconfig = $defaultconfig; }
+    if ( ( $ENV{CONSURFCONF} && -e "$ENV{CONSURFCONF}" )
+        || -e "$ENV{HOME}/.consurfrc" )
+    {
+        $config = Config::IniFiles->new(
+            -file => $ENV{CONSURFCONF} || "$ENV{HOME}/.consurfrc",
+            -import => $etcconfig
+        );
+    }
+    else { $config = $etcconfig; }
+
+    $consurf_utildir = $config->val( 'consurf', 'consurf_utildir' );
+}
+
+use lib glob($consurf_utildir);
+
 use CONSURF_CONSTANTS;
 use CONSURF_FUNCTIONS;
 use prepareMSA;
 use MSA_parser;
 use TREE_parser;
 use pdbParser;
+use cp_rasmol_gradesPE_and_pipe;  
 
 
 my %FORM=();
 my %VARS=();
-
+my ( $dbg, $version );
 GetOptions(
           # Mandatory Argumants  
 	    "PDB=s"=>\$VARS{pdb_file_name}, 		# PDB File
@@ -71,10 +102,26 @@ GetOptions(
 	    "Algorithm:s"=>\$FORM{algorithm}, 		# [LikelihoodML] or [Bayesian] (default: Bayesian)
 	    "Matrix:s"=>\$FORM{matrix},			# [JTT] or [mtREV] or [cpREV] or [WAG] or [Dayhoff] (default JTT)
 	    
-	    "h"=>\$FORM{help}				# shows Help
+	    "h"=>\$FORM{help},				# shows Help
+        'debug!'    => \$dbg,
+        "v|version" => \$version
 	   );
 
 #$VARS{user_msa_file_name}
+if ( $VARS{working_dir} ) {
+    if ( $VARS{working_dir} !~ /^\//o ) {
+
+        #if (!(-e $workdir)){die "doesnt exist"}
+        # not fully qualified, so turn it into that:
+
+        $VARS{working_dir} = Cwd::realpath($VARS{working_dir});
+    }
+}
+else {
+    $VARS{working_dir} = File::Temp::tempdir( CLEANUP => !$dbg );
+}
+
+
 # VERIFY USER INPUTS	   
 if (defined $FORM{help})
 {
@@ -255,13 +302,16 @@ if ($VARS{running_mode} eq "_mode_pdb_no_msa" or $VARS{running_mode} eq "_mode_n
     
     $VARS{BLAST_out_file} = "$FORM{pdb_ID}_$FORM{chain}.protein_query.blast"; # file to hold blast output
     $VARS{BLAST_last_round} = "$FORM{pdb_ID}_$FORM{chain}.last_round.blast"; # file to hold blast output, last round
-    print "How many?".CONSURF_CONSTANTS::BLAST_MAX_HOMOLOGUES_TO_DISPLAY."\n";
-    $VARS{max_homologues_to_display}  = CONSURF_CONSTANTS::BLAST_MAX_HOMOLOGUES_TO_DISPLAY;
-    
-    if ($FORM{database} eq "SWISS-PROT"){
-        $VARS{protein_db} = CONSURF_CONSTANTS::SWISSPROT_DB;}
-    else{
-        $VARS{protein_db} = CONSURF_CONSTANTS::UNIPROT_DB;}
+   # print "How many?".CONSURF_CONSTANTS::BLAST_MAX_HOMOLOGUES_TO_DISPLAY."\n";
+   # $VARS{max_homologues_to_display}  = CONSURF_CONSTANTS::BLAST_MAX_HOMOLOGUES_TO_DISPLAY;
+    $VARS{max_homologues_to_display} =
+        $config->val( 'databases', 'BLAST_MAX_HOMOLOGUES_TO_DISPLAY' );
+
+     $VARS{protein_db} = $config->val( 'databases', 'UNIPROT_DB' );
+    # if ($FORM{database} eq "SWISS-PROT"){
+    #     $VARS{protein_db} = CONSURF_CONSTANTS::SWISSPROT_DB;}
+    # else{
+    #     $VARS{protein_db} = CONSURF_CONSTANTS::UNIPROT_DB;}
     # create the seqres fasta file, run blast
     
     
@@ -272,13 +322,25 @@ if ($VARS{running_mode} eq "_mode_pdb_no_msa" or $VARS{running_mode} eq "_mode_n
     # choosing homologs, create fasta file for all legal homologs
     my %blast_hash = ();
     my %cd_hit_hash = ();
-    $VARS{hit_redundancy} = CONSURF_CONSTANTS::FRAGMENT_REDUNDANCY_RATE;
-    $VARS{hit_overlap} = CONSURF_CONSTANTS::FRAGMENT_OVERLAP;
-    $VARS{hit_min_length} = CONSURF_CONSTANTS::FRAGMENT_MINIMUM_LENGTH;
-    $VARS{min_num_of_hits} = CONSURF_CONSTANTS::MINIMUM_FRAGMENTS_FOR_MSA;
-    $VARS{low_num_of_hits} = CONSURF_CONSTANTS::LOW_NUM_FRAGMENTS_FOR_MSA;
-    $VARS{HITS_fasta_file} = "$FORM{pdb_ID}_$FORM{chain}.homolougs.fas";
-    $VARS{HITS_rejected_file} = "$FORM{pdb_ID}_$FORM{chain}.rejected_homolougs.fas";
+    # $VARS{hit_redundancy} = CONSURF_CONSTANTS::FRAGMENT_REDUNDANCY_RATE;
+    # $VARS{hit_overlap} = CONSURF_CONSTANTS::FRAGMENT_OVERLAP;
+    # $VARS{hit_min_length} = CONSURF_CONSTANTS::FRAGMENT_MINIMUM_LENGTH;
+    # $VARS{min_num_of_hits} = CONSURF_CONSTANTS::MINIMUM_FRAGMENTS_FOR_MSA;
+    # $VARS{low_num_of_hits} = CONSURF_CONSTANTS::LOW_NUM_FRAGMENTS_FOR_MSA;
+    # $VARS{HITS_fasta_file} = "$FORM{pdb_ID}_$FORM{chain}.homolougs.fas";
+    # $VARS{HITS_rejected_file} = "$FORM{pdb_ID}_$FORM{chain}.rejected_homolougs.fas";
+    $VARS{hit_redundancy} =
+      $config->val( 'params', 'FRAGMENT_REDUNDANCY_RATE' );
+    $VARS{hit_overlap}    = $config->val( 'params', 'FRAGMENT_OVERLAP' );
+    $VARS{hit_min_length} = $config->val( 'params', 'FRAGMENT_MINIMUM_LENGTH' );
+    $VARS{min_num_of_hits} =
+      $config->val( 'params', 'MINIMUM_FRAGMENTS_FOR_MSA' );
+    $VARS{low_num_of_hits} =
+      $config->val( 'params', 'LOW_NUM_FRAGMENTS_FOR_MSA' );
+    $VARS{HITS_fasta_file} =
+      "$FORM{pdb_ID}_$FORM{chain}.homolougs.fas";
+    $VARS{HITS_rejected_file} =
+      "$FORM{pdb_ID}_$FORM{chain}.rejected_homolougs.fas";
     &choose_homologoues_from_blast(\%blast_hash);
     # screen homolougs by redundancy rate, according to clusters (CD-HIT)
     $VARS{cd_hit_out_file} = "$FORM{pdb_ID}_$FORM{chain}.cdhit.out";
@@ -339,7 +401,15 @@ if ($VARS{running_mode} eq "_mode_pdb_no_msa" or $VARS{running_mode} eq "_mode_p
     &create_atom_position_file; # this file will be used later to create the output which aligns rate4site sequence with the ATOM records
     my %r4s2pdb = (); # key: poistion in SEQRES/MSA, value: residue name with position in atom (i.e: ALA22:A)
     &match_pdb_to_seq(\%r4s2pdb); 
-    &create_gradesPE(\%r4s2pdb);          
+    &create_gradesPE(\%r4s2pdb);     
+    $VARS{ATOMS_with_ConSurf_Scores} = $VARS{working_dir}. "ATOMS_section_With_ConSurf.pdb";
+    $VARS{ATOMS_with_ConSurf_Scores_isd} =  $VARS{working_dir}. "ATOMS_section_With_ConSurf_isd.pdb";
+
+    $VARS{gradesPE} = $VARS{working_dir}.$VARS{gradesPE};
+    print "\nInput for PDB PIPE maker: Chain: ".$FORM{chain}."; PDB: ". $VARS{pdb_file_name}." Grades file: ".$VARS{gradesPE}."\n";
+    print "\nOutput file: ".$VARS{ATOMS_with_ConSurf_Scores}."\n";
+    my @ans1=cp_rasmol_gradesPE_and_pipe::ReplaceTempFactConSurfScore($FORM{chain},$VARS{pdb_file_name},$VARS{gradesPE},$VARS{ATOMS_with_ConSurf_Scores},$VARS{ATOMS_with_ConSurf_Scores_isd});
+        unless ($ans1[0] eq "OK") {print("cp_rasmol_gradesPE_and_pipe::ReplaceTempFactConSurf FAILED: @ans1");}
 }
 
 
@@ -369,7 +439,14 @@ sub analyse_seqres_atom{
     }
     # if modified residues exists, print them to the screen
     if (defined($VARS{pdb_file}->get("MODIFIED_COUNT$FORM{chain}.raw")) and $VARS{pdb_file}->get("MODIFIED_COUNT$FORM{chain}.raw")> 0 ){
-        if (defined($VARS{SEQRES_seq}) and length($VARS{SEQRES_seq}) > 0 and ($VARS{pdb_file}->get("MODIFIED_COUNT$FORM{chain}.raw") / length($VARS{SEQRES_seq}) > CONSURF_CONSTANTS::MAXIMUM_MODIFIED_PERCENT) ){
+        # if (defined($VARS{SEQRES_seq}) and length($VARS{SEQRES_seq}) > 0 and ($VARS{pdb_file}->get("MODIFIED_COUNT$FORM{chain}.raw") / length($VARS{SEQRES_seq}) > CONSURF_CONSTANTS::MAXIMUM_MODIFIED_PERCENT) ){
+            if (
+                defined( $VARS{SEQRES_seq} )
+            and length( $VARS{SEQRES_seq} ) > 0
+            and ( $VARS{pdb_file}->get("MODIFIED_COUNT$FORM{chain}.raw") /
+                length( $VARS{SEQRES_seq} ) >
+                    $config->val( 'databases', 'MAXIMUM_MODIFIED_PERCENT' ))
+          ){
             &exit_on_error('user_error', "Too many modified residues were found in SEQRES field.");
         }
         print LOG "analyse_seqres_atom : modified residues found\n";
@@ -546,7 +623,15 @@ sub cluster_homologoues{
     my $ref_blast_hash = shift;
     my $msg = "";
     print LOG "cluster_homologoues : running prepareMSA::create_cd_hit_output\n";
-    my @ans = prepareMSA::create_cd_hit_output("$VARS{working_dir}/", $VARS{HITS_fasta_file}, $VARS{cd_hit_out_file}, $VARS{hit_redundancy}/100, CONSURF_CONSTANTS::CD_HIT_DIR, $ref_cd_hit_hash, "from_ibis");
+    # my @ans = prepareMSA::create_cd_hit_output("$VARS{working_dir}/", $VARS{HITS_fasta_file}, $VARS{cd_hit_out_file}, $VARS{hit_redundancy}/100, CONSURF_CONSTANTS::CD_HIT_DIR, $ref_cd_hit_hash, "from_ibis");
+    my @ans = prepareMSA::create_cd_hit_output(
+        "$VARS{working_dir}/",         $VARS{HITS_fasta_file},
+        $VARS{cd_hit_out_file},        $VARS{hit_redundancy} / 100,
+        $config->val( 'databases', 'CD_HIT_DIR' )
+        , $ref_cd_hit_hash,
+        "from_ibis"
+    );
+
     if ($ans[0] eq "sys"){
         exit_on_error('sys_error',$ans[1]);
     }
@@ -1048,17 +1133,6 @@ print "got to match_pdb_to_seq";
 #---------------------------------------------
 sub create_gradesPE(){
 #---------------------------------------------
-    use Data::Dumper; 
-    my $ref_r4s2pdb = shift;
-#    print Dumper (@gradesPE_Output);
-#    print Dumper ($ref_r4s2pdb);
-#    print Dumper (%residue_freq);
-#    print Dumper (@no_isd_residue_color);
-#    print Dumper (@isd_residue_color);
-#    print Dumper ("$VARS{working_dir}/$VARS{gradesPE}");
-#    die();
-
-
     my @ans=CONSURF_FUNCTIONS::create_gradesPE(\@gradesPE_Output, $ref_r4s2pdb, \%residue_freq, \@no_isd_residue_color, \@isd_residue_color, "$VARS{working_dir}/$VARS{gradesPE}");
 
     unless ($ans[0] eq "OK"){exit_on_error('sys_error', "create_gradesPE : CONSURF_FUNCTION::".$ans[0]);}
@@ -1124,9 +1198,9 @@ Help Me!!
 
 Examples:
 1. Basic Build MSA mode (using defaults parameters) 
-	perl ConSurf.pl -PDB  MY_PDB_FILE.pdb -CHAIN MY_CHAIN_ID -Out_Dir /MY_DIR/ -m
+	consurf -PDB  MY_PDB_FILE.pdb -CHAIN MY_CHAIN_ID -Out_Dir /MY_DIR/ -m
 2. using build MSA mode and advanced options: 
-	perl ConSurf.pl -PDB MY_PDB.pdb -CHAIN A -Out_Dir /MY_DIR/ -m -MSAprogram CLUSTALW -DB "SWISS-PROT" -MaxHomol 100 -Iterat 2 -ESCORE 0.00001 -Algorithm LikelihoodML -Matrix Dayhoff
+	consurf -PDB MY_PDB.pdb -CHAIN A -Out_Dir /MY_DIR/ -m -MSAprogram CLUSTALW -DB "SWISS-PROT" -MaxHomol 100 -Iterat 2 -ESCORE 0.00001 -Algorithm LikelihoodML -Matrix Dayhoff
 		Will run Consurf in: building MSA mode (-m) for Chain A (-CHAIN) of PDB file: /groups/bioseq.home/1ENV.pdb (-PDB). The sequences for the MSA will be chosen according 2  iterations of PSI-Blast (-Iterat) against SwissProt Database (-DB "SWISS-PROT"), with E value cutoff of 0.00001 (-ESCORE), considering maximum 100 homologues (MaxHomol). The Rate4Site will use Maximum Liklihood algorithm (-Algorithm) and Dayhoff model (-Matrix)
 3. Simple Run With prepared MSA. 
 	perl ConSurf.pl -PDB MY_PDB_FILE.pdb -CHAIN A -Out_Dir /MY_DIR/ -MSA MY_MSA_FILE -SEQ_NAME MY_SEQ_NAME	
@@ -1135,3 +1209,246 @@ EndOfHelp
 print "For any questions or suggestions please contact us: bioSequence\@tauex.tau.ac.il\n";
 
 }
+
+
+__END__
+
+=pod
+
+=head1 NAME
+
+consurf - Identification of Functional Regions in Proteins. 
+
+=head1 SYNOPSIS
+
+consurf [OPTION]
+
+=head1 DESCRIPTION
+
+The ConSurf system identifies functional regions in proteins. It is mainly based on the Rate4Site algorithm for detecting conserved amino-acid sites by computing the relative evolutionary rate for each site in the multiple sequence alignment (MSA).
+
+The ConSurf work in several modes
+
+=over
+
+=item 1. Given Protein PDB File.
+
+=item 2. Given Multiple Sequence Alignment (MSA) and Protein PDB File.
+
+=item 3. Given Multiple Sequence Alignment (MSA), Phylogenetic Tree, and PDB File.
+
+=back
+
+The script is using the user provided MSA (and Phylogenetic tree if available) to calculate the conservation score for each position in the MSA based on the Rate4Site algorithm (Mayrose, I., Graur, D., Ben-Tal, N., and Pupko, T. 2004. Comparison of site-specific rate-inference methods: Bayesian methods are superior. Mol Biol Evol 21: 1781-1791).
+
+When running in the first mode the scripts the MSA is automatically build the MSA for the given protein based on ConSurf protocol.
+
+=head2 Output format
+
+Value ranges in output:
+
+TBD
+
+=head1 REFERENCES
+
+=over
+
+=item Landau M., Mayrose I., Rosenberg Y., Glaser F., Martz E., Pupko T., and Ben-Tal N. ConSurf: the projection of evolutionary conservation scores of residues on protein structures.  Nucl. Acids Res. 33:W299-W302. (2005). Bioinformatics 19: 163-164. (2003)
+
+=back
+
+=head1 OPTIONS
+
+=over
+
+=item --PDB
+
+Qualified path to PDB File
+
+=item --CHAIN 
+
+PDB Chain ID 
+
+=item --Out_Dir 
+
+Output Path
+
+=item --MSA
+
+MSA File Name.  B<MANDATORY IF -m NOT USED>
+
+=item --SEQ_NAME
+
+Query sequence name in MSA file. B<MANDATORY IF -m NOT USED>
+
+=item --Tree 
+
+Phylogenetic Tree (in Newick format). default building tree by Rate4Site, optional.
+
+=item  --m 
+
+build MSA mode
+
+=item --MSAprogram 
+
+<CLUSTALW|MUSCLE>. default = MUSCLE     
+
+=item --help
+
+Print short help
+
+=item --debug
+
+=item --nodebug
+
+Debug, default: B<--nodebug>
+
+=item --version
+
+Print program version
+
+=item --workdir
+
+Working directory. Use this option to force program reuse intermediate processing results.  Default: a new temporary directory that is removed automatically.
+
+=back 
+
+=head2 Parameters passed to Rate4Site
+
+see L<http://consurf.tau.ac.il/overview.html#methodology> and L<http://consurf.tau.ac.il/overview.html#MODEL> for details
+
+=over
+
+=item --Algorithm 
+
+[LikelihoodML] or [Bayesian]. default = B<Bayesian>
+
+=item --Matrix 
+
+[JTT] or [mtREV] or [cpREV] or [WAG] or [Dayhoff]. default B<JTT>
+
+=back
+
+=head2 Database options
+
+=over
+
+=item --DB 
+
+SWISS-PROT|UNIPROT. default = B<UNIPROT>  
+
+=item --MaxHomol 
+
+Max Number of Homologs to use for ConSurf Calculation. deafult = B<50>
+
+=item --Iterat 
+
+Number of PsiBlast iterataion. default =  B<1>
+
+=item --ESCORE 
+
+Minimal E-value cutoff for Blast search. default = B<0.001>
+
+=back
+
+=head1 EXAMPLES
+
+=over   
+
+=item Basic Build MSA mode (using defaults parameters) 
+
+C<consurf --PDB  __pkgdatadir__/MY_PDB_FILE.pdb --CHAIN MY_CHAIN_ID --Out_Dir /tmp/$USER/consurf -m>
+
+=item using build MSA mode and advanced options: 
+
+C<consurf --PDB __pkgdatadir__/MY_PDB_FILE.pdb --CHAIN A --Out_Dir /tmp/$USER/consurf --m --MSAprogram CLUSTALW --DB "SWISS-PROT" --MaxHomol 100 --Iterat 2 --ESCORE 0.00001 --Algorithm LikelihoodML --Matrix Dayhoff>
+
+Will run Consurf in: building MSA mode (--m) for Chain A (--CHAIN) of PDB file: /groups/bioseq.home/1ENV.pdb (--PDB). The sequences for the MSA will be chosen according 2  iterations of PSI-Blast (--Iterat) against SwissProt Database (--DB "SWISS-PROT"), with E value cutoff of 0.00001 (--ESCORE), considering maximum 100 homologues (MaxHomol). The Rate4Site will use Maximum Liklihood algorithm (--Algorithm) and Dayhoff model (--Matrix)
+
+=item Simple Run With prepared MSA. 
+
+C<consurf --PDB __pkgdatadir__/MY_PDB_FILE.pdb --CHAIN A --Out_Dir /tmp/$USER/consurf --MSA MY_MSA_FILE --SEQ_NAME MY_SEQ_NAME> 
+
+=back
+
+=head1 ENVIRONMENT
+
+=over
+
+=item CONSURFCONF
+
+Location of consurfrc configuration file to use, overriding other configuration files
+
+=back
+
+=head1 FILES
+
+=over
+
+=item F</usr/share/consurf/consurfrc.default>
+
+Default configuration file. See this file for a description of the parameters.
+
+=item F</etc/consurfrc>
+
+System configuration file overriding values in F</usr/share/snapfun/consurfrc.default>
+
+=item F<~/.consurfrc>
+
+User configuration file overriding values in F</etc/consurfrc>
+
+=item F<CONSURFCONF>
+
+If this environment variable is set F<~/.consurfrc> is disregarded and the value of the variable is read for configuration options overriding F</etc/consurfrc>
+
+=back
+
+=head1 AUTHOR
+
+Landau M., Mayrose I., Rosenberg Y., Glaser F., Martz E., Pupko T., and Ben-Tal N.
+
+=head1 BUGS
+
+Please report bugs at L<bioSequence@tauex.tau.ac.il>
+
+=head1 COPYRIGHT AND LICENSE
+
+(C) Copyright 2003, Nir Ben-Tal et al.
+
+NON COMMERCIAL SOFTWARE LICENSE AGREEMENT
+
+1. GENERAL.
+
+THE TERMS OF THIS LICENSE APPLY TO NON-PROFIT ORGANZIATIONS AND USERS WHO ARE EMPLOYEES OF NON-PROFIT ORGANIZAIONS. FOR PROFIT ORGANIZATION AND INDIVIDIAL USERS SHOULD CONTACT L<info@bio-sof.com> TO OBTAIN A COMMERCIAL LICENSE
+
+2. OWNERSHIP OF LICENSED PRODUCT.
+
+(a) Licensee acknowledges and agrees that the ``Licensed Product'' and all copies thereof are Licensor's exclusive property.  Licensee has no rights with respect to the Licensed Product except as set forth in this Agreement, and, without limiting the generality of the foregoing, may not distribute, resell, sublicense, assign or transfer the ``Licensed Product'' or any portion thereof, or modify, decompile, disassemble or otherwise change the Licensed Software without Licensor's prior written consent.
+
+(b) Upon any termination, cancellation, or expiration hereof, Licensee shall immediately delete the Licensed Software from all of its computer systems and destroy any copies of the Licensed Documentation in its possession.
+
+3. GRANT OF LICENSE.
+
+a. Licensor hereby grants to Licensee, and Licensee hereby accepts, a personal, Non-exclusive and non-transferable license to Use the Licensed Software at the Licensed Site during the term hereof, and to use the Licensed Documentation during such term in support of the Use of the Licensed Software. Additionally individuals who are employees or contractors of Licensee who log into computers at the Licensed Site from their personal home or while traveling, are entitled to Use the Licensed Software at such remote locations, provided that such Use is undertaken for and on behalf of the Licensee and that such employees or contractors report directly to employees of the Licensee whose usual and regular place of work is the Licensed Site.
+
+b. Other than as set forth in paragraph 3(a) above, a separate license shall be required, together with the payment of additional annual license fees and charges, to use the Licensed Software at any location other than the Licensed Site. 
+
+4. REPRODUCTION OF LICENSED PRODUCT. 
+
+Licensee may reproduce the Software for Use in accordance with the terms of the limited License granted to the Licensee in Section 2.   Reproduction of the Licensed Software for any other reason is strictly prohibited.  All copies of the Software, in whole or in part, shall contain the Licensor's restrictive and proprietary notices as they appear on the copies of Software provided by Licensor. 
+
+5. LIMITATION OF LIABILITY.
+
+a. IN NO EVENT SHALL LICENSOR BE LIABLE TO LICENSEE FOR ANY INDIRECT, SPECIAL OR CONSEQUENTIAL DAMAGES OR LOST PROFITS, ARISING OUT OF OR RELATED TO THIS LICENSE AGREEMENT OR THE PERFORMANCE OR BREACH THEREOF, EVEN IF THE LICENSOR HAS BEEN ADVISED OF THE POSSIBILITY THEREOF. 
+
+b. IN NO EVENT SHALL LICENSOR BE LIABLE TO LICENSEE FOR ANY DAMAGES RESULTING FROM OR RELATED TO ANY FAILURE OF THE SOFTWARE PRODUCTS, INCLUDING, BUT NOT LIMITED TO LOSS OF DATA, OR DELAY OF THE LICENSOR IN THE DELIVERY OF THE LICENSED PRODUCT OR IN THE PERFORMANCE OF SERVICES UNDER THIS LICENSE AGREEMENT.
+
+c. IN NO EVENT SHALL LICENSEE BE LIABLE TO LICENSOR FOR ANY LOST PROFITS, LOST OPPORTUNITY COSTS OR ANY SPECIAL, INDIRECT, CONSEQUENTIAL OR INCIDENTAL DAMAGES, HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY. 
+
+=head1 SEE ALSO
+
+rate4site(1), clustalw(1), muscle(1)
+
+=cut
+
+

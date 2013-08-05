@@ -1,0 +1,20 @@
+[consurf]
+# consurf_utildir=path to package utilities, default: __pkgdatadir__
+consurf_utildir=__pkgdatadir__
+
+[databases]
+PDB_DIVIDED =/biodb/PDB/data/structures/divided/pdb/
+SWISSPROT_DB=/biodb/BLAST/Proteins/swissprot
+UNIPROT_DB=/biodb/BLAST/Proteins/uniprot
+RCSB_WGET=wget ftp://ftp.wwpdb.org/pub/pdb/data/structures/all/pdb/
+CD_HIT_DIR=cd-hit_redundency/
+
+[params]
+BLAST_MAX_HOMOLOGUES_TO_DISPLAY=500
+MAXIMUM_MODIFIED_PERCENT=0.15
+FRAGMENT_REDUNDANCY_RATE=95
+FRAGMENT_OVERLAP=0.10
+FRAGMENT_MINIMUM_LENGTH=0.60
+MINIMUM_FRAGMENTS_FOR_MSA=5
+LOW_NUM_FRAGMENTS_FOR_MSA=10
+BAYES_INTERVAL=3
