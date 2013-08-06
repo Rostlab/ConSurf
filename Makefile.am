@@ -8,7 +8,8 @@ dist_pkgdata_DATA = \
 	MSA_parser.pm \
 	pdbParser.pm \
 	prepareMSA.pm \
-	TREE_parser.pm
+	TREE_parser.pm  \ 
+	consurfrc.default
 
 dist_pkgdata_SCRIPTS =
 
@@ -32,9 +33,9 @@ clean-local:
 	rm -f $(man_MANS)
 
 install-data-hook:
-#	for f in '$(DESTDIR)$(pkgdatadir)/consurfrc.default'; do \
+	for f in '$(DESTDIR)$(pkgdatadir)/consurfrc.default'; do \
 		sed -i -e 's|__datadir__|$(datadir)|g;s|__docdir__|$(docdir)|g;s|__pkgdatadir__|$(pkgdatadir)|g;s|__PREFIX__|$(prefix)|g;s|__sysconfdir__|$(sysconfdir)|g;s|__VERSION__|$(VERSION)|g;' "$$f"; \
-#	done
+	done
 
 install-exec-hook:
 	sed -i -e 's|__datadir__|$(datadir)|g;s|__docdir__|$(docdir)|g;s|__pkgdatadir__|$(pkgdatadir)|g;s|__PREFIX__|$(prefix)|g;s|__sysconfdir__|$(sysconfdir)|g;s|__VERSION__|$(VERSION)|g;' "$(DESTDIR)$(bindir)/consurf"
