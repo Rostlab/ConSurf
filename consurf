@@ -155,6 +155,7 @@ if (!defined $VARS{pdb_file_name} or !defined $FORM{chain} or ! defined $VARS{wo
 }
 
 $VARS{pdb_file_name} = glob($VARS{pdb_file_name});
+
 if (! -e $VARS{pdb_file_name}){
     die "===[FATAL ERROR] Non existent input:".  $VARS{pdb_file_name} ."\n"; 
 }
