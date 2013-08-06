@@ -153,6 +153,13 @@ if (!defined $VARS{pdb_file_name} or !defined $FORM{chain} or ! defined $VARS{wo
 {
 	die "===[FATAL ERROR] Missing Arguments; -PDB,-CHAIN,-Out_Dir must be specified\n"
 }
+
+$VARS{pdb_file_name} = glob($VARS{pdb_file_name});
+if (! -e $VARS{pdb_file_name}){
+    die "===[FATAL ERROR] Non existent input:".  $VARS{pdb_file_name} ."\n"; 
+}
+
+
 if (!$FORM{buildMSA}) 
 {
 	if (!defined $VARS{user_msa_file_name} or !$FORM{msa_SEQNAME})
@@ -552,9 +559,9 @@ sub compare_atom_seqres_or_msa{
     }
 
     # remove the dnd file
-    my $cmd = "rm *.dnd";
-    chdir $VARS{working_dir};
-    `$cmd`;
+    # my $cmd = "rm *.dnd";
+    # chdir $VARS{working_dir};
+    # `$cmd`;
 }
 #------------------------------------------
 # In PDB mode: create a fasta file with the protein SEQRES sequence (if no seqres - than with the ATOM sequence)
@@ -1149,7 +1156,7 @@ print "got to match_pdb_to_seq" if ($dbg);
         $chain = $FORM{chain};}
     else{
         $chain = " ";}
-    print  "match_pdb_to_seq : CONSURF_FUNCTIONS::match_seqres_pdb($VARS{working_dir}/$VARS{pairwise_aln}, $VARS{working_dir}/$VARS{atom_positionFILE}, $chain, $ref_r4s2pdb)\n";
+    print  "match_pdb_to_seq : CONSURF_FUNCTIONS::match_seqres_pdb($VARS{working_dir}/$VARS{pairwise_aln}, $VARS{working_dir}/$VARS{atom_positionFILE}, $chain, $ref_r4s2pdb)\n" if ($dbg);
     my @ans = CONSURF_FUNCTIONS::match_seqres_pdb("$VARS{working_dir}/$VARS{pairwise_aln}", "$VARS{working_dir}/$VARS{atom_positionFILE}", $chain, $ref_r4s2pdb);
     unless ($ans[0] eq "OK") {exit_on_error('sys_error', "match_pdb_to_seq : CONSURF_FUNCTIONS::".$ans[0]);}
     elsif (keys %$ref_r4s2pdb <1 ){exit_on_error('sys_error',"match_pdb_to_seq : Did not create hash to hold r4s and ATOM sequences");}
