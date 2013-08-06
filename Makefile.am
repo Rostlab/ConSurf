@@ -1,4 +1,4 @@
-dist_noinst_DATA = debian/changelog  debian/compat  debian/control  debian/copyright $(PACKAGE).spec
+dist_noinst_DATA = debian/changelog  debian/compat  debian/control  debian/copyright 
 dist_noinst_SCRIPTS = debian/rules
 
 dist_bin_SCRIPTS = consurf
@@ -7,7 +7,6 @@ dist_pkgdata_DATA = \
 	CONSURF_CONSTANTS.pm \
 	MSA_parser.pm \
 	pdbParser.pm \
-	consurfrc.default \
 	prepareMSA.pm \
 	TREE_parser.pm
 
@@ -33,9 +32,9 @@ clean-local:
 	rm -f $(man_MANS)
 
 install-data-hook:
-	for f in '$(DESTDIR)$(pkgdatadir)/consurfrc.default'; do \
+#	for f in '$(DESTDIR)$(pkgdatadir)/consurfrc.default'; do \
 		sed -i -e 's|__datadir__|$(datadir)|g;s|__docdir__|$(docdir)|g;s|__pkgdatadir__|$(pkgdatadir)|g;s|__PREFIX__|$(prefix)|g;s|__sysconfdir__|$(sysconfdir)|g;s|__VERSION__|$(VERSION)|g;' "$$f"; \
-	done
+#	done
 
 install-exec-hook:
 	sed -i -e 's|__datadir__|$(datadir)|g;s|__docdir__|$(docdir)|g;s|__pkgdatadir__|$(pkgdatadir)|g;s|__PREFIX__|$(prefix)|g;s|__sysconfdir__|$(sysconfdir)|g;s|__VERSION__|$(VERSION)|g;' "$(DESTDIR)$(bindir)/consurf"

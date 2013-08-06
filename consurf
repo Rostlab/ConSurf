@@ -53,10 +53,10 @@ BEGIN {
     }
     else { $etcconfig = $defaultconfig; }
     if ( ( $ENV{CONSURFCONF} && -e "$ENV{CONSURFCONF}" )
-        || -e "$ENV{HOME}/.consurfrc" )
+        || -e "$ENV{CONSURFCONF}/.consurfrc" )
     {
         $config = Config::IniFiles->new(
-            -file => $ENV{CONSURFCONF} || "$ENV{HOME}/.consurfrc",
+            -file => $ENV{CONSURFCONF} || "$ENV{CONSURFCONF}/.consurfrc",
             -import => $etcconfig
         );
     }
@@ -305,7 +305,7 @@ if ($VARS{running_mode} eq "_mode_pdb_no_msa" or $VARS{running_mode} eq "_mode_n
    # print "How many?".CONSURF_CONSTANTS::BLAST_MAX_HOMOLOGUES_TO_DISPLAY."\n";
    # $VARS{max_homologues_to_display}  = CONSURF_CONSTANTS::BLAST_MAX_HOMOLOGUES_TO_DISPLAY;
     $VARS{max_homologues_to_display} =
-        $config->val( 'databases', 'BLAST_MAX_HOMOLOGUES_TO_DISPLAY' );
+        $config->val( 'params', 'BLAST_MAX_HOMOLOGUES_TO_DISPLAY' );
 
      $VARS{protein_db} = $config->val( 'databases', 'UNIPROT_DB' );
     # if ($FORM{database} eq "SWISS-PROT"){
@@ -554,6 +554,8 @@ sub run_blast{
 
     my $cmd = "cd $VARS{working_dir}; ".CONSURF_CONSTANTS::BLASTPGP." -i $VARS{working_dir}/$VARS{protein_seq} -e $FORM{ESCORE} -d $VARS{protein_db} -o $VARS{working_dir}/$VARS{BLAST_out_file} -j $FORM{iterations} -v $VARS{max_homologues_to_display} -b $VARS{max_homologues_to_display} -F F";
     print LOG "run_blast : running: $cmd\n";
+    warn "run_blast : running: $cmd\n";
+
     
     my $ans = `$cmd`;
     print LOG "run_blast : ans from blast run: $ans\n" if $ans ne "";
@@ -1133,6 +1135,7 @@ print "got to match_pdb_to_seq";
 #---------------------------------------------
 sub create_gradesPE(){
 #---------------------------------------------
+    my $ref_r4s2pdb = shift;
     my @ans=CONSURF_FUNCTIONS::create_gradesPE(\@gradesPE_Output, $ref_r4s2pdb, \%residue_freq, \@no_isd_residue_color, \@isd_residue_color, "$VARS{working_dir}/$VARS{gradesPE}");
 
     unless ($ans[0] eq "OK"){exit_on_error('sys_error', "create_gradesPE : CONSURF_FUNCTION::".$ans[0]);}

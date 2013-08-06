@@ -16,7 +16,8 @@ sub create_cd_hit_output{
     my $input_file = shift;   # fasta file with sequences to cluster
     my $output_file = shift;  # final fasta file with chosen homolougs
     my $cutoff = shift;       # the decimal fraction of identity we allow between the homolougs
-    my $cd_hit_dir = shift;   # directory from where we run cd-hit program
+#    my $cd_hit_dir = shift;   # directory from where we run cd-hit program
+    my $cd_hit = shift;   # directory from where we run cd-hit program
     my $ref_cd_hit_hash = shift; # hash that holds all the chosen homolougs sequences
     my $which_server = shift;
     
@@ -25,9 +26,9 @@ sub create_cd_hit_output{
     ##################
     # running cd-hit #
     ##################
-    my $cmd="./cd-hit -i $working_dir"."$input_file -o $working_dir"."$output_file -c $cutoff";
-    chdir($cd_hit_dir);
-    
+    my $cmd= $cd_hit . " -i $working_dir"."$input_file -o $working_dir"."$output_file -c $cutoff";
+#    chdir($cd_hit_dir);
+    warn ($cmd);
     my $ans = `$cmd`;    
     
     unless ((-e $working_dir.$output_file)||(-z $working_dir.$output_file)){

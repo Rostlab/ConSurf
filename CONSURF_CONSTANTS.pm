@@ -14,7 +14,7 @@ use constant BAYES_INTERVAL => 3;
 
 #external databases
 	# replace /biodb/PDB/data/structures/divided/pdb/ with your location of the PDB
-use constant PDB_DIVIDED =>         "/mnt/project/rost_db/data/pdb/entries/"
+use constant PDB_DIVIDED =>         "/mnt/project/rost_db/data/pdb/entries/";
 	# replace /biodb/BLAST/Proteins/swissprot with your location of SwissProt database
 use constant SWISSPROT_DB =>        "/mnt/project/rost_db/data/swissprot/uniprot_sprot";
 	# replace /biodb/BLAST/Proteins/uniprot with your location of UniProt Database
