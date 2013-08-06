@@ -572,7 +572,7 @@ sub run_blast{
 
     my $cmd = "cd $VARS{working_dir}; ".CONSURF_CONSTANTS::BLASTPGP." -i $VARS{working_dir}/$VARS{protein_seq} -e $FORM{ESCORE} -d $VARS{protein_db} -o $VARS{working_dir}/$VARS{BLAST_out_file} -j $FORM{iterations} -v $VARS{max_homologues_to_display} -b $VARS{max_homologues_to_display} -F F";
     print LOG "run_blast : running: $cmd\n";
-    warn "run_blast : running: $cmd\n";
+    warn "run_blast : running: $cmd\n" if (!$dbg);
 
     
     my $ans = `$cmd`;
@@ -971,14 +971,14 @@ sub create_MSA{
 #---------------------------------------------
 sub open_log_file{
 #---------------------------------------------
-    if (!-e $VARS{run_log} or -z $VARS{run_log}){
+    # if (!-e $VARS{run_log} or -z $VARS{run_log}){
         open LOG, ">".$VARS{run_log} or exit_on_error('sys_error', "Cannot open the log file $VARS{run_log} for writing $!");
         print LOG "--------- ConSurf Log $VARS{run_log}.log -------------\n";
         print LOG "Begin Time: ".CONSURF_FUNCTIONS::printTime()."\n";
-    }
-    else{
-        open LOG, ">>".$VARS{run_log} or exit_on_error('sys_error', "Cannot open the log file $VARS{run_log} for writing $!");
-    }
+    # }
+    # else{
+    #     open LOG, ">>".$VARS{run_log} or exit_on_error('sys_error', "Cannot open the log file $VARS{run_log} for writing $!");
+    # }
 }
 #---------------------------------------------
 sub exit_on_error{
