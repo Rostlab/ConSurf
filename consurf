@@ -53,10 +53,10 @@ BEGIN {
     }
     else { $etcconfig = $defaultconfig; }
     if ( ( $ENV{CONSURFCONF} && -e "$ENV{CONSURFCONF}" )
-        || -e "$ENV{CONSURFCONF}/.consurfrc" )
+        || -e "$ENV{HOME}/.consurfrc" )
     {
         $config = Config::IniFiles->new(
-            -file => $ENV{CONSURFCONF} || "$ENV{CONSURFCONF}/.consurfrc",
+            -file => $ENV{CONSURFCONF} || "$ENV{HOME}/.consurfrc",
             -import => $etcconfig
         );
     }
