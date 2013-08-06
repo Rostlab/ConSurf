@@ -577,7 +577,7 @@ sub run_blast{
 
     my $cmd = "cd $VARS{working_dir}; ".$config->val( 'programs', 'BLASTPGP' )." -i $VARS{working_dir}/$VARS{protein_seq} -e $FORM{ESCORE} -d $VARS{protein_db} -o $VARS{working_dir}/$VARS{BLAST_out_file} -j $FORM{iterations} -v $VARS{max_homologues_to_display} -b $VARS{max_homologues_to_display} -F F";
     print LOG "run_blast : running: $cmd\n";
-    warn "run_blast : running: $cmd\n" if (!$dbg);
+    warn "run_blast : running: $cmd\n" if ($dbg);
 
     
     my $ans = `$cmd`;
@@ -972,7 +972,7 @@ sub create_MSA{
     }
     $VARS{msa_format} = "clustalw";
     # remove the dnd file    
-    $cmd = "rm *.dnd";
+    # $cmd = "rm *.dnd";
     chdir $VARS{working_dir};
     `$cmd`;
 }
