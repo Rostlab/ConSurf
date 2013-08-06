@@ -10,7 +10,7 @@ Homepage: http://consurf.tau.ac.il/
 Package: consurf
 Architecture: all
 Pre-Depends: debconf (>= 0.5)
-Depends: ${perl:Depends}, ${shlibs:Depends}, ${misc:Depends}, blast2, clustalw, muscle, rate4site
+Depends: ${perl:Depends}, ${shlibs:Depends}, ${misc:Depends}, blast2, clustalw, muscle, rate4site, bioperl
 Recommends: pp-popularity-contest
 Description: identifies functional sites on the protein surface 
  The ConSurf system identifies functional regions in proteins. It is mainly based on the Rate4Site algorithm 
