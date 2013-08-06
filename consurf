@@ -159,6 +159,12 @@ if (! -e $VARS{pdb_file_name}){
     die "===[FATAL ERROR] Non existent input:".  $VARS{pdb_file_name} ."\n"; 
 }
 
+# copy input file to temp dir
+use File::Copy;
+use File::Basename;
+my $t_file =  basename( $VARS{pdb_file_name} );;
+copy ($VARS{pdb_file_name}, $VARS{working_dir}. $t_file );
+$VARS{pdb_file_name}  = $VARS{working_dir}. $t_file;
 
 if (!$FORM{buildMSA}) 
 {
