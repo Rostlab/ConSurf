@@ -32,7 +32,7 @@ use Bio::AlignIO;
 use Bio::Align::AlignI;
 use Getopt::Long;
 use File::Path;
-
+use Pod::Usage;
 
 our $config;
 my $consurf_utildir;
