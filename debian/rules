@@ -41,7 +41,6 @@ build-stamp:  config.status
 
 	# Add here commands to compile the package.
 	$(MAKE)
-	#docbook-to-man debian/snapfun.sgml > snapfun.1
 
 	touch $@
 
@@ -64,7 +63,7 @@ install: build
 	dh_prep
 	dh_installdirs
 
-	# Add here commands to install the package into debian/snapfun.
+	# Add here commands to install the package into debian/consurf.
 	$(MAKE) DESTDIR=$(CURDIR)/debian/consurf install
 
 
@@ -72,10 +71,6 @@ install: build
 binary-indep: build install
 	dh_testdir
 	dh_testroot
-	for i in $$(sed -n '/^Package:/s/^.* //p' debian/control); do \
-		cp debian/templates debian/$$i.templates; \
-		cp debian/preinst debian/$$i.preinst; \
-	done;
 	dh_installchangelogs ChangeLog
 	dh_installdocs
 	dh_installexamples

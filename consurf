@@ -31,6 +31,7 @@ use Bio::SeqIO;
 use Bio::AlignIO;
 use Bio::Align::AlignI;
 use Getopt::Long;
+use File::Path;
 
 
 our $config;
@@ -78,8 +79,10 @@ use cp_rasmol_gradesPE_and_pipe;
 
 my %FORM=();
 my %VARS=();
-my ( $dbg, $version );
-GetOptions(
+my ( $dbg, $version, $help, $man );
+if (@ARGV < 1){ die "Usage: $0 [OPTIONS]\n";}
+
+my $result = GetOptions(
           # Mandatory Argumants  
 	    "PDB=s"=>\$VARS{pdb_file_name}, 		# PDB File
 	    "CHAIN=s"=>\$FORM{chain},			# Chain ID
@@ -102,32 +105,49 @@ GetOptions(
 	    "Algorithm:s"=>\$FORM{algorithm}, 		# [LikelihoodML] or [Bayesian] (default: Bayesian)
 	    "Matrix:s"=>\$FORM{matrix},			# [JTT] or [mtREV] or [cpREV] or [WAG] or [Dayhoff] (default JTT)
 	    
-	    "h"=>\$FORM{help},				# shows Help
+	    "h|help"=>\$help,				# shows Help
         'debug!'    => \$dbg,
-        "v|version" => \$version
-	   );
+        "v|version" => \$version,
+        "man" => \$man
+	   ) or pod2usage(2);
 
-#$VARS{user_msa_file_name}
+if( $help ) { pod2usage(0); }
+pod2usage(-verbose => 2) if $man;
+
+if ($version){
+    print STDERR qq|This is ConSurf version __PACKAGE_VERSION__
+
+Copyright 2003, Ben-Tal et al
+
+Please see COPYING file for license information
+
+Complete documentation for ConSurf should be found on
+this system using "man consurf".
+
+|;
+    exit (0);
+}
+
 if ( $VARS{working_dir} ) {
-    if ( $VARS{working_dir} !~ /^\//o ) {
-
-        #if (!(-e $workdir)){die "doesnt exist"}
-        # not fully qualified, so turn it into that:
-
-        $VARS{working_dir} = Cwd::realpath($VARS{working_dir});
-    }
+    $VARS{working_dir} = glob($VARS{working_dir});
+    if (! -e ($VARS{working_dir}) ){
+        make_path ($VARS{working_dir}) 
+            || die ("Cannot create non existing path:".$VARS{working_dir}." .".$!);
+    } 
 }
 else {
     $VARS{working_dir} = File::Temp::tempdir( CLEANUP => !$dbg );
 }
+warn ("Work dir: ".$VARS{working_dir}) if ($dbg);
+
 
 
 # VERIFY USER INPUTS	   
-if (defined $FORM{help})
-{
-	&Print_Help();
-	exit;
-}
+# if ($help)
+# {
+# 	&Print_Help();
+# 	exit;
+# }
 if (!defined $VARS{pdb_file_name} or !defined $FORM{chain} or ! defined $VARS{working_dir})
 {
 	die "===[FATAL ERROR] Missing Arguments; -PDB,-CHAIN,-Out_Dir must be specified\n"
@@ -194,10 +214,11 @@ my $curr_time = $submission_time." $mday-".($mon+1)."-".($year+1900);
 
 $VARS{submission_time}=$submission_time."\n";
 
-print "Submuission Time: ".$VARS{submission_time};
+print "Submuission Time: ".$VARS{submission_time} if ($dbg);
+
 $VARS{run_log} = "$VARS{working_dir}/$FORM{pdb_ID}_$FORM{chain}_ConSurf.log";
 
-print $VARS{run_log}."\n";
+print $VARS{run_log}."\n" if ($dbg);
 
 $VARS{protein_seq} = "$FORM{pdb_ID}_$FORM{chain}_protein_seq.fas"; # a fasta file with the protein sequence - from PDB or from protein seq input
 
@@ -206,9 +227,6 @@ $VARS{msa_format} = ""; # will be either: pir, fasta, nexus, clustalw, gcg, gde.
 
 
 &open_log_file();
-
-
-
 
 ## This Script Run ConSurf Calculation Given MSA and PDB ID
     
@@ -267,12 +285,12 @@ elsif ((!$FORM{buildMSA}) and ($VARS{user_tree_file_name} ne ""))
 #---------------------------------------------
 # create a pdbParser, to get various info from the pdb file
 
-print "Got in: include pdb\n";
+print "Got in: include pdb\n" if ($dbg);
 
 if ($VARS{running_mode} eq "_mode_pdb_no_msa" or $VARS{running_mode} eq "_mode_pdb_msa" or $VARS{running_mode} eq "_mode_pdb_msa_tree"){
     $VARS{pdb_file} = new pdbParser;
     $VARS{pdb_file}->read($VARS{pdb_file_name});
-    print  $VARS{pdb_file}."\n";
+    print  $VARS{pdb_file}."\n" if ($dbg);
     
     # FIRST check if there is no seqres
     ($VARS{SEQRES_seq}, $VARS{ATOM_seq}) = &get_seqres_atom_seq();
@@ -282,7 +300,7 @@ if ($VARS{running_mode} eq "_mode_pdb_no_msa" or $VARS{running_mode} eq "_mode_p
 # mode : no msa - with PDB or without PDB
 #---------------------------------------------
 
-print "\ngot in mode : no msa - with PDB or without PDB MODE\n";
+print "\ngot in mode : no msa - with PDB or without PDB MODE\n" if ($dbg);
 
 if ($VARS{running_mode} eq "_mode_pdb_no_msa" or $VARS{running_mode} eq "_mode_no_pdb_no_msa"){
     # if there is pdb : we compare the atom and seqres
@@ -296,7 +314,7 @@ if ($VARS{running_mode} eq "_mode_pdb_no_msa" or $VARS{running_mode} eq "_mode_n
 	    # print "\nAlignment ?\n";
         # align seqres and pdb sequences
        &compare_atom_seqres_or_msa("SEQRES");
-		        print "\nGOT OR NOT? ?\n";
+		        print "\nGOT OR NOT? ?\n" if ($dbg);
 
 	}
     
@@ -317,7 +335,7 @@ if ($VARS{running_mode} eq "_mode_pdb_no_msa" or $VARS{running_mode} eq "_mode_n
     
     
     &run_blast();
-    print "\nIs blast finished?\n";
+    print "\nIs blast finished?\n" if ($dbg);
     &extract_round_from_blast();
     # choosing homologs, create fasta file for all legal homologs
     my %blast_hash = ();
@@ -406,10 +424,10 @@ if ($VARS{running_mode} eq "_mode_pdb_no_msa" or $VARS{running_mode} eq "_mode_p
     $VARS{ATOMS_with_ConSurf_Scores_isd} =  $VARS{working_dir}. "ATOMS_section_With_ConSurf_isd.pdb";
 
     $VARS{gradesPE} = $VARS{working_dir}.$VARS{gradesPE};
-    print "\nInput for PDB PIPE maker: Chain: ".$FORM{chain}."; PDB: ". $VARS{pdb_file_name}." Grades file: ".$VARS{gradesPE}."\n";
+    print "\nInput for PDB PIPE maker: Chain: ".$FORM{chain}."; PDB: ". $VARS{pdb_file_name}." Grades file: ".$VARS{gradesPE}."\n" if ($dbg);
     print "\nOutput file: ".$VARS{ATOMS_with_ConSurf_Scores}."\n";
     my @ans1=cp_rasmol_gradesPE_and_pipe::ReplaceTempFactConSurfScore($FORM{chain},$VARS{pdb_file_name},$VARS{gradesPE},$VARS{ATOMS_with_ConSurf_Scores},$VARS{ATOMS_with_ConSurf_Scores_isd});
-        unless ($ans1[0] eq "OK") {print("cp_rasmol_gradesPE_and_pipe::ReplaceTempFactConSurf FAILED: @ans1");}
+        unless ($ans1[0] eq "OK") {print("cp_rasmol_gradesPE_and_pipe::ReplaceTempFactConSurf FAILED: @ans1") if ($dbg);}
 }
 
 
@@ -452,7 +470,7 @@ sub analyse_seqres_atom{
         print LOG "analyse_seqres_atom : modified residues found\n";
         
     }
-    print "The Atoms are fine !!!\n ".$VARS{ATOM_seq};
+    print "The Atoms are fine !!!\n ".$VARS{ATOM_seq} if ($dbg);
     
 }
 #---------------------------------------------
@@ -461,7 +479,7 @@ sub compare_atom_seqres_or_msa{
     my $what_to_compare = shift;
     # in case there are both seqres and atom fields, checks the similarity between the 2 sequences.
     my $atom_length = length($VARS{ATOM_seq});
-    print "\n".$atom_length."\n";
+    print "\n".$atom_length."\n" if ($dbg); 
     
     my ($other_query_length, $other_query_seq, %query_line);
     my $two_fastas = "PDB_$what_to_compare"."_$FORM{pdb_ID}_$FORM{chain}.fasta2"; #CHANGHING THE NAMES
@@ -1115,7 +1133,7 @@ sub create_atom_position_file{
 sub match_pdb_to_seq{
 #---------------------------------------------
 
-print "got to match_pdb_to_seq";
+print "got to match_pdb_to_seq" if ($dbg);
 
     my $ref_r4s2pdb = shift;
     my $chain;
