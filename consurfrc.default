@@ -18,3 +18,11 @@ FRAGMENT_MINIMUM_LENGTH=0.60
 MINIMUM_FRAGMENTS_FOR_MSA=5
 LOW_NUM_FRAGMENTS_FOR_MSA=10
 BAYES_INTERVAL=3
+
+[programs]
+MUSCLE=muscle
+CLUSTALW=clustalw
+RATE4SITE=/mnt/project/consurf/bin/rate4site
+RATE4SITE_SLOW=/mnt/project/consurf/bin/rate4site
+CD_HIT_DIR=cd-hit
+BLASTPGP=blastppg

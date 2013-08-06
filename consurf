@@ -138,6 +138,7 @@ if ( $VARS{working_dir} ) {
 else {
     $VARS{working_dir} = File::Temp::tempdir( CLEANUP => !$dbg );
 }
+$VARS{working_dir} =~ s!/*$!/!; 
 warn ("Work dir: ".$VARS{working_dir}) if ($dbg);
 
 
@@ -253,8 +254,10 @@ my ($seq3d_grades_isd, $seq3d_grades);
 my ($length_of_seqres,$length_of_atom);
 
 # programs
-my $rate4s = CONSURF_CONSTANTS::RATE4SITE;
-my $rate4s_slow = CONSURF_CONSTANTS::RATE4SITE_SLOW;
+# my $rate4s = CONSURF_CONSTANTS::RATE4SITE;
+# my $rate4s_slow = CONSURF_CONSTANTS::RATE4SITE_SLOW;
+my $rate4site = $config->val( 'programs', 'RATE4SITE' );
+my $rate4s_slow = $config->val( 'programs', 'RATE4SITE_SLOW' ); 
 
 # outputs
 $VARS{r4s_log} = "$FORM{pdb_ID}_$FORM{chain}_r4s.log";
@@ -304,10 +307,10 @@ print "\ngot in mode : no msa - with PDB or without PDB MODE\n" if ($dbg);
 
 if ($VARS{running_mode} eq "_mode_pdb_no_msa" or $VARS{running_mode} eq "_mode_no_pdb_no_msa"){
     # if there is pdb : we compare the atom and seqres
-    print "\ngot in mode : no msa - with PDB or without PDB MODE-22222\n";
+    print "\ngot in mode : no msa - with PDB or without PDB MODE-22222\n" if ($dbg);
 
     if ($VARS{running_mode} eq "_mode_pdb_no_msa" and (defined($VARS{SEQRES_seq}) and length($VARS{SEQRES_seq}) > 0)){
-	    print "\ngot in mode : no msa - with PDB or without PDB MODE-33333\n";
+	    print "\ngot in mode : no msa - with PDB or without PDB MODE-33333\n" if ($dbg);
 
 	    
 	    
@@ -522,7 +525,9 @@ sub compare_atom_seqres_or_msa{
     print FAS ">".$what_to_compare."_$FORM{chain}\n$other_query_seq\n>ATOM_$FORM{chain}\n$VARS{ATOM_seq}\n";
     close FAS;
 
-    my $command = "cd ".$VARS{working_dir}."; ".CONSURF_CONSTANTS::CLUSTALW." -INFILE=".$VARS{working_dir}."/".$two_fastas." -GAPOPEN=1 -OUTFILE=$VARS{working_dir}/$VARS{pairwise_aln} > ".$VARS{working_dir}."/".$clustalw_out;
+    # my $command = "cd ".$VARS{working_dir}."; ".CONSURF_CONSTANTS::CLUSTALW." -INFILE=".$VARS{working_dir}."/".$two_fastas." -GAPOPEN=1 -OUTFILE=$VARS{working_dir}/$VARS{pairwise_aln} > ".$VARS{working_dir}."/".$clustalw_out;
+     my $command = "cd ".$VARS{working_dir}."; ".$config->val( 'programs', 'CLUSTALW' )." -INFILE=".$VARS{working_dir}."/".$two_fastas." -GAPOPEN=1 -OUTFILE=$VARS{working_dir}/$VARS{pairwise_aln} > ".$VARS{working_dir}."/".$clustalw_out;
+   
     print LOG "compare_atom_seqres_or_msa : run $command\n";
     `$command`;
     if (!-e "$VARS{working_dir}/$VARS{pairwise_aln}" or -z "$VARS{working_dir}/$VARS{pairwise_aln}" or !-e "$VARS{working_dir}/$clustalw_out" or -z "$VARS{working_dir}/$clustalw_out"){
@@ -570,7 +575,7 @@ sub run_blast{
         }
     }
 
-    my $cmd = "cd $VARS{working_dir}; ".CONSURF_CONSTANTS::BLASTPGP." -i $VARS{working_dir}/$VARS{protein_seq} -e $FORM{ESCORE} -d $VARS{protein_db} -o $VARS{working_dir}/$VARS{BLAST_out_file} -j $FORM{iterations} -v $VARS{max_homologues_to_display} -b $VARS{max_homologues_to_display} -F F";
+    my $cmd = "cd $VARS{working_dir}; ".$config->val( 'programs', 'BLASTPGP' )." -i $VARS{working_dir}/$VARS{protein_seq} -e $FORM{ESCORE} -d $VARS{protein_db} -o $VARS{working_dir}/$VARS{BLAST_out_file} -j $FORM{iterations} -v $VARS{max_homologues_to_display} -b $VARS{max_homologues_to_display} -F F";
     print LOG "run_blast : running: $cmd\n";
     warn "run_blast : running: $cmd\n" if (!$dbg);
 
@@ -951,10 +956,13 @@ sub create_MSA{
     my $cmd;
     chdir $VARS{working_dir};
     if($FORM{MSAprogram} eq 'CLUSTALW'){
-        $cmd = CONSURF_CONSTANTS::CLUSTALW." -infile=$VARS{FINAL_sequences} -outfile=$VARS{protein_MSA}";
+        # $cmd = CONSURF_CONSTANTS::CLUSTALW." -infile=$VARS{FINAL_sequences} -outfile=$VARS{protein_MSA}";
+        $cmd = $config->val( 'programs', 'CLUSTALW' )." -infile=$VARS{FINAL_sequences} -outfile=$VARS{protein_MSA}";
+         
     }
     else{
-        $cmd = CONSURF_CONSTANTS::MUSCLE." -in $VARS{FINAL_sequences} -out $VARS{protein_MSA} -clwstrict -quiet";
+         # $cmd = CONSURF_CONSTANTS::MUSCLE." -in $VARS{FINAL_sequences} -out $VARS{protein_MSA} -clwstrict -quiet";
+         $cmd = $config->val( 'programs', 'MUSCLE' )." -in $VARS{FINAL_sequences} -out $VARS{protein_MSA} -clwstrict -quiet";
     }
     print LOG "create_MSA : run $cmd\n";
     chdir $VARS{working_dir};
@@ -972,9 +980,9 @@ sub create_MSA{
 sub open_log_file{
 #---------------------------------------------
     # if (!-e $VARS{run_log} or -z $VARS{run_log}){
-        open LOG, ">".$VARS{run_log} or exit_on_error('sys_error', "Cannot open the log file $VARS{run_log} for writing $!");
-        print LOG "--------- ConSurf Log $VARS{run_log}.log -------------\n";
-        print LOG "Begin Time: ".CONSURF_FUNCTIONS::printTime()."\n";
+    open LOG, ">".$VARS{run_log} or exit_on_error('sys_error', "Cannot open the log file $VARS{run_log} for writing $!");
+    print LOG "--------- ConSurf Log $VARS{run_log}.log -------------\n";
+    print LOG "Begin Time: ".CONSURF_FUNCTIONS::printTime()."\n";
     # }
     # else{
     #     open LOG, ">>".$VARS{run_log} or exit_on_error('sys_error', "Cannot open the log file $VARS{run_log} for writing $!");
