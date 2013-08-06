@@ -256,7 +256,7 @@ my ($length_of_seqres,$length_of_atom);
 # programs
 # my $rate4s = CONSURF_CONSTANTS::RATE4SITE;
 # my $rate4s_slow = CONSURF_CONSTANTS::RATE4SITE_SLOW;
-my $rate4site = $config->val( 'programs', 'RATE4SITE' );
+my $rate4s = $config->val( 'programs', 'RATE4SITE' );
 my $rate4s_slow = $config->val( 'programs', 'RATE4SITE_SLOW' ); 
 
 # outputs
