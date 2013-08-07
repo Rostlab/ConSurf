@@ -248,11 +248,15 @@ my $tmp_dir =  cwd().'/consurf-'.join('-',$hour,$min,$sec ).'/';
 if ( $VARS{out_dir} ) {
     $VARS{out_dir} = glob($VARS{out_dir});
     if (! -e ($VARS{out_dir}) ){
-        print "Output dir $VARS{out_dir} does not exist. Should i create it?";
+        print "Output dir $VARS{out_dir} does not exist. Should i create it? (Y/N) ";
         my $answer = <>;
-        if ($answer =~ /^y[(es)]$/){
+        if ($answer =~ m/y[(es)]/i){
             make_path ($VARS{out_dir}) 
                 || die ("Cannot create output dir:".$VARS{out_dir}." .".$!);
+        }else {
+             $VARS{out_dir}  = $tmp_dir;
+             make_path ($VARS{out_dir}) 
+             || die ("Cannot create output dir:".$VARS{out_dir}." .\nSystem message: ".$!);
         }
     }
 }else{
