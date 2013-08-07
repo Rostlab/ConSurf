@@ -246,11 +246,11 @@ use Cwd;
 
 my $tmp_dir =  cwd().'/consurf-'.join('-',$hour,$min,$sec ).'/';
 if ( $VARS{out_dir} ) {
-    $VARS{out_dir} = glob($VARS{out_dir});
+    $VARS{out_dir} = glob($VARS{out_dir}).'/';
     if (! -e ($VARS{out_dir}) ){
-        print "Output dir $VARS{out_dir} does not exist. Should i create it? (Y/N) ";
+        print "Output dir $VARS{out_dir} does not exist. Create it? (Y/N) ";
         my $answer = <>;
-        if ($answer =~ m/y[(es)]/i){
+        if ($answer =~ m/y/i){
             make_path ($VARS{out_dir}) 
                 || die ("Cannot create output dir:".$VARS{out_dir}." .".$!);
         }else {
