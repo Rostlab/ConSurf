@@ -484,6 +484,7 @@ if ($VARS{running_mode} eq "_mode_pdb_no_msa" or $VARS{running_mode} eq "_mode_p
         unless ($ans1[0] eq "OK") {print("cp_rasmol_gradesPE_and_pipe::ReplaceTempFactConSurf FAILED: @ans1") if ($dbg);}
 
     copy ($VARS{working_dir}.'/'. $VARS{protein_MSA}, $VARS{out_dir}.'/'. $VARS{protein_MSA} );
+    copy ($VARS{working_dir}.'/'. $VARS{HITS_rejected_file}, $VARS{out_dir}.'/'. $VARS{HITS_rejected_file} );
 
     my $final_output_message = <<EOF;
 
@@ -492,11 +493,11 @@ Consurf run completed successfuly!
 Here is a list of files that could be found in the output dir
     $VARS{out_dir}
     |
+    |--  $VARS{out_dir}/$VARS{protein_MSA}\tMultiple Sequence Alignment
+    |--  $VARS{out_dir}/$VARS{HITS_rejected_file}\tRejected seqeunces
     |-- $VARS{ATOMS_with_ConSurf_Scores}\tPDB with conservation scores
     |-- $VARS{ATOMS_with_ConSurf_Scores_isd}\tPDB with conservation scores /without/ insufficient data annotations
     |-- $VARS{gradesPE}\tAmino Acid Conservation Scores, Confidence Intervals and Conservation Colors
-    |--  $VARS{out_dir}/$VARS{protein_MSA}\tMultiple Sequence Alignment
-
 
 EOF
 
