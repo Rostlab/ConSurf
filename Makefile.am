@@ -31,7 +31,7 @@ clean-local:
 
 install-data-hook:
 	for f in '$(DESTDIR)$(pkgdatadir)/consurfrc.default'; do \
-		sed -i -e 's|__datadir__|$(datadir)|g;s|__docdir__|$(docdir)|g;s|__pkgdatadir__|$(pkgdatadir)|g;s|__PREFIX__|$(prefix)|g;s|__sysconfdir__|$(sysconfdir)|g;s|__VERSION__|$(VERSION)|g;' "$$f"; \
+		sed -i -e 's|__datadir__|$(datadir)|g;s|__docdir__|$(docdir)|g;s|__pkgdatadir__|$(pkgdatadir)|g;s|__PREFIX__|$(prefix)|g;s|__sysconfdir__|$(sysconfdir)|g;s|__PACKAGE_VERSION__|$(VERSION)|g;' "$$f"; \
 	done
 
 install-exec-hook:
