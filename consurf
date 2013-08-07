@@ -128,6 +128,27 @@ this system using "man consurf".
     exit (0);
 }
 
+my $submission_time;
+my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time);
+$submission_time = $hour . ':' . $min . ':' . $sec;
+my $curr_time = $submission_time." $mday-".($mon+1)."-".($year+1900);
+
+$VARS{submission_time}=$submission_time;
+
+
+
+ my $welcome_message = <<EOF;
+
+Consurf Version __PACKAGE_VERSION__
+====================================
+Process Started at $VARS{submission_time}
+
+EOF
+
+print $welcome_message;
+
+
+
 if ( $VARS{working_dir} ) {
     $VARS{working_dir} = glob($VARS{working_dir});
     if (! -e ($VARS{working_dir}) ){
@@ -219,14 +240,6 @@ $FORM{matrix}="JTT" if !defined ($FORM{matrix});
 $VARS{user_tree_file_name}="" if !defined ($VARS{user_tree_file_name});
 
 
-my $submission_time;
-my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time);
-$submission_time = $hour . ':' . $min . ':' . $sec;
-my $curr_time = $submission_time." $mday-".($mon+1)."-".($year+1900);
-
-$VARS{submission_time}=$submission_time;
-
-print "Submuission Time: ".$VARS{submission_time}."\n" if ($dbg);
 
 # Construct the output dir
 use Cwd;
@@ -469,7 +482,9 @@ if ($VARS{running_mode} eq "_mode_pdb_no_msa" or $VARS{running_mode} eq "_mode_p
     copy ($VARS{working_dir}.'/'. $VARS{protein_MSA}, $VARS{out_dir}.'/'. $VARS{protein_MSA} );
 
     my $final_output_message = <<EOF;
+
 Consurf run completed successfuly!
+
 Here is a list of files that could be found in the output dir
     $VARS{out_dir}
     |
@@ -477,6 +492,7 @@ Here is a list of files that could be found in the output dir
     |-- $VARS{ATOMS_with_ConSurf_Scores_isd}\tPDB with conservation scores /without/ insufficient data annotations
     |-- $VARS{gradesPE}\tAmino Acid Conservation Scores, Confidence Intervals and Conservation Colors
     |--  $VARS{out_dir}/$VARS{protein_MSA}\tMultiple Sequence Alignment
+
 
 EOF
 
@@ -1092,6 +1108,7 @@ sub run_rate4site{
     chdir $VARS{working_dir};
     warn ($r4s_comm) if ($dbg);
     `$r4s_comm`;
+    chdir($orig_cwd);
     $did_r4s_fail = &check_if_rate4site_failed("$VARS{working_dir}/$VARS{r4s_out}", "$VARS{working_dir}/$VARS{r4s_log}");
     # if the run failed - we rerun using the slow verion
     if ($did_r4s_fail eq "yes"){
@@ -1101,14 +1118,16 @@ sub run_rate4site{
 	if ($tree_file_r4s eq ""){$r4s_comm = $r4s_comm." -x $VARS{r4s_tree}";}
         print LOG "run_rate4site : running command: $r4s_comm\n";
         warn ($r4s_comm) if ($dbg);
+         chdir $VARS{working_dir};
         `$r4s_comm`;
+         chdir($orig_cwd);
         $did_r4s_fail = &check_if_rate4site_failed("$VARS{working_dir}/$VARS{r4s_out}", "$VARS{working_dir}/$VARS{r4s_slow_log}");
         if ($did_r4s_fail eq "yes"){            
             my $err = "The run $r4s_comm for $VARS{run_number} failed.\nThe MSA $msa was too large.\n";
             exit_on_error('user_error', "The calculation could not be completed due to memory problem, since the MSA is too large. Please run ConSurf again with fewer sequences.")
         }
-	chdir($orig_cwd);
     }    
+
 }
 #---------------------------------------------    
 sub check_if_rate4site_failed{
