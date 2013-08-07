@@ -1,5 +1,5 @@
-consurf (1.0.0)
+consurf (1.0.0) UNRELEASED; urgency=low
 
-  * Initial release
+  * Initial release. 
 
- -- Guy Yachdav <gyachdav@rostlab.org>  Fri, 02 Aug 2013 17:44:35 +0200
+ -- Guy Yachdav <gyachdav@rostlab.org>  Tue, 06 Aug 2013 17:34:27 +0200

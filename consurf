@@ -31,7 +31,7 @@ use Bio::SeqIO;
 use Bio::AlignIO;
 use Bio::Align::AlignI;
 use Getopt::Long;
-use File::Path;
+use File::Path qw(make_path);
 use Pod::Usage;
 
 our $config;
@@ -224,13 +224,14 @@ my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time);
 $submission_time = $hour . ':' . $min . ':' . $sec;
 my $curr_time = $submission_time." $mday-".($mon+1)."-".($year+1900);
 
-$VARS{submission_time}=$submission_time."\n";
+$VARS{submission_time}=$submission_time;
 
-print "Submuission Time: ".$VARS{submission_time} if ($dbg);
+print "Submuission Time: ".$VARS{submission_time}."\n" if ($dbg);
 
 # Construct the output dir
 use Cwd;
-my $tmp_dir =  cwd().'/consurf-'.$VARS{submission_time}.'/';
+
+my $tmp_dir =  cwd().'/consurf-'.join('-',$hour,$min,$sec ).'/';
 if ( $VARS{out_dir} ) {
     $VARS{out_dir} = glob($VARS{out_dir});
     if (! -e ($VARS{out_dir}) ){
@@ -458,19 +459,25 @@ if ($VARS{running_mode} eq "_mode_pdb_no_msa" or $VARS{running_mode} eq "_mode_p
     $VARS{ATOMS_with_ConSurf_Scores} = $VARS{out_dir}. "ATOMS_section_With_ConSurf.pdb";
     $VARS{ATOMS_with_ConSurf_Scores_isd} =  $VARS{out_dir}. "ATOMS_section_With_ConSurf_isd.pdb";
 
-    $VARS{gradesPE} = $VARS{out_dir}.$VARS{gradesPE};
+#    $VARS{gradesPE} = $VARS{out_dir}.$VARS{gradesPE};
+
+
     print "\nInput for PDB PIPE maker: Chain: ".$FORM{chain}."; PDB: ". $VARS{pdb_file_name}." Grades file: ".$VARS{gradesPE}."\n" if ($dbg);
     my @ans1=cp_rasmol_gradesPE_and_pipe::ReplaceTempFactConSurfScore($FORM{chain},$VARS{pdb_file_name},$VARS{gradesPE},$VARS{ATOMS_with_ConSurf_Scores},$VARS{ATOMS_with_ConSurf_Scores_isd});
         unless ($ans1[0] eq "OK") {print("cp_rasmol_gradesPE_and_pipe::ReplaceTempFactConSurf FAILED: @ans1") if ($dbg);}
+
+    copy ($VARS{working_dir}.'/'. $VARS{protein_MSA}, $VARS{out_dir}.'/'. $VARS{protein_MSA} );
+
     my $final_output_message = <<EOF;
 Consurf run completed successfuly!
 Here is a list of files that could be found in the output dir
     $VARS{out_dir}
     |
-    |-- $VARS{ATOMS_with_ConSurf_Scores}    PDB with conservation scores
-    |-- $VARS{ATOMS_with_ConSurf_Scores_isd}    PDB with conservation scores /without/ insufficient data annotations
-    |-- $VARS{ATOMS_with_ConSurf_Scores_isd}    PDB with conservation scores /without/ insufficient data annotations
-    |-- $VARS{gradesPE}                         Amino Acid Conservation Scores, Confidence Intervals and Conservation Colors
+    |-- $VARS{ATOMS_with_ConSurf_Scores}\tPDB with conservation scores
+    |-- $VARS{ATOMS_with_ConSurf_Scores_isd}\tPDB with conservation scores /without/ insufficient data annotations
+    |-- $VARS{gradesPE}\tAmino Acid Conservation Scores, Confidence Intervals and Conservation Colors
+    |--  $VARS{out_dir}/$VARS{protein_MSA}\tMultiple Sequence Alignment
+
 EOF
 
 print $final_output_message;
@@ -619,7 +626,7 @@ sub run_blast{
         }
     }
 
-    my $cmd = "cd $VARS{working_dir}; ".$config->val( 'programs', 'BLASTPGP' )." -i $VARS{working_dir}/$VARS{protein_seq} -e $FORM{ESCORE} -d $VARS{protein_db} -o $VARS{working_dir}/$VARS{BLAST_out_file} -j $FORM{iterations} -v $VARS{max_homologues_to_display} -b $VARS{max_homologues_to_display} -F F";
+    my $cmd = $config->val( 'programs', 'BLASTPGP' )." -i $VARS{working_dir}/$VARS{protein_seq} -e $FORM{ESCORE} -d $VARS{protein_db} -o $VARS{working_dir}/$VARS{BLAST_out_file} -j $FORM{iterations} -v $VARS{max_homologues_to_display} -b $VARS{max_homologues_to_display} -F F";
     print LOG "run_blast : running: $cmd\n";
     warn "run_blast : running: $cmd\n" if ($dbg);
 
@@ -1000,7 +1007,6 @@ sub get_seqres_atom_seq{
 sub create_MSA{
 #---------------------------------------------
     my $cmd;
-    # chdir $VARS{working_dir};
     if($FORM{MSAprogram} eq 'CLUSTALW'){
         # $cmd = CONSURF_CONSTANTS::CLUSTALW." -infile=$VARS{FINAL_sequences} -outfile=$VARS{protein_MSA}";
         $cmd = $config->val( 'programs', 'CLUSTALW' )." -infile=$VARS{working_dir}/$VARS{FINAL_sequences} -outfile=$VARS{working_dir}/$VARS{protein_MSA}";
@@ -1011,17 +1017,12 @@ sub create_MSA{
          $cmd = $config->val( 'programs', 'MUSCLE' )." -in $VARS{working_dir}/$VARS{FINAL_sequences} -out $VARS{working_dir}/$VARS{protein_MSA} -clwstrict -quiet";
     }
     print LOG "create_MSA : run $cmd\n";
-    # chdir $VARS{working_dir};
     warn ($cmd) if ($dbg);
     `$cmd`;
     if (!-e "$VARS{working_dir}/$VARS{protein_MSA}" or -z "$VARS{working_dir}/$VARS{protein_MSA}"){
         exit_on_error('sys_error',"create_MSA : the file $VARS{working_dir}/$VARS{protein_MSA} was not created or of size zero");
     }
     $VARS{msa_format} = "clustalw";
-    # remove the dnd file    
-    # $cmd = "rm *.dnd";
-    # chdir $VARS{working_dir};
-    # `$cmd`;
 }
 #---------------------------------------------
 sub open_log_file{
@@ -1082,10 +1083,13 @@ sub run_rate4site{
         $msa = $VARS{user_msa_fasta};
         $VARS{rate4site_msa_format} = "fasta";
     }
+
+
+    my $orig_cwd = cwd;
     my $r4s_comm = "$rate4s $algorithm -a \'$query_name\' -s $VARS{working_dir}/$msa -zn $MatrixHash{$FORM{matrix}} $tree_file_r4s -bn -l $VARS{working_dir}/$VARS{r4s_log} -o $VARS{working_dir}/$VARS{r4s_out}";
     if ($tree_file_r4s eq ""){$r4s_comm = $r4s_comm." -x $VARS{r4s_tree}";}
     print LOG "run_rate4site : running command: $r4s_comm\n";
-    # chdir $VARS{working_dir};
+    chdir $VARS{working_dir};
     warn ($r4s_comm) if ($dbg);
     `$r4s_comm`;
     $did_r4s_fail = &check_if_rate4site_failed("$VARS{working_dir}/$VARS{r4s_out}", "$VARS{working_dir}/$VARS{r4s_log}");
@@ -1096,7 +1100,6 @@ sub run_rate4site{
         $r4s_comm = "$rate4s $algorithm -a \'$query_name\' -s $VARS{working_dir}/$msa -zn $MatrixHash{$FORM{matrix}} $tree_file_r4s -bn -l $VARS{working_dir}/$VARS{r4s_slow_log} -o $VARS{working_dir}/$VARS{r4s_out}";
 	if ($tree_file_r4s eq ""){$r4s_comm = $r4s_comm." -x $VARS{r4s_tree}";}
         print LOG "run_rate4site : running command: $r4s_comm\n";
-        # chdir $VARS{working_dir};
         warn ($r4s_comm) if ($dbg);
         `$r4s_comm`;
         $did_r4s_fail = &check_if_rate4site_failed("$VARS{working_dir}/$VARS{r4s_out}", "$VARS{working_dir}/$VARS{r4s_slow_log}");
@@ -1104,6 +1107,7 @@ sub run_rate4site{
             my $err = "The run $r4s_comm for $VARS{run_number} failed.\nThe MSA $msa was too large.\n";
             exit_on_error('user_error', "The calculation could not be completed due to memory problem, since the MSA is too large. Please run ConSurf again with fewer sequences.")
         }
+	chdir($orig_cwd);
     }    
 }
 #---------------------------------------------    
@@ -1211,11 +1215,11 @@ print "got to match_pdb_to_seq" if ($dbg);
 sub create_gradesPE(){
 #---------------------------------------------
     my $ref_r4s2pdb = shift;
-    my @ans=CONSURF_FUNCTIONS::create_gradesPE(\@gradesPE_Output, $ref_r4s2pdb, \%residue_freq, \@no_isd_residue_color, \@isd_residue_color, "$VARS{working_dir}/$VARS{gradesPE}");
+    my @ans=CONSURF_FUNCTIONS::create_gradesPE(\@gradesPE_Output, $ref_r4s2pdb, \%residue_freq, \@no_isd_residue_color, \@isd_residue_color, $VARS{gradesPE});
 
     unless ($ans[0] eq "OK"){exit_on_error('sys_error', "create_gradesPE : CONSURF_FUNCTION::".$ans[0]);}
-    elsif(!-e "$VARS{working_dir}/$VARS{gradesPE}" or -z "$VARS{working_dir}/$VARS{gradesPE}") {
-        exit_on_error('sys_error', "create_gradesPE : the file $VARS{working_dir}/$VARS{gradesPE} was not found or empty");}
+    elsif(!-e "$VARS{gradesPE}" or -z "$VARS{gradesPE}") {
+        exit_on_error('sys_error', "create_gradesPE : the file $VARS{gradesPE} was not found or empty");}
     if ($ans[1] eq "" or $ans[2] eq ""){
         exit_on_error('sys_error', "create_gradesPE : there is no data in the returned values seq3d_grades_isd or seq3d_grades from the routine");
     }
