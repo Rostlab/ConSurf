@@ -493,8 +493,8 @@ Consurf run completed successfuly!
 Here is a list of files that could be found in the output dir
     $VARS{out_dir}
     |
-    |--  $VARS{out_dir}/$VARS{protein_MSA}\tMultiple Sequence Alignment
-    |--  $VARS{out_dir}/$VARS{HITS_rejected_file}\tRejected seqeunces
+    |-- $VARS{out_dir}/$VARS{protein_MSA}\tMultiple Sequence Alignment
+    |-- $VARS{out_dir}/$VARS{HITS_rejected_file}\tRejected seqeunces
     |-- $VARS{ATOMS_with_ConSurf_Scores}\tPDB with conservation scores
     |-- $VARS{ATOMS_with_ConSurf_Scores_isd}\tPDB with conservation scores /without/ insufficient data annotations
     |-- $VARS{gradesPE}\tAmino Acid Conservation Scores, Confidence Intervals and Conservation Colors
