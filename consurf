@@ -86,7 +86,7 @@ my $result = GetOptions(
           # Mandatory Argumants  
 	    "PDB=s"=>\$VARS{pdb_file_name}, 		# PDB File
 	    "CHAIN=s"=>\$FORM{chain},			# Chain ID
-	    "Out_Dir=s"=>\$VARS{working_dir},		# Output Path
+	    "Out_Dir=s"=>\$VARS{out_dir},		# Output Path
 	   
 	   # Given MSA mode parameters   
 	    "MSA:s"=>\$VARS{user_msa_file_name},	# <MSA File Name>	(MANDATORY IF -m NOT USED)
@@ -143,12 +143,9 @@ warn ("Work dir: ".$VARS{working_dir}) if ($dbg);
 
 
 
-# VERIFY USER INPUTS	   
-# if ($help)
-# {
-# 	&Print_Help();
-# 	exit;
-# }
+
+
+
 if (!defined $VARS{pdb_file_name} or !defined $FORM{chain} or ! defined $VARS{working_dir})
 {
 	die "===[FATAL ERROR] Missing Arguments; -PDB,-CHAIN,-Out_Dir must be specified\n"
@@ -231,6 +228,27 @@ $VARS{submission_time}=$submission_time."\n";
 
 print "Submuission Time: ".$VARS{submission_time} if ($dbg);
 
+# Construct the output dir
+use Cwd;
+my $tmp_dir =  cwd().'/consurf-'.$VARS{submission_time}.'/';
+if ( $VARS{out_dir} ) {
+    $VARS{out_dir} = glob($VARS{out_dir});
+    if (! -e ($VARS{out_dir}) ){
+        print "Output dir $VARS{out_dir} does not exist. Should i create it?";
+        my $answer = <>;
+        if ($answer =~ /^y[(es)]$/){
+            make_path ($VARS{out_dir}) 
+                || die ("Cannot create output dir:".$VARS{out_dir}." .".$!);
+        }
+    }
+}else{
+    $VARS{out_dir}  = $tmp_dir;
+    make_path ($VARS{out_dir}) 
+        || die ("Cannot create output dir:".$VARS{out_dir}." .\nSystem message: ".$!);
+} 
+
+print "Output files could be found in output directory: ".$VARS{out_dir}."\n";
+
 $VARS{run_log} = "$VARS{working_dir}/$FORM{pdb_ID}_$FORM{chain}_ConSurf.log";
 
 print $VARS{run_log}."\n" if ($dbg);
@@ -278,7 +296,7 @@ $VARS{r4s_log} = "$FORM{pdb_ID}_$FORM{chain}_r4s.log";
 $VARS{r4s_out} = "$FORM{pdb_ID}_$FORM{chain}_r4s.res";
 $VARS{r4s_slow_log} = "$FORM{pdb_ID}_$FORM{chain}_r4s_slow.log";
 $VARS{atom_positionFILE} = "$FORM{pdb_ID}_$FORM{chain}_atom_pos.txt";
-$VARS{gradesPE} = "$FORM{pdb_ID}_$FORM{chain}_consurf.grades";
+$VARS{gradesPE} = $VARS{out_dir}."/$FORM{pdb_ID}_$FORM{chain}_consurf.grades";
 $VARS{r4s_tree}="$FORM{pdb_ID}_$FORM{chain}_Tree.txt";
 $VARS{insufficient_data_pdb} = "";
 
@@ -437,16 +455,28 @@ if ($VARS{running_mode} eq "_mode_pdb_no_msa" or $VARS{running_mode} eq "_mode_p
     my %r4s2pdb = (); # key: poistion in SEQRES/MSA, value: residue name with position in atom (i.e: ALA22:A)
     &match_pdb_to_seq(\%r4s2pdb); 
     &create_gradesPE(\%r4s2pdb);     
-    $VARS{ATOMS_with_ConSurf_Scores} = $VARS{working_dir}. "ATOMS_section_With_ConSurf.pdb";
-    $VARS{ATOMS_with_ConSurf_Scores_isd} =  $VARS{working_dir}. "ATOMS_section_With_ConSurf_isd.pdb";
+    $VARS{ATOMS_with_ConSurf_Scores} = $VARS{out_dir}. "ATOMS_section_With_ConSurf.pdb";
+    $VARS{ATOMS_with_ConSurf_Scores_isd} =  $VARS{out_dir}. "ATOMS_section_With_ConSurf_isd.pdb";
 
-    $VARS{gradesPE} = $VARS{working_dir}.$VARS{gradesPE};
+    $VARS{gradesPE} = $VARS{out_dir}.$VARS{gradesPE};
     print "\nInput for PDB PIPE maker: Chain: ".$FORM{chain}."; PDB: ". $VARS{pdb_file_name}." Grades file: ".$VARS{gradesPE}."\n" if ($dbg);
-    print "\nOutput file: ".$VARS{ATOMS_with_ConSurf_Scores}."\n";
     my @ans1=cp_rasmol_gradesPE_and_pipe::ReplaceTempFactConSurfScore($FORM{chain},$VARS{pdb_file_name},$VARS{gradesPE},$VARS{ATOMS_with_ConSurf_Scores},$VARS{ATOMS_with_ConSurf_Scores_isd});
         unless ($ans1[0] eq "OK") {print("cp_rasmol_gradesPE_and_pipe::ReplaceTempFactConSurf FAILED: @ans1") if ($dbg);}
+    my $final_output_message = <<EOF;
+Consurf run completed successfuly!
+Here is a list of files that could be found in the output dir
+    $VARS{out_dir}
+    |
+    |-- $VARS{ATOMS_with_ConSurf_Scores}    PDB with conservation scores
+    |-- $VARS{ATOMS_with_ConSurf_Scores_isd}    PDB with conservation scores /without/ insufficient data annotations
+    |-- $VARS{ATOMS_with_ConSurf_Scores_isd}    PDB with conservation scores /without/ insufficient data annotations
+    |-- $VARS{gradesPE}                         Amino Acid Conservation Scores, Confidence Intervals and Conservation Colors
+EOF
+
+print $final_output_message;
 }
 
+exit (0);
 
 ### SUBRUTINES #####
 ####################
@@ -632,8 +662,9 @@ sub extract_round_from_blast{
             exit_on_error('sys_error',"extract_round_from_blast : $ans[1]");
         }
         if (-e "$VARS{working_dir}/$VARS{BLAST_last_round}" and !-z "$VARS{working_dir}/$VARS{BLAST_last_round}"){
-            my $cmd = "mv $VARS{BLAST_last_round} $VARS{BLAST_out_file}";
-            chdir $VARS{working_dir};
+            my $cmd = "mv $VARS{working_dir}/$VARS{BLAST_last_round} $VARS{working_dir}/$VARS{BLAST_out_file}";
+            warn $cmd if ($dbg);
+            # chdir $VARS{working_dir};
             `$cmd`;
         }
         else{
@@ -668,7 +699,8 @@ sub cluster_homologoues{
         $VARS{cd_hit_out_file},        $VARS{hit_redundancy} / 100,
         $config->val( 'databases', 'CD_HIT_DIR' )
         , $ref_cd_hit_hash,
-        "from_ibis"
+        "from_ibis",
+        $dbg
     );
 
     if ($ans[0] eq "sys"){
@@ -968,18 +1000,19 @@ sub get_seqres_atom_seq{
 sub create_MSA{
 #---------------------------------------------
     my $cmd;
-    chdir $VARS{working_dir};
+    # chdir $VARS{working_dir};
     if($FORM{MSAprogram} eq 'CLUSTALW'){
         # $cmd = CONSURF_CONSTANTS::CLUSTALW." -infile=$VARS{FINAL_sequences} -outfile=$VARS{protein_MSA}";
-        $cmd = $config->val( 'programs', 'CLUSTALW' )." -infile=$VARS{FINAL_sequences} -outfile=$VARS{protein_MSA}";
+        $cmd = $config->val( 'programs', 'CLUSTALW' )." -infile=$VARS{working_dir}/$VARS{FINAL_sequences} -outfile=$VARS{working_dir}/$VARS{protein_MSA}";
          
     }
     else{
          # $cmd = CONSURF_CONSTANTS::MUSCLE." -in $VARS{FINAL_sequences} -out $VARS{protein_MSA} -clwstrict -quiet";
-         $cmd = $config->val( 'programs', 'MUSCLE' )." -in $VARS{FINAL_sequences} -out $VARS{protein_MSA} -clwstrict -quiet";
+         $cmd = $config->val( 'programs', 'MUSCLE' )." -in $VARS{working_dir}/$VARS{FINAL_sequences} -out $VARS{working_dir}/$VARS{protein_MSA} -clwstrict -quiet";
     }
     print LOG "create_MSA : run $cmd\n";
-    chdir $VARS{working_dir};
+    # chdir $VARS{working_dir};
+    warn ($cmd) if ($dbg);
     `$cmd`;
     if (!-e "$VARS{working_dir}/$VARS{protein_MSA}" or -z "$VARS{working_dir}/$VARS{protein_MSA}"){
         exit_on_error('sys_error',"create_MSA : the file $VARS{working_dir}/$VARS{protein_MSA} was not created or of size zero");
@@ -987,8 +1020,8 @@ sub create_MSA{
     $VARS{msa_format} = "clustalw";
     # remove the dnd file    
     # $cmd = "rm *.dnd";
-    chdir $VARS{working_dir};
-    `$cmd`;
+    # chdir $VARS{working_dir};
+    # `$cmd`;
 }
 #---------------------------------------------
 sub open_log_file{
@@ -1049,20 +1082,22 @@ sub run_rate4site{
         $msa = $VARS{user_msa_fasta};
         $VARS{rate4site_msa_format} = "fasta";
     }
-    my $r4s_comm = "$rate4s $algorithm -a \'$query_name\' -s $msa -zn $MatrixHash{$FORM{matrix}} $tree_file_r4s -bn -l $VARS{r4s_log} -o $VARS{r4s_out}";
+    my $r4s_comm = "$rate4s $algorithm -a \'$query_name\' -s $VARS{working_dir}/$msa -zn $MatrixHash{$FORM{matrix}} $tree_file_r4s -bn -l $VARS{working_dir}/$VARS{r4s_log} -o $VARS{working_dir}/$VARS{r4s_out}";
     if ($tree_file_r4s eq ""){$r4s_comm = $r4s_comm." -x $VARS{r4s_tree}";}
     print LOG "run_rate4site : running command: $r4s_comm\n";
-    chdir $VARS{working_dir};
+    # chdir $VARS{working_dir};
+    warn ($r4s_comm) if ($dbg);
     `$r4s_comm`;
     $did_r4s_fail = &check_if_rate4site_failed("$VARS{working_dir}/$VARS{r4s_out}", "$VARS{working_dir}/$VARS{r4s_log}");
     # if the run failed - we rerun using the slow verion
     if ($did_r4s_fail eq "yes"){
         print LOG "run_rate4site : The run of rate4site failed. Sending warning message to output.\nThe same run will be done using the SLOW version of rate4site.\n";
         print_message_to_output("Warning: The given MSA is very large, therefore it will take longer for ConSurf calculation to finish. The calculation continues nevertheless.");
-        $r4s_comm = "$rate4s $algorithm -a \'$query_name\' -s $msa -zn $MatrixHash{$FORM{matrix}} $tree_file_r4s -bn -l $VARS{r4s_slow_log} -o $VARS{r4s_out}";
+        $r4s_comm = "$rate4s $algorithm -a \'$query_name\' -s $VARS{working_dir}/$msa -zn $MatrixHash{$FORM{matrix}} $tree_file_r4s -bn -l $VARS{working_dir}/$VARS{r4s_slow_log} -o $VARS{working_dir}/$VARS{r4s_out}";
 	if ($tree_file_r4s eq ""){$r4s_comm = $r4s_comm." -x $VARS{r4s_tree}";}
         print LOG "run_rate4site : running command: $r4s_comm\n";
-        chdir $VARS{working_dir};
+        # chdir $VARS{working_dir};
+        warn ($r4s_comm) if ($dbg);
         `$r4s_comm`;
         $did_r4s_fail = &check_if_rate4site_failed("$VARS{working_dir}/$VARS{r4s_out}", "$VARS{working_dir}/$VARS{r4s_slow_log}");
         if ($did_r4s_fail eq "yes"){            
@@ -1189,6 +1224,7 @@ sub create_gradesPE(){
 }
 
 #-------------------------------------------
+## DEPRECATED - help screen is printed from the man page
 sub Print_Help(){
 #-------------------------------------------
 print <<EndOfHelp;

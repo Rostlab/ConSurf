@@ -20,7 +20,7 @@ sub create_cd_hit_output{
     my $cd_hit = shift;   # directory from where we run cd-hit program
     my $ref_cd_hit_hash = shift; # hash that holds all the chosen homolougs sequences
     my $which_server = shift;
-    
+    my $dbg = shift;
     my ($seq, $seq_name);
     
     ##################
@@ -28,7 +28,7 @@ sub create_cd_hit_output{
     ##################
     my $cmd= $cd_hit . " -i $working_dir"."$input_file -o $working_dir"."$output_file -c $cutoff";
 #    chdir($cd_hit_dir);
-    warn ($cmd);
+    warn ($cmd) if $dbg;
     my $ans = `$cmd`;    
     
     unless ((-e $working_dir.$output_file)||(-z $working_dir.$output_file)){
