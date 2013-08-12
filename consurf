@@ -3,6 +3,14 @@
 #
 #   This Script implement the ConSurf system for Identification of Functional Regions in Proteins 
 #
+#   ConSurf: Using Evolutionary Data to Raise Testable Hypotheses about Protein Function
+#   Celniker G., Nimrod G., Ashkenazy H., Glaser F., Martz E., Mayrose I., Pupko T., and Ben-Tal N. 2013.
+#   Isr. J. Chem. 2013 March 10, doi: 10.1002/ijch.201200096 
+#   
+#   ConSurf 2010: calculating evolutionary conservation in sequence and structure of proteins and nucleic acids.
+#   Ashkenazy H., Erez E., Martz E., Pupko T. and Ben-Tal N. 2010 
+#   Nucl. Acids Res. 2010; DOI: 10.1093/nar/gkq399; PMID: 20478830 
+#
 #  ConSurf: the projection of evolutionary conservation scores of residues on protein structures                              
 #        Landau M., Mayrose I., Rosenberg Y., Glaser F., Martz E., Pupko T., and Ben-Tal N.
 #				 Nucl. Acids Res. 33:W299-W302. (2005)
@@ -22,8 +30,6 @@
 #
 #   
 #####################################################################################################
-
-
 
 use strict;
 use Storable;
@@ -483,16 +489,14 @@ if ($VARS{running_mode} eq "_mode_pdb_no_msa" or $VARS{running_mode} eq "_mode_p
     my @ans1=cp_rasmol_gradesPE_and_pipe::ReplaceTempFactConSurfScore($FORM{chain},$VARS{pdb_file_name},$VARS{gradesPE},$VARS{ATOMS_with_ConSurf_Scores},$VARS{ATOMS_with_ConSurf_Scores_isd});
         unless ($ans1[0] eq "OK") {print("cp_rasmol_gradesPE_and_pipe::ReplaceTempFactConSurf FAILED: @ans1") if ($dbg);}
 
-	# --- HAIM ADD 11/8/2013 - START ---
-
 	# 1. ATOM FILE WITH R4S scores - needed for pymol
-	$VARS{ATOMS_with_R4S_Scores}= $VARS{out_dir}. "ATOMS_section_With_R4S.pdb";
+	# $VARS{ATOMS_with_R4S_Scores}= $VARS{out_dir}. "ATOMS_section_With_R4S.pdb";
 	
-	my %Rate4Site_Grades=();	
-	print "\nCalling:cp_rasmol_gradesPE_and_pipe::read_Rate4Site_gradesPE($VARS{gradesPE},\%Rate4Site_Grades)\n" if ($dbg);
-	cp_rasmol_gradesPE_and_pipe::read_Rate4Site_gradesPE($VARS{gradesPE},\%Rate4Site_Grades);
-	print "Calling:cp_rasmol_gradesPE_and_pipe::replace_tempFactor($VARS{pdb_file_name},$FORM{chain},\%Rate4Site_Grades,$VARS{ATOMS_with_R4S_Scores})\n" if ($dbg);
-	cp_rasmol_gradesPE_and_pipe::replace_tempFactor("$VARS{pdb_file_name}",$FORM{chain},\%Rate4Site_Grades,$VARS{ATOMS_with_R4S_Scores});
+	# my %Rate4Site_Grades=();	
+	# print "\nCalling:cp_rasmol_gradesPE_and_pipe::read_Rate4Site_gradesPE($VARS{gradesPE},\%Rate4Site_Grades)\n" if ($dbg);
+	# cp_rasmol_gradesPE_and_pipe::read_Rate4Site_gradesPE($VARS{gradesPE},\%Rate4Site_Grades);
+	# # print "Calling:cp_rasmol_gradesPE_and_pipe::replace_tempFactor($VARS{pdb_file_name},$FORM{chain},\%Rate4Site_Grades,$VARS{ATOMS_with_R4S_Scores})\n" if ($dbg);
+	# cp_rasmol_gradesPE_and_pipe::replace_tempFactor("$VARS{pdb_file_name}",$FORM{chain},\%Rate4Site_Grades,$VARS{ATOMS_with_R4S_Scores});
 
 	# 2. create RASMOL (was on &create_rasmol)
 	#---------------------------------------------
@@ -513,27 +517,35 @@ if ($VARS{running_mode} eq "_mode_pdb_no_msa" or $VARS{running_mode} eq "_mode_p
 	print "Calling cp_rasmol_gradesPE_and_pipe::print_precentage(\%residue_freq, \%position_totalAA, $VARS{MSA_percentage_FILE},\@gradesPE_Output)\n" if ($dbg);
 	my @ans3 = cp_rasmol_gradesPE_and_pipe::print_precentage(\%residue_freq, \%position_totalAA, $VARS{MSA_percentage_FILE},\@gradesPE_Output);
 	unless ($ans3[0] eq "OK") {print "cp_rasmol_gradesPE_and_pipe::print_precentage FAILED: @ans3" if ($dbg);}
-	# --- HAIM ADD 11/8/2013 - END ---
 	
     copy ($VARS{working_dir}.'/'. $VARS{protein_MSA}, $VARS{out_dir}.'/'. $VARS{protein_MSA} );
     copy ($VARS{working_dir}.'/'. $VARS{HITS_rejected_file}, $VARS{out_dir}.'/'. $VARS{HITS_rejected_file} );
 
+    $VAR{chimera_script_src} = $consurf_utildir.'/chimera_consurf.cmd';
+    $VAR{pymol_script_src} = $consurf_utildir.'/consurf_new.py';
+    $VAR{chimera_script_target} = $VARS{out_dir}.'/chimera_consurf.cmd';
+    $VAR{pymol_script_target} = $VARS{out_dir}.'/consurf_new.py';
+    copy ( $VAR{chimera_script_src},    $VAR{chimera_script_target} );
+    copy ( $VAR{pymol_script_src}  ,    $VAR{pymol_script_target}  );
+
     my $final_output_message = <<EOF;
 
 Consurf run completed successfuly!
-
+ 
 Here is a list of files that could be found in the output dir
     $VARS{out_dir}
     |
     |-- $VARS{out_dir}/$VARS{protein_MSA}\tMultiple Sequence Alignment
     |-- $VARS{out_dir}/$VARS{HITS_rejected_file}\tRejected seqeunces
-    |-- $VARS{ATOMS_with_ConSurf_Scores}\tPDB with conservation scores
-    |-- $VARS{ATOMS_with_ConSurf_Scores_isd}\tPDB with conservation scores /without/ insufficient data annotations
     |-- $VARS{gradesPE}\tAmino acid conservation scores, confidence intervals and conservation colors
-    |-- $VARS{MSA_percentage_FILE}\tAResidue variety per position in the MSA
-    |-- $VARS{ATOMS_with_R4S_Scores}\tPDB with conservation scores adapted for presentation using the PyMol viewer
+    |-- $VARS{MSA_percentage_FILE}\tResidue variety per position in the MSA
+    |-- $VARS{r4s_tree}\tPhylogenetic tree.
+    |-- $VARS{ATOMS_with_ConSurf_Scores}\tPDB with conservation scores for presentation using the Chimera and Pymol viewers
+    |-- $VARS{ATOMS_with_ConSurf_Scores_isd}\tPDB with conservation scores for presentation using the Chimera and Pymol viewers (/without/ insufficient data annotations)
     |-- $VARS{rasmolFILE}\tRasMol script required to present the results using the RasMol viewer
     |-- $VARS{rasmol_isdFILE}\tRasMol script required to present the results using the RasMol viewer (without insufficient data annotations)
+    |-- $VARS{chimera_script_target}\Chimera script required to present the results using the Chimera viewer
+    |-- $VARS{pymol_script_target}\Pymol script required to present the results using the Pymol viewer (without insufficient data annotations)
 
 EOF
 
