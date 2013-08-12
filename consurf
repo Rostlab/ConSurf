@@ -172,10 +172,6 @@ $VARS{working_dir} =~ s!/*$!/!;
 warn ("Work dir: ".$VARS{working_dir}) if ($dbg);
 
 
-
-
-
-
 if (!defined $VARS{pdb_file_name} or !defined $FORM{chain} or ! defined $VARS{working_dir})
 {
 	die "===[FATAL ERROR] Missing Arguments; -PDB,-CHAIN,-Out_Dir must be specified\n"
@@ -257,8 +253,13 @@ my $tmp_dir =  cwd().'/consurf-'.join('-',$hour,$min,$sec ).'/';
 if ( $VARS{out_dir} ) {
     $VARS{out_dir} = glob($VARS{out_dir}).'/';
     if (! -e ($VARS{out_dir}) ){
-        print "Output dir $VARS{out_dir} does not exist. Create it? (Y/N) ";
-        my $answer = <>;
+        my $answer;
+        if ($quiet){
+            $answer = 'y';
+        }else{
+            print "Output dir $VARS{out_dir} does not exist. Create it? (Y/N) ";
+            $answer = <>;
+        }
         if ($answer =~ m/y/i){
             make_path ($VARS{out_dir}) 
                 || die ("Cannot create output dir:".$VARS{out_dir}." .".$!);
