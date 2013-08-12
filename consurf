@@ -140,7 +140,10 @@ $VARS{submission_time}=$submission_time;
 if (! $quiet){
     $quiet = $config->val( 'consurf', 'quiet' );
 }
-$quiet = 0 if ( $dbg == 1 );
+
+if ($dbg){
+    $quiet=0
+};
 
 
  my $welcome_message = <<EOF;
@@ -271,7 +274,7 @@ if ( $VARS{out_dir} ) {
         || die ("Cannot create output dir:".$VARS{out_dir}." .\nSystem message: ".$!);
 } 
 
-print "Output files could be found in output directory: ".$VARS{out_dir}."\n";
+print "Output files could be found in output directory: ".$VARS{out_dir}."\n" (if !$quiet);
 
 $VARS{run_log} = "$VARS{working_dir}/$FORM{pdb_ID}_$FORM{chain}_ConSurf.log";
 
@@ -531,7 +534,7 @@ Here is a list of files that could be found in the output dir
 
 EOF
 
-print $final_output_message;
+print $final_output_message if (!$quiet);
 }
 
 exit (0);
@@ -677,7 +680,7 @@ sub run_blast{
     my $cmd = $config->val( 'programs', 'BLASTPGP' )." -i $VARS{working_dir}/$VARS{protein_seq} -e $FORM{ESCORE} -d $VARS{protein_db} -o $VARS{working_dir}/$VARS{BLAST_out_file} -j $FORM{iterations} -v $VARS{max_homologues_to_display} -b $VARS{max_homologues_to_display} -F F";
     print LOG "run_blast : running: $cmd\n";
 
-    $cmd .= " 1>&2 2>/dev/null" if ($quiet);
+    $cmd .= " 2>&1 1>/dev/null" if ($quiet);
     warn "$cmd\n" if ($dbg);
     my $ans = `$cmd`;
     print LOG "run_blast : ans from blast run: $ans\n" if $ans ne "";
@@ -1066,7 +1069,7 @@ sub create_MSA{
     }
     print LOG "create_MSA : run $cmd\n";
     warn ($cmd) if ($dbg);
-    $cmd .= " 1>&2 2>/dev/null" if ($quiet);
+    $cmd .= " 2>&1 1>/dev/null" if ($quiet);
     `$cmd`;
     if (!-e "$VARS{working_dir}/$VARS{protein_MSA}" or -z "$VARS{working_dir}/$VARS{protein_MSA}"){
         exit_on_error('sys_error',"create_MSA : the file $VARS{working_dir}/$VARS{protein_MSA} was not created or of size zero");
@@ -1140,7 +1143,7 @@ sub run_rate4site{
     print LOG "run_rate4site : running command: $r4s_comm\n";
     chdir $VARS{working_dir};
     warn ($r4s_comm) if ($dbg);
-    $r4s_comm .= " 1>&2 2>/dev/null" if ($quiet);
+    $r4s_comm .= " 2>&1 1>/dev/null" if ($quiet);
     `$r4s_comm`;
     chdir($orig_cwd);
     $did_r4s_fail = &check_if_rate4site_failed("$VARS{working_dir}/$VARS{r4s_out}", "$VARS{working_dir}/$VARS{r4s_log}");
@@ -1153,7 +1156,7 @@ sub run_rate4site{
         print LOG "run_rate4site : running command: $r4s_comm\n";
         warn ($r4s_comm) if ($dbg);
          chdir $VARS{working_dir};
-        $r4s_comm .= " 1>&2 2>/dev/null" if ($quiet);
+        $r4s_comm .= " 2>&1 1>/dev/null" if ($quiet);
         `$r4s_comm`;
          chdir($orig_cwd);
         $did_r4s_fail = &check_if_rate4site_failed("$VARS{working_dir}/$VARS{r4s_out}", "$VARS{working_dir}/$VARS{r4s_slow_log}");
@@ -1260,7 +1263,7 @@ print "got to match_pdb_to_seq" if ($dbg);
     my @ans = CONSURF_FUNCTIONS::match_seqres_pdb("$VARS{working_dir}/$VARS{pairwise_aln}", "$VARS{working_dir}/$VARS{atom_positionFILE}", $chain, $ref_r4s2pdb);
     unless ($ans[0] eq "OK") {exit_on_error('sys_error', "match_pdb_to_seq : CONSURF_FUNCTIONS::".$ans[0]);}
     elsif (keys %$ref_r4s2pdb <1 ){exit_on_error('sys_error',"match_pdb_to_seq : Did not create hash to hold r4s and ATOM sequences");}
-    print  "match_pdb_to_seq : Total residues in the msa sequence: $ans[1]. Total residues in the ATOM : $ans[2]\n";
+    print  "match_pdb_to_seq : Total residues in the msa sequence: $ans[1]. Total residues in the ATOM : $ans[2]\n" if (!$quiet);
     $length_of_seqres = $ans[1];
     $length_of_atom = $ans[2];
   
