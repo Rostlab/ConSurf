@@ -97,7 +97,7 @@ my $result = GetOptions(
 	    "m"=>\$FORM{buildMSA},			# Builed MSA mode
 	    "MSAprogram:s"=>\$FORM{MSAprogram},		# ["CLUSTALW"] or ["MUSCLE"] (default: MUSCLE)
 	    "DB:s"=>\$FORM{database}, 			# ["SWISS-PROT"] or ["UNIPROT"] (default: UniProt)  
-	    "MaxHomol:s"=>\$FORM{MAX_NUM_HOMOL},	# <Max Number of Homologs to use for ConSurf Calculation> (deafult: 50)
+	    "MaxHomol:s"=>\$FORM{MAX_NUM_HOMOL},	#1 <Max Number of Homologs to use for ConSurf Calculation> (deafult: 50)
 	    "Iterat:s"=>\$FORM{iterations},		# <Number of PsiBlast iterataion> (default: 1)
 	    "ESCORE:s"=>\$FORM{ESCORE},    		# <Minimal E-value cutoff for Blast search> (default: 0.001)
 	    
@@ -237,7 +237,7 @@ if ($VARS{pdb_file_name}=~/([A-Za-z0-9]{4})(.[A-Za-z0-9]+)?$/)
 # Defaults , NOTE SOME OF THEM ARE IGNORED DURING THE PROGRAM BY IF ELSE MECHANISM
 $FORM{iterations} = 1 if !defined($FORM{iterations});
 $FORM{ESCORE} = 0.001 if !defined($FORM{ESCORE});
-$FORM{MAX_NUM_HOMOL} = 50 if !defined($FORM{MAX_NUM_HOMOL});
+$FORM{MAX_NUM_HOMOL} = 150 if !defined($FORM{MAX_NUM_HOMOL});
 $FORM{database}="UNIPROT" if !defined ($FORM{database});
 $FORM{algorithm}="Bayesian" if !defined ($FORM{algorithm});
 $FORM{MSAprogram}="MUSCLE" if !defined ($FORM{MSAprogram});
@@ -531,6 +531,7 @@ Here is a list of files that could be found in the output dir
     |-- $VARS{ATOMS_with_ConSurf_Scores_isd}\tPDB with conservation scores /without/ insufficient data annotations
     |-- $VARS{gradesPE}\tAmino acid conservation scores, confidence intervals and conservation colors
     |-- $VARS{MSA_percentage_FILE}\tAResidue variety per position in the MSA
+    |-- $VARS{ATOMS_with_R4S_Scores}\tPDB with conservation scores adapted for presentation using the PyMol viewer
     |-- $VARS{rasmolFILE}\tRasMol script required to present the results using the RasMol viewer
     |-- $VARS{rasmol_isdFILE}\tRasMol script required to present the results using the RasMol viewer (without insufficient data annotations)
 
@@ -829,7 +830,7 @@ sub choose_final_homologoues{
     }
     close FINAL;
     my $final_file_size = (-s "$VARS{working_dir}/$VARS{FINAL_sequences}"); # take the size of the file before we add more sequences to it
-    my @ans = prepareMSA::sort_sequences_from_eval($ref_blast_hash ,$ref_cd_hit_hash, ($FORM{MAX_NUM_HOMOL}-1), "$VARS{working_dir}/$VARS{FINAL_sequences}");
+    my @ans = prepareMSA::sort_sequences_from_eval($ref_blast_hash ,$ref_cd_hit_hash, ($FORM{MAX_NUM_HOMOL}-1)1, "$VARS{working_dir}/$VARS{FINAL_sequences}");
     if ($ans[0] eq "err"){exit_on_error('sys_error',$ans[1]);}
     # check that more sequences were added to the file
     unless ($final_file_size < (-s "$VARS{working_dir}/$VARS{FINAL_sequences}")){
