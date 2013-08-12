@@ -24,7 +24,7 @@
 #####################################################################################################
 
 
-# perl cn_2202a.pl -PDB 1.pdb -CHAIN A -Out_Dir /bioseq/Gershon/ConSurf_Exec/test -m
+
 use strict;
 use Storable;
 use Bio::SeqIO;
@@ -79,7 +79,7 @@ use cp_rasmol_gradesPE_and_pipe;
 
 my %FORM=();
 my %VARS=();
-my ( $dbg, $version, $help, $man );
+my ( $dbg, $quiet, $version, $help, $man );
 if (@ARGV < 1){ die "Usage: $0 [OPTIONS]\n";}
 
 my $result = GetOptions(
@@ -107,6 +107,7 @@ my $result = GetOptions(
 	    
 	    "h|help"=>\$help,				# shows Help
         'debug!'    => \$dbg,
+        'quiet!'    => \$quiet,
         "v|version" => \$version,
         "man" => \$man
 	   ) or pod2usage(2);
@@ -136,6 +137,11 @@ my $curr_time = $submission_time." $mday-".($mon+1)."-".($year+1900);
 $VARS{submission_time}=$submission_time;
 
 
+if (! $quiet){
+    $quiet = $config->val( 'consurf', 'quiet' );
+}
+$quiet = 0 if ( $dbg == 1 );
+
 
  my $welcome_message = <<EOF;
 
@@ -145,7 +151,7 @@ Process Started at $VARS{submission_time}
 
 EOF
 
-print $welcome_message;
+print $welcome_message if (!$quiet);
 
 
 
@@ -269,7 +275,7 @@ print "Output files could be found in output directory: ".$VARS{out_dir}."\n";
 
 $VARS{run_log} = "$VARS{working_dir}/$FORM{pdb_ID}_$FORM{chain}_ConSurf.log";
 
-print "Debug log van be found in: ".$VARS{run_log}."\n" if ($dbg);
+print "Debug log can be found in: ".$VARS{run_log}."\n" if ($dbg);
 
 $VARS{protein_seq} = "$FORM{pdb_ID}_$FORM{chain}_protein_seq.fas"; # a fasta file with the protein sequence - from PDB or from protein seq input
 
@@ -647,10 +653,7 @@ sub compare_atom_seqres_or_msa{
         }
     }
 
-    # remove the dnd file
-    # my $cmd = "rm *.dnd";
-    # chdir $VARS{working_dir};
-    # `$cmd`;
+    
 }
 #------------------------------------------
 # In PDB mode: create a fasta file with the protein SEQRES sequence (if no seqres - than with the ATOM sequence)
@@ -673,9 +676,9 @@ sub run_blast{
 
     my $cmd = $config->val( 'programs', 'BLASTPGP' )." -i $VARS{working_dir}/$VARS{protein_seq} -e $FORM{ESCORE} -d $VARS{protein_db} -o $VARS{working_dir}/$VARS{BLAST_out_file} -j $FORM{iterations} -v $VARS{max_homologues_to_display} -b $VARS{max_homologues_to_display} -F F";
     print LOG "run_blast : running: $cmd\n";
-    warn "$cmd\n" if ($dbg);
 
-    
+    $cmd .= " 1>&2 2>/dev/null" if ($quiet);
+    warn "$cmd\n" if ($dbg);
     my $ans = `$cmd`;
     print LOG "run_blast : ans from blast run: $ans\n" if $ans ne "";
     if (!-e "$VARS{working_dir}/$VARS{BLAST_out_file}" or (-e "$VARS{working_dir}/$VARS{BLAST_out_file}" and -z "$VARS{working_dir}/$VARS{BLAST_out_file}")){
@@ -1063,6 +1066,7 @@ sub create_MSA{
     }
     print LOG "create_MSA : run $cmd\n";
     warn ($cmd) if ($dbg);
+    $cmd .= " 1>&2 2>/dev/null" if ($quiet);
     `$cmd`;
     if (!-e "$VARS{working_dir}/$VARS{protein_MSA}" or -z "$VARS{working_dir}/$VARS{protein_MSA}"){
         exit_on_error('sys_error',"create_MSA : the file $VARS{working_dir}/$VARS{protein_MSA} was not created or of size zero");
@@ -1136,6 +1140,7 @@ sub run_rate4site{
     print LOG "run_rate4site : running command: $r4s_comm\n";
     chdir $VARS{working_dir};
     warn ($r4s_comm) if ($dbg);
+    $r4s_comm .= " 1>&2 2>/dev/null" if ($quiet);
     `$r4s_comm`;
     chdir($orig_cwd);
     $did_r4s_fail = &check_if_rate4site_failed("$VARS{working_dir}/$VARS{r4s_out}", "$VARS{working_dir}/$VARS{r4s_log}");
@@ -1148,6 +1153,7 @@ sub run_rate4site{
         print LOG "run_rate4site : running command: $r4s_comm\n";
         warn ($r4s_comm) if ($dbg);
          chdir $VARS{working_dir};
+        $r4s_comm .= " 1>&2 2>/dev/null" if ($quiet);
         `$r4s_comm`;
          chdir($orig_cwd);
         $did_r4s_fail = &check_if_rate4site_failed("$VARS{working_dir}/$VARS{r4s_out}", "$VARS{working_dir}/$VARS{r4s_slow_log}");
@@ -1187,7 +1193,7 @@ sub check_if_rate4site_failed{
 sub print_message_to_output{
 #---------------------------------------------
     my $msg = shift;
-    print "\n$msg\n";
+    print "\n$msg\n" if (!$quiet);
 }
 #---------------------------------------------
 sub remove_core{

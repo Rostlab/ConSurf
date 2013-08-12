@@ -1,6 +1,7 @@
 [consurf]
 # consurf_utildir=path to package utilities, default: __pkgdatadir__
 consurf_utildir=__pkgdatadir__
+quiet=1
 
 [databases]
 PDB_DIVIDED =/biodb/PDB/data/structures/divided/pdb/
