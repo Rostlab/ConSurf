@@ -544,8 +544,8 @@ Here is a list of files that could be found in the output dir
     |-- $VARS{ATOMS_with_ConSurf_Scores_isd}\tPDB with conservation scores for presentation using the Chimera and Pymol viewers (/without/ insufficient data annotations)
     |-- $VARS{rasmolFILE}\tRasMol script required to present the results using the RasMol viewer
     |-- $VARS{rasmol_isdFILE}\tRasMol script required to present the results using the RasMol viewer (without insufficient data annotations)
-    |-- $VARS{chimera_script_target}\Chimera script required to present the results using the Chimera viewer
-    |-- $VARS{pymol_script_target}\Pymol script required to present the results using the Pymol viewer (without insufficient data annotations)
+    |-- $VARS{chimera_script_target}\tChimera script required to present the results using the Chimera viewer
+    |-- $VARS{pymol_script_target}\tPymol script required to present the results using the Pymol viewer (without insufficient data annotations)
 
 EOF
 
@@ -842,7 +842,7 @@ sub choose_final_homologoues{
     }
     close FINAL;
     my $final_file_size = (-s "$VARS{working_dir}/$VARS{FINAL_sequences}"); # take the size of the file before we add more sequences to it
-    my @ans = prepareMSA::sort_sequences_from_eval($ref_blast_hash ,$ref_cd_hit_hash, ($FORM{MAX_NUM_HOMOL}-1)1, "$VARS{working_dir}/$VARS{FINAL_sequences}");
+    my @ans = prepareMSA::sort_sequences_from_eval($ref_blast_hash ,$ref_cd_hit_hash, ($FORM{MAX_NUM_HOMOL}-1), "$VARS{working_dir}/$VARS{FINAL_sequences}");
     if ($ans[0] eq "err"){exit_on_error('sys_error',$ans[1]);}
     # check that more sequences were added to the file
     unless ($final_file_size < (-s "$VARS{working_dir}/$VARS{FINAL_sequences}")){
