@@ -1725,7 +1725,7 @@ sub ReplaceTempFactConSurfScore
     close OUTP;
     close OUT_ISD;
     #!system ("rm -f $out");
-    return "OK";
+    return ("OK", $insufficient);
 }
 #************************************************************************************************
 sub read_ConSurf_gradesPE{

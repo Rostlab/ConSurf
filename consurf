@@ -488,7 +488,7 @@ if ($VARS{running_mode} eq "_mode_pdb_no_msa" or $VARS{running_mode} eq "_mode_p
     print "\nInput for PDB PIPE maker: Chain: ".$FORM{chain}."; PDB: ". $VARS{pdb_file_name}." Grades file: ".$VARS{gradesPE}."\n" if ($dbg);
     my @ans1=cp_rasmol_gradesPE_and_pipe::ReplaceTempFactConSurfScore($FORM{chain},$VARS{pdb_file_name},$VARS{gradesPE},$VARS{ATOMS_with_ConSurf_Scores},$VARS{ATOMS_with_ConSurf_Scores_isd});
         unless ($ans1[0] eq "OK") {print("cp_rasmol_gradesPE_and_pipe::ReplaceTempFactConSurf FAILED: @ans1") if ($dbg);}
-
+    $VARS{insufficient_data} = $ans1[1];
 	# 1. ATOM FILE WITH R4S scores - needed for pymol
 	# $VARS{ATOMS_with_R4S_Scores}= $VARS{out_dir}. "ATOMS_section_With_R4S.pdb";
 	
@@ -507,8 +507,10 @@ if ($VARS{running_mode} eq "_mode_pdb_no_msa" or $VARS{running_mode} eq "_mode_p
     print "Calling cp_rasmol_gradesPE_and_pipe::print_rasmol for files $VARS{rasmolFILE} and $VARS{rasmol_isdFILE}\n" if ($dbg);
     my @ans2 = cp_rasmol_gradesPE_and_pipe::print_rasmol($VARS{rasmolFILE}, "no",\@no_isd_residue_color, $FORM{chain}, "no"); #Without isd residue Color
 	unless ($ans2[0] eq "OK") {print "cp_rasmol_gradesPE_and_pipe::print_rasmol FAILED: @ans2" if ($dbg);}
-    @ans2 = cp_rasmol_gradesPE_and_pipe::print_rasmol($VARS{rasmol_isdFILE}, "yes",\@isd_residue_color, $FORM{chain}, "no"); #With isd Residue Color
-	unless ($ans2[0] eq "OK") {print "cp_rasmol_gradesPE_and_pipe::print_rasmol FAILED: @ans2" if ($dbg);}
+    if ( $VARS{insufficient_data} eq "yes"){
+        @ans2 = cp_rasmol_gradesPE_and_pipe::print_rasmol($VARS{rasmol_isdFILE}, "yes",\@isd_residue_color, $FORM{chain}, "no"); #With isd Residue Color
+    	unless ($ans2[0] eq "OK") {print "cp_rasmol_gradesPE_and_pipe::print_rasmol FAILED: @ans2" if ($dbg);}
+    }
 	
 	# 3. print a file that details percentage of each AA in the MSA - (&print_residue_precentage())
 	#------------------------------------------------------------------
