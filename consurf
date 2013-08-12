@@ -330,8 +330,8 @@ $VARS{r4s_log} = "$FORM{pdb_ID}_$FORM{chain}_r4s.log";
 $VARS{r4s_out} = "$FORM{pdb_ID}_$FORM{chain}_r4s.res";
 $VARS{r4s_slow_log} = "$FORM{pdb_ID}_$FORM{chain}_r4s_slow.log";
 $VARS{atom_positionFILE} = "$FORM{pdb_ID}_$FORM{chain}_atom_pos.txt";
-$VARS{gradesPE} = $VARS{out_dir}."/$FORM{pdb_ID}_$FORM{chain}_consurf.grades";
-$VARS{r4s_tree}="$FORM{pdb_ID}_$FORM{chain}_Tree.txt";
+$VARS{gradesPE} =  $VARS{out_dir}."/$FORM{pdb_ID}_$FORM{chain}_consurf.grades";
+$VARS{r4s_tree} =  $FORM{pdb_ID}."_".$FORM{chain}."_Tree.txt";
 $VARS{insufficient_data_pdb} = "";
 
 $VARS{insufficient_data}="no";
@@ -520,11 +520,13 @@ if ($VARS{running_mode} eq "_mode_pdb_no_msa" or $VARS{running_mode} eq "_mode_p
 	
     copy ($VARS{working_dir}.'/'. $VARS{protein_MSA}, $VARS{out_dir}.'/'. $VARS{protein_MSA} );
     copy ($VARS{working_dir}.'/'. $VARS{HITS_rejected_file}, $VARS{out_dir}.'/'. $VARS{HITS_rejected_file} );
+    copy ($VARS{working_dir}.'/'. $VARS{r4s_tree}, $VARS{out_dir}.'/'. $VARS{r4s_tree} );
+    $VARS{r4s_tree} = $VARS{out_dir}.$VARS{r4s_tree};
 
     $VARS{chimera_script_src} = $consurf_utildir.'/chimera_consurf.cmd';
     $VARS{pymol_script_src} = $consurf_utildir.'/consurf_new.py';
-    $VARS{chimera_script_target} = $VARS{out_dir}.'/chimera_consurf.cmd';
-    $VARS{pymol_script_target} = $VARS{out_dir}.'/consurf_new.py';
+    $VARS{chimera_script_target} = $VARS{out_dir}.'chimera_consurf.cmd';
+    $VARS{pymol_script_target} = $VARS{out_dir}.'consurf_new.py';
     copy ( $VARS{chimera_script_src},    $VARS{chimera_script_target} );
     copy ( $VARS{pymol_script_src}  ,    $VARS{pymol_script_target}  );
 
