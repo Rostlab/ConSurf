@@ -338,8 +338,6 @@ elsif ((!$FORM{buildMSA}) and ($VARS{user_tree_file_name} ne ""))
 #---------------------------------------------
 # create a pdbParser, to get various info from the pdb file
 
-print "Got in: include pdb\n" if ($dbg);
-
 if ($VARS{running_mode} eq "_mode_pdb_no_msa" or $VARS{running_mode} eq "_mode_pdb_msa" or $VARS{running_mode} eq "_mode_pdb_msa_tree"){
     $VARS{pdb_file} = new pdbParser;
     $VARS{pdb_file}->read($VARS{pdb_file_name});
@@ -353,21 +351,14 @@ if ($VARS{running_mode} eq "_mode_pdb_no_msa" or $VARS{running_mode} eq "_mode_p
 # mode : no msa - with PDB or without PDB
 #---------------------------------------------
 
-print "\ngot in mode : no msa - with PDB or without PDB MODE\n" if ($dbg);
+print "No msa mode - with PDB or without PDB MODE\n" if ($dbg);
 
 if ($VARS{running_mode} eq "_mode_pdb_no_msa" or $VARS{running_mode} eq "_mode_no_pdb_no_msa"){
     # if there is pdb : we compare the atom and seqres
-    print "\ngot in mode : no msa - with PDB or without PDB MODE-22222\n" if ($dbg);
 
     if ($VARS{running_mode} eq "_mode_pdb_no_msa" and (defined($VARS{SEQRES_seq}) and length($VARS{SEQRES_seq}) > 0)){
-	    print "\ngot in mode : no msa - with PDB or without PDB MODE-33333\n" if ($dbg);
-
-	    
-	    
-	    # print "\nAlignment ?\n";
         # align seqres and pdb sequences
        &compare_atom_seqres_or_msa("SEQRES");
-		        print "\nGOT OR NOT? ?\n" if ($dbg);
 
 	}
     
@@ -388,7 +379,6 @@ if ($VARS{running_mode} eq "_mode_pdb_no_msa" or $VARS{running_mode} eq "_mode_n
     
     
     &run_blast();
-    print "\nIs blast finished?\n" if ($dbg);
     &extract_round_from_blast();
     # choosing homologs, create fasta file for all legal homologs
     my %blast_hash = ();
@@ -1496,17 +1486,17 @@ Minimal E-value cutoff for Blast search. default = B<0.001>
 
 =item Basic Build MSA mode (using defaults parameters) 
 
-C<consurf --PDB  __pkgdatadir__/MY_PDB_FILE.pdb --CHAIN MY_CHAIN_ID --Out_Dir /tmp/$USER/consurf -m>
+C<consurf --PDB  __pkgdatadir__/example/1lk2.pdb --CHAIN MY_CHAIN_ID --Out_Dir /tmp/$USER/consurf -m>
 
 =item using build MSA mode and advanced options: 
 
-C<consurf --PDB __pkgdatadir__/MY_PDB_FILE.pdb --CHAIN A --Out_Dir /tmp/$USER/consurf --m --MSAprogram CLUSTALW --DB "SWISS-PROT" --MaxHomol 100 --Iterat 2 --ESCORE 0.00001 --Algorithm LikelihoodML --Matrix Dayhoff>
+C<consurf --PDB __pkgdatadir__/example/1lk2.pdb --CHAIN A --Out_Dir /tmp/$USER/consurf --m --MSAprogram CLUSTALW --DB "SWISS-PROT" --MaxHomol 100 --Iterat 2 --ESCORE 0.00001 --Algorithm LikelihoodML --Matrix Dayhoff>
 
 Will run Consurf in: building MSA mode (--m) for Chain A (--CHAIN) of PDB file: /groups/bioseq.home/1ENV.pdb (--PDB). The sequences for the MSA will be chosen according 2  iterations of PSI-Blast (--Iterat) against SwissProt Database (--DB "SWISS-PROT"), with E value cutoff of 0.00001 (--ESCORE), considering maximum 100 homologues (MaxHomol). The Rate4Site will use Maximum Liklihood algorithm (--Algorithm) and Dayhoff model (--Matrix)
 
 =item Simple Run With prepared MSA. 
 
-C<consurf --PDB __pkgdatadir__/MY_PDB_FILE.pdb --CHAIN A --Out_Dir /tmp/$USER/consurf --MSA MY_MSA_FILE --SEQ_NAME MY_SEQ_NAME> 
+C<consurf --PDB __pkgdatadir__/example/1lk2.pdb --CHAIN A --Out_Dir /tmp/$USER/consurf --MSA MY_MSA_FILE --SEQ_NAME MY_SEQ_NAME> 
 
 =back
 
