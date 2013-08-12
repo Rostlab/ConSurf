@@ -274,7 +274,7 @@ if ( $VARS{out_dir} ) {
         || die ("Cannot create output dir:".$VARS{out_dir}." .\nSystem message: ".$!);
 } 
 
-print "Output files could be found in output directory: ".$VARS{out_dir}."\n" (if !$quiet);
+print "Output files could be found in output directory: ".$VARS{out_dir}."\n" if (!$quiet);
 
 $VARS{run_log} = "$VARS{working_dir}/$FORM{pdb_ID}_$FORM{chain}_ConSurf.log";
 
