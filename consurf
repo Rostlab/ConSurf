@@ -567,7 +567,7 @@ sub analyse_seqres_atom{
         print LOG "analyse_seqres_atom : modified residues found\n";
         
     }
-    print "The Atoms are fine !!!\n ".$VARS{ATOM_seq} if ($dbg);
+    # print "The Atoms are fine !!!\n ".$VARS{ATOM_seq} if ($dbg);
     
 }
 #---------------------------------------------
@@ -576,7 +576,7 @@ sub compare_atom_seqres_or_msa{
     my $what_to_compare = shift;
     # in case there are both seqres and atom fields, checks the similarity between the 2 sequences.
     my $atom_length = length($VARS{ATOM_seq});
-    print "\n".$atom_length."\n" if ($dbg); 
+    # print "\n".$atom_length."\n" if ($dbg); 
     
     my ($other_query_length, $other_query_seq, %query_line);
     my $two_fastas = "PDB_$what_to_compare"."_$FORM{pdb_ID}_$FORM{chain}.fasta2"; #CHANGHING THE NAMES
@@ -671,7 +671,7 @@ sub run_blast{
 
     my $cmd = $config->val( 'programs', 'BLASTPGP' )." -i $VARS{working_dir}/$VARS{protein_seq} -e $FORM{ESCORE} -d $VARS{protein_db} -o $VARS{working_dir}/$VARS{BLAST_out_file} -j $FORM{iterations} -v $VARS{max_homologues_to_display} -b $VARS{max_homologues_to_display} -F F";
     print LOG "run_blast : running: $cmd\n";
-    warn "run_blast : running: $cmd\n" if ($dbg);
+    warn "$cmd\n" if ($dbg);
 
     
     my $ans = `$cmd`;
@@ -1486,7 +1486,7 @@ Minimal E-value cutoff for Blast search. default = B<0.001>
 
 =item Basic Build MSA mode (using defaults parameters) 
 
-C<consurf --PDB  __pkgdatadir__/example/1lk2.pdb --CHAIN MY_CHAIN_ID --Out_Dir /tmp/$USER/consurf -m>
+C<consurf --PDB  __pkgdatadir__/example/1lk2.pdb --CHAIN A --Out_Dir /tmp/$USER/consurf -m>
 
 =item using build MSA mode and advanced options: 
 
