@@ -529,8 +529,9 @@ Here is a list of files that could be found in the output dir
     |-- $VARS{out_dir}/$VARS{HITS_rejected_file}\tRejected seqeunces
     |-- $VARS{ATOMS_with_ConSurf_Scores}\tPDB with conservation scores
     |-- $VARS{ATOMS_with_ConSurf_Scores_isd}\tPDB with conservation scores /without/ insufficient data annotations
-    |-- $VARS{gradesPE}\tAmino Acid Conservation Scores, Confidence Intervals and Conservation Colors
-    |-- $VARS{rasmolFILE}\tRasMol script required to present the results using the RasMol viewer. 
+    |-- $VARS{gradesPE}\tAmino acid conservation scores, confidence intervals and conservation colors
+    |-- $VARS{MSA_percentage_FILE}\tAResidue variety per position in the MSA
+    |-- $VARS{rasmolFILE}\tRasMol script required to present the results using the RasMol viewer
     |-- $VARS{rasmol_isdFILE}\tRasMol script required to present the results using the RasMol viewer (without insufficient data annotations)
 
 EOF
@@ -1139,7 +1140,7 @@ sub run_rate4site{
 
 
     my $orig_cwd = cwd;
-    my $r4s_comm = "$rate4s $algorithm -a \'$query_name\' -s $VARS{working_dir}/$msa -zn $MatrixHash{$FORM{matrix}} $tree_file_r4s -bn -l $VARS{working_dir}/$VARS{r4s_log} -o $VARS{working_dir}/$VARS{r4s_out}";
+    my $r4s_comm = "$rate4s $algorithm -a \'$query_name\' -s $VARS{working_dir}/$msa -zn $MatrixHash{$FORM{matrix}} $tree_file_r4s -bn -l $VARS{working_dir}/$VARS{r4s_log} -o $VARS{working_dir}/$VARS{r4s_out} -n 32 ";
     if ($tree_file_r4s eq ""){$r4s_comm = $r4s_comm." -x $VARS{r4s_tree}";}
     print LOG "run_rate4site : running command: $r4s_comm\n";
     chdir $VARS{working_dir};
@@ -1152,7 +1153,7 @@ sub run_rate4site{
     if ($did_r4s_fail eq "yes"){
         print LOG "run_rate4site : The run of rate4site failed. Sending warning message to output.\nThe same run will be done using the SLOW version of rate4site.\n";
         print_message_to_output("Warning: The given MSA is very large, therefore it will take longer for ConSurf calculation to finish. The calculation continues nevertheless.");
-        $r4s_comm = "$rate4s $algorithm -a \'$query_name\' -s $VARS{working_dir}/$msa -zn $MatrixHash{$FORM{matrix}} $tree_file_r4s -bn -l $VARS{working_dir}/$VARS{r4s_slow_log} -o $VARS{working_dir}/$VARS{r4s_out}";
+        $r4s_comm = "$rate4s $algorithm -a \'$query_name\' -s $VARS{working_dir}/$msa -zn $MatrixHash{$FORM{matrix}} $tree_file_r4s -bn -l $VARS{working_dir}/$VARS{r4s_slow_log} -o $VARS{working_dir}/$VARS{r4s_out} -n 32  ";
 	if ($tree_file_r4s eq ""){$r4s_comm = $r4s_comm." -x $VARS{r4s_tree}";}
         print LOG "run_rate4site : running command: $r4s_comm\n";
         warn ($r4s_comm) if ($dbg);
