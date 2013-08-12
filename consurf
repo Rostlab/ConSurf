@@ -488,7 +488,7 @@ if ($VARS{running_mode} eq "_mode_pdb_no_msa" or $VARS{running_mode} eq "_mode_p
 	$VARS{ATOMS_with_R4S_Scores}= $VARS{out_dir}. "ATOMS_section_With_R4S.pdb";
 	
 	my %Rate4Site_Grades=();	
-	"\nCalling:cp_rasmol_gradesPE_and_pipe::read_Rate4Site_gradesPE($VARS{gradesPE},\%Rate4Site_Grades)\n" if ($dbg);
+	print "\nCalling:cp_rasmol_gradesPE_and_pipe::read_Rate4Site_gradesPE($VARS{gradesPE},\%Rate4Site_Grades)\n" if ($dbg);
 	cp_rasmol_gradesPE_and_pipe::read_Rate4Site_gradesPE($VARS{gradesPE},\%Rate4Site_Grades);
 	print "Calling:cp_rasmol_gradesPE_and_pipe::replace_tempFactor($VARS{pdb_file_name},$FORM{chain},\%Rate4Site_Grades,$VARS{ATOMS_with_R4S_Scores})\n" if ($dbg);
 	cp_rasmol_gradesPE_and_pipe::replace_tempFactor("$VARS{working_dir}/$VARS{pdb_file_name}",$FORM{chain},\%Rate4Site_Grades,$VARS{ATOMS_with_R4S_Scores});
