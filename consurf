@@ -269,7 +269,7 @@ print "Output files could be found in output directory: ".$VARS{out_dir}."\n";
 
 $VARS{run_log} = "$VARS{working_dir}/$FORM{pdb_ID}_$FORM{chain}_ConSurf.log";
 
-print $VARS{run_log}."\n" if ($dbg);
+print "Debug log van be found in: ".$VARS{run_log}."\n" if ($dbg);
 
 $VARS{protein_seq} = "$FORM{pdb_ID}_$FORM{chain}_protein_seq.fas"; # a fasta file with the protein sequence - from PDB or from protein seq input
 
@@ -520,6 +520,8 @@ Here is a list of files that could be found in the output dir
     |-- $VARS{ATOMS_with_ConSurf_Scores}\tPDB with conservation scores
     |-- $VARS{ATOMS_with_ConSurf_Scores_isd}\tPDB with conservation scores /without/ insufficient data annotations
     |-- $VARS{gradesPE}\tAmino Acid Conservation Scores, Confidence Intervals and Conservation Colors
+    |-- $VARS{rasmolFILE}\tRasMol script required to present the results using the RasMol viewer. 
+    |-- $VARS{rasmol_isdFILE}\tRasMol script required to present the results using the RasMol viewer (without insufficient data annotations)
 
 EOF
 
