@@ -640,22 +640,26 @@ sub residues_shift_left
     }
     delete($ref_residue_frequency->{$index});    
 }
+
 #************************************************************************************************
 # for each position, calculate the % for each residue which is found in the MSA in that position
 # the output is written in "Cvs" format, meaning there are ',' signs for each tab carachter
 sub print_precentage{
-    my ($ref_residue_freq,$ref_position_totalAA, $out_file) = @_;    
+    my ($ref_residue_freq,$ref_position_totalAA, $out_file, $ref_ConSurfGrades) = @_;
     my @aa_arr = ("A","C","D","E","F","G","H","I","K","L","M","N","P","Q","R","S","T","V","W","Y","OTHER");
     my ($val, $aa_found, $total, @aa_in_position, $other, $other_val);
     unless (open OUT, ">".$out_file) {return ("print_precentage : Could not open the file $out_file for writing $!", 'PANIC');}
 	print OUT "\"The table details the residue variety in % for each position in the query sequence.\"\n\"Each column shows the % for that amino-acid, found in position ('pos') in the MSA.\"\n\"In case there are residues which are not a standard amino-acid in the MSA, they are represented under column 'OTHER'\"\n\n";
     print OUT "pos";
     print OUT ",$_" foreach (@aa_arr);
-    print OUT "\n";
+    print OUT ",MAX AA,ConSurf Grade\n";
+	
     # order the lines according to AA position in the sequence
     for my $position (sort {$a <=> $b} keys %$ref_residue_freq){
         $total=0; $aa_found = "no"; $other="";$other_val=0;
-        print OUT $position;
+        my $max_precent=0;my $max_AA="";
+		print OUT $position;
+		
         # the total number of animo acids found in the MSA for that position
         $total += $ref_position_totalAA->{$position};
         #For each position , sort the amino acids variety
@@ -667,7 +671,7 @@ sub print_precentage{
         my $i=0; 
 		while ($i<@aa_arr){
 			# if there are non standart aa, we calculate its total value seperately and add it under column OTHER
-			while ($aa !~ /^[KRHDEYWSTFLIMCNQAVPG]$/ and $j < @aa_in_position){
+			while ($aa !~ /^[KRHDEYWSTFLIMCNQAVPG]$/i and $j < @aa_in_position){
 				$other_val+=$val;
 				$j+=1;
 				if ($j < @aa_in_position){
@@ -679,25 +683,44 @@ sub print_precentage{
 				$other = $other_val;
 				print OUT ",$other";
 			}			
-            elsif ($aa_arr[$i] eq $aa){				
-                print OUT ",$val";
-                $j+=1;
-                if ($j < @aa_in_position){
-                    $aa = $aa_in_position[$j];
-                    $val = ($ref_residue_freq->{$position}->{$aa})/$total*100;
-					
-                }
-            }			
-            else{
-                print OUT ",";
-            }
+			elsif ($aa_arr[$i] eq uc ($aa)){
+				if ($val>$max_precent)
+				{
+					$max_precent=$val;
+					$max_AA=$aa;
+				}
+				elsif ($val==$max_precent)
+				{
+					$max_AA.=$aa;
+				}	
+				print OUT ",".sprintf("%.3f",$val);
+				$j+=1;
+				if ($j < @aa_in_position){
+					$aa = $aa_in_position[$j];
+					$val = ($ref_residue_freq->{$position}->{$aa})/$total*100;
+				}
+			}			
+			else{
+				print OUT ",";
+			}
 			$i++;
-        }
-        print OUT "\n";
+		}
+        print OUT ",$max_AA ".sprintf("%.3f",$max_precent);
+		if (defined $ref_ConSurfGrades->[($position-1)]) 
+		{
+			my $GradesPE_elem=$ref_ConSurfGrades->[($position-1)];
+			print OUT ",$$GradesPE_elem{COLOR}";
+			if($$GradesPE_elem{ISD}==1){
+				print OUT "*";
+			}
+		}
+		print OUT "\n";
+		
     }
     close OUT;
-	return ("OK");
+    return ("OK");
 }
+
 #************************************************************************************************
 # for each position, calculate the % for each residue which is found in the MSA in that position
 # the values in the line might not sum to exactly 100%, as we round the value to be written with
@@ -1689,7 +1712,12 @@ sub ReplaceTempFactConSurfScore
                         $tempFactor_isd = "     $gradesPE_info_with0{$residue}      "; 
                     }                        
                 }
-                print OUTP "$atom$atom_num$atom_name$altLoc$res_name$chain$res_num$iCode$x$y$z$occupancy$tempFactor\n";
+				else
+                {
+					$tempFactor = "            ";
+					$tempFactor_isd = "            ";
+                }
+				print OUTP "$atom$atom_num$atom_name$altLoc$res_name$chain$res_num$iCode$x$y$z$occupancy$tempFactor\n";
                 print OUT_ISD "$atom$atom_num$atom_name$altLoc$res_name$chain$res_num$iCode$x$y$z$occupancy$tempFactor_isd\n" if ($insufficient eq "yes" );
             }                
         }#while               

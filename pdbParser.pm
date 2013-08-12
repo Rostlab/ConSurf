@@ -275,7 +275,8 @@ sub read {
             #    $chainInsCode = '';
             #}
             # get chain previous data
-            my $last_residue_num = $self->{"ATOM_RES_NUM$ATOM_chain.raw"};            
+            my $last_residue_num = $self->{"ATOM_RES_NUM$ATOM_chain.raw"};
+            if (!defined $last_residue_num){$last_residue_num="NA";}
             my $ATOM_seq = $self->{"ATOM$ATOM_chain.raw"};
             # check if this chain was already processed
             my $chainfound = 0;
@@ -288,10 +289,11 @@ sub read {
                 push(@ATOM_chains,$ATOM_chain);
             }
             # update ATOM sequence only if we read the next residue (not the next atom)
-            if (!(defined $last_residue_num) or $last_residue_num < $residue_number){
+            if (($last_residue_num eq "NA") or $last_residue_num < $residue_number){
+				if ($last_residue_num eq "NA") {$last_residue_num=0;}
                 while ($residue_number!=$last_residue_num+1){ # For Disorder regions
                      $ATOM_seq=$ATOM_seq."X";
-			$last_residue_num++;
+					 $last_residue_num++;
                 }
                 # convert to one letter format
                 my $resShortName = $aa{$Res3L};
