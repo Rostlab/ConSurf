@@ -155,7 +155,7 @@ if ($dbg){
 
  my $welcome_message = <<EOF;
 
-Consurf Version __PACKAGE_VERSION__
+ConSurf Version __PACKAGE_VERSION__
 ====================================
 Process Started at $VARS{submission_time}
 
@@ -650,23 +650,7 @@ sub compare_atom_seqres_or_msa{
     print FAS ">".$what_to_compare."_$FORM{chain}\n$other_query_seq\n>ATOM_$FORM{chain}\n$VARS{ATOM_seq}\n";
     close FAS;
 
-    # my $command = "cd ".$VARS{working_dir}."; ".CONSURF_CONSTANTS::CLUSTALW." -INFILE=".$VARS{working_dir}."/".$two_fastas." -GAPOPEN=1 -OUTFILE=$VARS{working_dir}/$VARS{pairwise_aln} > ".$VARS{working_dir}."/".$clustalw_out;
-    #  my $command = "cd ".$VARS{working_dir}."; ".$config->val( 'programs', 'CLUSTALW' )." -INFILE=".$VARS{working_dir}."/".$two_fastas." -GAPOPEN=1 -OUTFILE=$VARS{working_dir}/$VARS{pairwise_aln} > ".$VARS{working_dir}."/".$clustalw_out;
-   
-    # print LOG "compare_atom_seqres_or_msa : run $command\n";
-    # `$command`;
-    # if (!-e "$VARS{working_dir}/$VARS{pairwise_aln}" or -z "$VARS{working_dir}/$VARS{pairwise_aln}" or !-e "$VARS{working_dir}/$clustalw_out" or -z "$VARS{working_dir}/$clustalw_out"){
-    #     exit_on_error('sys_error',"compare_atom_seqres_or_msa : one of clustalw outputs were not create; $clustalw_out and/or $VARS{pairwise_aln}");
-    # }
-    # open OUT, "$VARS{working_dir}/$clustalw_out" or exit_on_error('sys_error', "compare_atom_seqres_or_msa : Cannot open the file $clustalw_out for reading $!");
-    # while(<OUT>){
-    #     if(/Sequences.+Aligned.+Score:\s+(\d+)/){
-    #         $alignment_score = $1;
-    #         last;
-    #     }
-    # }
-    # close OUT;
-
+  
     my $command = $config->val( 'programs', 'MUSCLE' )." -in ".$VARS{working_dir}."/".$two_fastas." -out $VARS{working_dir}/$VARS{pairwise_aln} -clwstrict -quiet";
    
     print LOG "compare_atom_seqres_or_msa : run $command\n";
