@@ -667,7 +667,7 @@ sub compare_atom_seqres_or_msa{
     # }
     # close OUT;
 
-    my $command = $config->val( 'programs', 'MUSCLE' )." -in".$VARS{working_dir}."/".$two_fastas." -out $VARS{working_dir}/$VARS{pairwise_aln} -clwstrict -quiet";
+    my $command = $config->val( 'programs', 'MUSCLE' )." -in ".$VARS{working_dir}."/".$two_fastas." -out $VARS{working_dir}/$VARS{pairwise_aln} -clwstrict -quiet";
    
     print LOG "compare_atom_seqres_or_msa : run $command\n";
     warn $command if ($dbg);
