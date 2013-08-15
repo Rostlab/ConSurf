@@ -36,6 +36,7 @@ use Storable;
 use Bio::SeqIO;
 use Bio::AlignIO;
 use Bio::Align::AlignI;
+use Bio::SimpleAlign;
 use Getopt::Long;
 use File::Path qw(make_path);
 use Pod::Usage;
@@ -650,21 +651,35 @@ sub compare_atom_seqres_or_msa{
     close FAS;
 
     # my $command = "cd ".$VARS{working_dir}."; ".CONSURF_CONSTANTS::CLUSTALW." -INFILE=".$VARS{working_dir}."/".$two_fastas." -GAPOPEN=1 -OUTFILE=$VARS{working_dir}/$VARS{pairwise_aln} > ".$VARS{working_dir}."/".$clustalw_out;
-     my $command = "cd ".$VARS{working_dir}."; ".$config->val( 'programs', 'CLUSTALW' )." -INFILE=".$VARS{working_dir}."/".$two_fastas." -GAPOPEN=1 -OUTFILE=$VARS{working_dir}/$VARS{pairwise_aln} > ".$VARS{working_dir}."/".$clustalw_out;
+    #  my $command = "cd ".$VARS{working_dir}."; ".$config->val( 'programs', 'CLUSTALW' )." -INFILE=".$VARS{working_dir}."/".$two_fastas." -GAPOPEN=1 -OUTFILE=$VARS{working_dir}/$VARS{pairwise_aln} > ".$VARS{working_dir}."/".$clustalw_out;
+   
+    # print LOG "compare_atom_seqres_or_msa : run $command\n";
+    # `$command`;
+    # if (!-e "$VARS{working_dir}/$VARS{pairwise_aln}" or -z "$VARS{working_dir}/$VARS{pairwise_aln}" or !-e "$VARS{working_dir}/$clustalw_out" or -z "$VARS{working_dir}/$clustalw_out"){
+    #     exit_on_error('sys_error',"compare_atom_seqres_or_msa : one of clustalw outputs were not create; $clustalw_out and/or $VARS{pairwise_aln}");
+    # }
+    # open OUT, "$VARS{working_dir}/$clustalw_out" or exit_on_error('sys_error', "compare_atom_seqres_or_msa : Cannot open the file $clustalw_out for reading $!");
+    # while(<OUT>){
+    #     if(/Sequences.+Aligned.+Score:\s+(\d+)/){
+    #         $alignment_score = $1;
+    #         last;
+    #     }
+    # }
+    # close OUT;
+
+    my $command = $config->val( 'programs', 'MUSCLE' )." -in".$VARS{working_dir}."/".$two_fastas." -out $VARS{working_dir}/$VARS{pairwise_aln} -clwstrict -quiet";
    
     print LOG "compare_atom_seqres_or_msa : run $command\n";
+    warn $command if ($dbg);
     `$command`;
-    if (!-e "$VARS{working_dir}/$VARS{pairwise_aln}" or -z "$VARS{working_dir}/$VARS{pairwise_aln}" or !-e "$VARS{working_dir}/$clustalw_out" or -z "$VARS{working_dir}/$clustalw_out"){
-        exit_on_error('sys_error',"compare_atom_seqres_or_msa : one of clustalw outputs were not create; $clustalw_out and/or $VARS{pairwise_aln}");
+    if (!-e "$VARS{working_dir}/$VARS{pairwise_aln}" or -z "$VARS{working_dir}/$VARS{pairwise_aln}"){
+        exit_on_error('sys_error',"compare_atom_seqres_or_msa : pairwise alignment output was not created: $VARS{pairwise_aln}");
     }
-    open OUT, "$VARS{working_dir}/$clustalw_out" or exit_on_error('sys_error', "compare_atom_seqres_or_msa : Cannot open the file $clustalw_out for reading $!");
-    while(<OUT>){
-        if(/Sequences.+Aligned.+Score:\s+(\d+)/){
-            $alignment_score = $1;
-            last;
-        }
-    }
-    close OUT;
+    # Use Bio::AlignIO to read in the alignment
+    my $str = Bio::AlignIO->new(-file => "$VARS{working_dir}/$VARS{pairwise_aln}");
+    my $aln = $str->next_aln();
+    $alignment_score = $aln->overall_percentage_identity;
+    $alignment_score = sprintf "%.3f", $alignment_score;
 
     if ($alignment_score < 100){
         if ($alignment_score < 60){
@@ -675,7 +690,6 @@ sub compare_atom_seqres_or_msa{
         }
     }
 
-    
 }
 #------------------------------------------
 # In PDB mode: create a fasta file with the protein SEQRES sequence (if no seqres - than with the ATOM sequence)

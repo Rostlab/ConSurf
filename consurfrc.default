@@ -22,8 +22,8 @@ BAYES_INTERVAL=3
 
 [programs]
 MUSCLE=muscle
-CLUSTALW=clustalw
-RATE4SITE=/mnt/project/consurf/bin/rate4site
-RATE4SITE_SLOW=/mnt/project/consurf/bin/rate4site
+CLUSTALW=clustalw2
+RATE4SITE=rate4site
+RATE4SITE_SLOW=rate4site_doublerep
 CD_HIT_DIR=cd-hit
-BLASTPGP=blastppg
+BLASTPGP=blastpgp
