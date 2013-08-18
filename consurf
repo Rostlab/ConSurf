@@ -112,7 +112,8 @@ my $result = GetOptions(
 	    "Algorithm:s"=>\$FORM{algorithm}, 		# [LikelihoodML] or [Bayesian] (default: Bayesian)
 	    "Matrix:s"=>\$FORM{matrix},			# [JTT] or [mtREV] or [cpREV] or [WAG] or [Dayhoff] (default JTT)
 	    
-	    "h|help"=>\$help,				# shows Help
+	   "w|workdir" => \$VARS{working_dir} ,
+        "h|help"=>\$help,				# shows Help
         'debug!'    => \$dbg,
         'quiet!'    => \$quiet,
         "v|version" => \$version,
@@ -768,12 +769,11 @@ sub cluster_homologoues{
     my $ref_blast_hash = shift;
     my $msg = "";
     print LOG "cluster_homologoues : running prepareMSA::create_cd_hit_output\n";
-    # my @ans = prepareMSA::create_cd_hit_output("$VARS{working_dir}/", $VARS{HITS_fasta_file}, $VARS{cd_hit_out_file}, $VARS{hit_redundancy}/100, CONSURF_CONSTANTS::CD_HIT_DIR, $ref_cd_hit_hash, "from_ibis");
     my @ans = prepareMSA::create_cd_hit_output(
         "$VARS{working_dir}/",         $VARS{HITS_fasta_file},
         $VARS{cd_hit_out_file},        $VARS{hit_redundancy} / 100,
-        $config->val( 'databases', 'CD_HIT_DIR' )
-        , $ref_cd_hit_hash,
+        $config->val( 'programs', 'CD_HIT' ),
+        $ref_cd_hit_hash,
         "from_ibis",
         $dbg
     );

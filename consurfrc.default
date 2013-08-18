@@ -1,14 +1,17 @@
 [consurf]
 # consurf_utildir=path to package utilities, default: __pkgdatadir__
 consurf_utildir=__pkgdatadir__
-quiet=1
+# set to 1 to supress runtime output
+quiet=0
 
 [databases]
-PDB_DIVIDED =/biodb/PDB/data/structures/divided/pdb/
-SWISSPROT_DB=/biodb/BLAST/Proteins/swissprot
-UNIPROT_DB=/biodb/BLAST/Proteins/uniprot
+# path to PDB divided. see ftp://ftp.wwpdb.org/pub/pdb/data/structures/divided
+PDB_DIVIDED =
+# path to Swiss-Prot database. see http://www.uniprot.org/downloads
+SWISSPROT_DB=
+# path to UniRef90 database. see ftp://ftp.uniprot.org/pub/databases/uniprot/uniref/uniref90/README
+UNIPROT_DB=
 RCSB_WGET=wget ftp://ftp.wwpdb.org/pub/pdb/data/structures/all/pdb/
-CD_HIT_DIR=cd-hit_redundency/
 
 [params]
 BLAST_MAX_HOMOLOGUES_TO_DISPLAY=500
@@ -25,5 +28,5 @@ MUSCLE=muscle
 CLUSTALW=clustalw2
 RATE4SITE=rate4site
 RATE4SITE_SLOW=rate4site_doublerep
-CD_HIT_DIR=cd-hit
+CD_HIT=cd-hit
 BLASTPGP=blastpgp

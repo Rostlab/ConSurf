@@ -16,7 +16,6 @@ sub create_cd_hit_output{
     my $input_file = shift;   # fasta file with sequences to cluster
     my $output_file = shift;  # final fasta file with chosen homolougs
     my $cutoff = shift;       # the decimal fraction of identity we allow between the homolougs
-#    my $cd_hit_dir = shift;   # directory from where we run cd-hit program
     my $cd_hit = shift;   # directory from where we run cd-hit program
     my $ref_cd_hit_hash = shift; # hash that holds all the chosen homolougs sequences
     my $which_server = shift;
@@ -27,12 +26,11 @@ sub create_cd_hit_output{
     # running cd-hit #
     ##################
     my $cmd= $cd_hit . " -i $working_dir"."$input_file -o $working_dir"."$output_file -c $cutoff";
-#    chdir($cd_hit_dir);
     warn ($cmd) if $dbg;
     my $ans = `$cmd`;    
     
     unless ((-e $working_dir.$output_file)||(-z $working_dir.$output_file)){
-        return ("sys", "parseFiles::create_cd_hit_output : CD-HIT produced no output!\n");    
+        return ("sys", "prepareMSA::create_cd_hit_output : CD-HIT produced no output!\n");    
     }
     #####################################
     # insert chosen homolougs to a hash #
@@ -83,7 +81,7 @@ sub choose_homologoues_from_blast{
     # AAseq1 : the sequence itself, as read from the "Subjct" line of the HSP    
     
     unless (open QUERY, $query){
-        return ("sys", "parseFiles::choose_homologoues_from_blast : can't open file $query for reading\n");
+        return ("sys", "prepareMSA::choose_homologoues_from_blast : can't open file $query for reading\n");
     }
     ################################
     # Extracting Query information #
@@ -240,7 +238,7 @@ sub choose_homologoues_from_blast_with_lower_identity_cutoff{
     # AAseq1 : the sequence itself, as read from the "Subjct" line of the HSP    
     
     unless (open QUERY, $query){
-        return ("sys", "parseFiles::choose_homologoues_from_blast_with_lower_identity_cutoff : can't open file $query for reading\n");
+        return ("sys", "prepareMSA::choose_homologoues_from_blast_with_lower_identity_cutoff : can't open file $query for reading\n");
     }
     ################################
     # Extracting Query information #
@@ -264,7 +262,7 @@ sub choose_homologoues_from_blast_with_lower_identity_cutoff{
     ##################################################
     
     unless (open OUT_REJECT, ">".$working_dir.$rejected_seqs){
-        {return ("sys", "parseFiles::choose_homologoues_from_blast_with_lower_identity_cutoff : can't open file $rejected_seqs for writing\n");}
+        {return ("sys", "prepareMSA::choose_homologoues_from_blast_with_lower_identity_cutoff : can't open file $rejected_seqs for writing\n");}
     }    
     my $searchio = new Bio::SearchIO(-format => 'blast',
                                      -file   => $blast_output);
@@ -327,7 +325,7 @@ sub choose_homologoues_from_blast_with_lower_identity_cutoff{
     my $seq_frag_name;
     
     unless (open OUT ,">".$working_dir.$fasta_output)
-        {return ("sys", "parseFiles::choose_homologoues_from_blast : can't open file $fasta_output for writing\n");}
+        {return ("sys", "prepareMSA::choose_homologoues_from_blast : can't open file $fasta_output for writing\n");}
     while (($s_name, $seq_details) = each (%sequences)){        
         for ($i=0; $i<=$#$seq_details; $i++){
             $seq_frag_name = "$s_name"."_".$seq_details->[$i]{beg}."_".$seq_details->[$i]{end};
