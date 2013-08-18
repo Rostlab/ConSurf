@@ -1495,7 +1495,7 @@ SWISS-PROT|UNIPROT. default = B<UNIPROT>
 
 =item --MaxHomol 
 
-Max Number of Homologs to use for ConSurf Calculation. deafult = B<50>
+Max Number of Homologs to use for ConSurf Calculation. deafult = B<150>
 
 =item --Iterat 
 
