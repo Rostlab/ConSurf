@@ -10,7 +10,10 @@ dist_pkgdata_DATA = \
 	prepareMSA.pm \
 	TREE_parser.pm  \
 	cp_rasmol_gradesPE_and_pipe.pm \
-	consurfrc.default
+	consurfrc.default \
+	consurf_new.py \
+	chimera_consurf.cmd 
+
 
 dist_pkgdata_SCRIPTS =
 
