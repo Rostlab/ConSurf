@@ -111,8 +111,7 @@ my $result = GetOptions(
 	   # Rate4Site Parameters 
 	    "Algorithm:s"=>\$FORM{algorithm}, 		# [LikelihoodML] or [Bayesian] (default: Bayesian)
 	    "Matrix:s"=>\$FORM{matrix},			# [JTT] or [mtREV] or [cpREV] or [WAG] or [Dayhoff] (default JTT)
-	    
-	   "w|workdir" => \$VARS{working_dir} ,
+	    "w|workdir:s" => \$VARS{working_dir} ,
         "h|help"=>\$help,				# shows Help
         'debug!'    => \$dbg,
         'quiet!'    => \$quiet,
