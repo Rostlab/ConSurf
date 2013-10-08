@@ -1,6 +1,3 @@
-dist_noinst_DATA = debian/changelog  debian/compat  debian/control  debian/copyright 
-dist_noinst_SCRIPTS = debian/rules
-
 dist_bin_SCRIPTS = consurf
 dist_pkgdata_DATA = \
 	CONSURF_FUNCTIONS.pm \
