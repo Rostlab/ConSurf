@@ -1033,7 +1033,7 @@ sub get_seqres_atom_seq{
     # extract the sequences from the pdbParser
     my $seqres = "";
     my $atom = "";
-    if (defined (@{$VARS{pdb_file}->{SEQRES_chains}})){
+    if (@{$VARS{pdb_file}->{SEQRES_chains}}){
         foreach my $chainid (@{$VARS{pdb_file}->{SEQRES_chains}}){
             if (($chainid eq " " and $FORM{chain} =~ /none/i) or $chainid =~ /$FORM{chain}/i){
                 $seqres = $VARS{pdb_file}->get("SEQRES$chainid.raw");
@@ -1041,7 +1041,7 @@ sub get_seqres_atom_seq{
             }
         }
     }
-    if (defined (@{$VARS{pdb_file}->{ATOM_chains}})){
+    if (@{$VARS{pdb_file}->{ATOM_chains}}){
         foreach my $chainid (@{$VARS{pdb_file}->{ATOM_chains}}){
             if (($chainid eq " " and $FORM{chain} =~ /none/i) or $chainid =~ /$FORM{chain}/i){
                 $atom = $VARS{pdb_file}->get("ATOM$chainid.raw");
@@ -1053,7 +1053,7 @@ sub get_seqres_atom_seq{
         &exit_on_error('user_error',"The protein sequence for chain '$FORM{chain}' was not found in SEQRES nor ATOM fields in the PDB file.");
     }
     # output a message in case there is no seqres relevant sequence, but there are other chains.
-    if ($seqres eq "" and (defined (@{$VARS{pdb_file}->{SEQRES_chains}}))){
+    if ($seqres eq "" and (@{$VARS{pdb_file}->{SEQRES_chains}})){
         my $all_chains = "";
         foreach my $chainid (@{$VARS{pdb_file}->{SEQRES_chains}}){
            if ($chainid eq " ") {$chainid = "NONE";}
