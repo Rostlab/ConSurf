@@ -478,7 +478,20 @@ elsif ($VARS{running_mode} eq "_mode_pdb_msa" or $VARS{running_mode} eq "_mode_m
 if ($VARS{running_mode} eq "_mode_pdb_no_msa" or $VARS{running_mode} eq "_mode_pdb_msa" or $VARS{running_mode} eq "_mode_pdb_msa_tree"){
     &create_atom_position_file; # this file will be used later to create the output which aligns rate4site sequence with the ATOM records
     my %r4s2pdb = (); # key: poistion in SEQRES/MSA, value: residue name with position in atom (i.e: ALA22:A)
-    &match_pdb_to_seq(\%r4s2pdb); 
+	if ((defined($VARS{SEQRES_seq}) and length($VARS{SEQRES_seq})>0))
+    {
+		&match_pdb_to_seq(\%r4s2pdb);
+    }
+	elsif ((defined $VARS{pairwise_aln}) and (-e "$VARS{working_dir}/$VARS{pairwise_aln}"))
+    {
+		&match_pdb_to_seq(\%r4s2pdb);
+    }
+    else # NO SEQRES
+    {
+		&fill_r4s2pdb(\%r4s2pdb); # fill $length_of_atom
+		$length_of_seqres=0;
+    }
+
     &create_gradesPE(\%r4s2pdb);     
     $VARS{ATOMS_with_ConSurf_Scores} = $VARS{out_dir}. "ATOMS_section_With_ConSurf.pdb";
     $VARS{ATOMS_with_ConSurf_Scores_isd} =  $VARS{out_dir}. "ATOMS_section_With_ConSurf_isd.pdb";
@@ -1033,7 +1046,7 @@ sub get_seqres_atom_seq{
     # extract the sequences from the pdbParser
     my $seqres = "";
     my $atom = "";
-    if (@{$VARS{pdb_file}->{SEQRES_chains}}){
+    if (defined (@{$VARS{pdb_file}->{SEQRES_chains}})){
         foreach my $chainid (@{$VARS{pdb_file}->{SEQRES_chains}}){
             if (($chainid eq " " and $FORM{chain} =~ /none/i) or $chainid =~ /$FORM{chain}/i){
                 $seqres = $VARS{pdb_file}->get("SEQRES$chainid.raw");
@@ -1041,7 +1054,7 @@ sub get_seqres_atom_seq{
             }
         }
     }
-    if (@{$VARS{pdb_file}->{ATOM_chains}}){
+    if (defined (@{$VARS{pdb_file}->{ATOM_chains}})){
         foreach my $chainid (@{$VARS{pdb_file}->{ATOM_chains}}){
             if (($chainid eq " " and $FORM{chain} =~ /none/i) or $chainid =~ /$FORM{chain}/i){
                 $atom = $VARS{pdb_file}->get("ATOM$chainid.raw");
@@ -1053,7 +1066,7 @@ sub get_seqres_atom_seq{
         &exit_on_error('user_error',"The protein sequence for chain '$FORM{chain}' was not found in SEQRES nor ATOM fields in the PDB file.");
     }
     # output a message in case there is no seqres relevant sequence, but there are other chains.
-    if ($seqres eq "" and (@{$VARS{pdb_file}->{SEQRES_chains}})){
+    if ($seqres eq "" and (defined (@{$VARS{pdb_file}->{SEQRES_chains}}))){
         my $all_chains = "";
         foreach my $chainid (@{$VARS{pdb_file}->{SEQRES_chains}}){
            if ($chainid eq " ") {$chainid = "NONE";}
@@ -1285,6 +1298,36 @@ print "got to match_pdb_to_seq" if ($dbg);
   
 }
 #---------------------------------------------
+sub fill_r4s2pdb{
+#---------------------------------------------
+	print "got to fill_r4s2pdb" if ($dbg);
+	
+	my $ref_r4s2pdb = shift; # key: poistion in SEQRES/MSA, value: residue name with position in atom (i.e: ALA22:A)
+	my $chain;
+	unless ($FORM{chain} =~ /none/i){
+        $chain = $FORM{chain};}
+    else{
+        $chain = " ";}
+	$length_of_atom=0;
+	open (POSITIONS,"$VARS{working_dir}/$VARS{atom_positionFILE}") or (exit_on_error('sys_error',"fill_r4s2pdb: Can't open $VARS{working_dir}/$VARS{atom_positionFILE} $!"));
+	while (my $line=<POSITIONS>)
+	{
+		chomp ($line);
+		my @line=split(/\t/,$line);
+		my $Residue_Name=$line[0];
+		my $FAS_Pos=$line[1];
+		my $ATOM_pos=$line[2];
+		$ATOM_pos=trim($ATOM_pos);
+		$FAS_Pos=trim($FAS_Pos);
+		$Residue_Name=trim($Residue_Name);
+		
+		$ref_r4s2pdb->{$FAS_Pos}=$Residue_Name.$ATOM_pos.":$chain";
+		$length_of_atom++;
+	}
+	close (POSITIONS);
+}
+
+#---------------------------------------------
 sub create_gradesPE(){
 #---------------------------------------------
     my $ref_r4s2pdb = shift;
@@ -1298,6 +1341,15 @@ sub create_gradesPE(){
     }
     $seq3d_grades_isd = $ans[1];
     $seq3d_grades = $ans[2];
+}
+
+#---------------------------------------------
+sub trim{
+#---------------------------------------------
+	my $string = shift;
+	$string =~ s/^[\s\t]+//;
+	$string =~ s/[\s\t]+$//;
+	return $string;
 }
 
 #-------------------------------------------
