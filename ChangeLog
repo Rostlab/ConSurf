@@ -1,3 +1,9 @@
+consurf (1.0.1) unstable; urgency=low
+
+  * Enhancment: can now take PDB files without chain ID
+
+ -- Guy Yachdav <gyachdav@rostlab.org>  Wed, 19 Feb 2014 16:52:15 +0100
+
 consurf (1.0.0) unstable; urgency=low
 
   * Initial release
