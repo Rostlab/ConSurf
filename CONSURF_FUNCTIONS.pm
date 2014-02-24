@@ -423,7 +423,88 @@ sub create_gradesPE{
     close(PE);
 	return ("OK",$seq3d_grades_isd, $seq3d_grades);
 }
-
+#************************************************************************************************
+#printing the the ConSeq gradesPE file
+sub create_gradesPE_ConSeq{
+    my ($Output, $ref_residue_freq, $ref_Solv_Acc_Pred, $gradesPE_file) = @_;
+    # open file
+    unless (open PE, ">$gradesPE_file" ){
+        return ("create_gradesPE_Conseq : can't open '$gradesPE_file'","PANIC");}
+    print PE "\t Amino Acid Conservation Scores\n";
+    print PE "\t===============================\n\n";
+    print PE "- POS: The position of the AA in the SEQRES derived sequence.\n";
+    print PE "- SEQ: The SEQRES derived sequence in one letter code.\n";
+    print PE "- SCORE: The normalized conservation scores.\n";
+    print PE "- COLOR: The color scale representing the conservation scores (9 - conserved, 1 - variable).\n";
+    print PE "- CONFIDENCE INTERVAL: When using the bayesian method for calculating rates, a confidence interval is assigned to each of the inferred evolutionary conservation scores.\n";
+    print PE "- CONFIDENCE INTERVAL COLORS: When using the bayesian method for calculating rates. The color scale representing the lower and upper bounds of the confidence interval.\n";
+#    print PE "- B/E: Burried (b) or Exposed (e) residue.\n";
+#    print PE "- FUNCTION: functional (f) or structural (s) residue (f - highly conserved and exposed, s - highly conserved and burried).\n";
+    print PE "- MSA DATA: The number of aligned sequences having an amino acid (non-gapped) from the overall number of sequences at each position.\n";
+    print PE "- RESIDUE VARIETY: The residues variety at each position of the multiple sequence alignment.\n\n";
+#    print PE " POS\t SEQ\tSCORE\t\tCOLOR\tCONFIDENCE INTERVAL\tCONFIDENCE INTERVAL COLORS\tB\/E\tFUNCTION\tMSA DATA\tRESIDUE VARIETY\n";
+#    print PE "    \t    \t(normalized)\t        \t               \n";
+	print PE " POS\t SEQ\tSCORE\t\tCOLOR\tCONFIDENCE INTERVAL\tCONFIDENCE INTERVAL COLORS\tMSA DATA\tRESIDUE VARIETY\n";
+    print PE "    \t    \t(normalized)\t        \t               \n";
+    foreach my $elem (@$Output){
+		my $pos = $$elem{POS};
+		my $var = "";
+		my $Solv_Acc_Pred=" ";
+		if (exists $$ref_Solv_Acc_Pred{$pos})
+		{
+			$Solv_Acc_Pred=$$ref_Solv_Acc_Pred{$pos};
+		}
+		my $score = $$elem{COLOR};
+		
+		printf (PE "%4d", $pos);
+		printf (PE "\t%4s", "$$elem{SEQ}");
+		
+		printf (PE "\t%6.3f", "$$elem{GRADE}");
+		if($$elem{ISD}==1){
+			printf (PE "\t\t%3d", "$$elem{COLOR}");
+			printf (PE "%1s", "*");
+		}
+		else{printf (PE "\t\t%3d", "$$elem{COLOR}");}
+		printf (PE "\t%6.3f", "$$elem{INTERVALLOW}");
+		printf (PE "%1s", ",");
+		printf (PE "%6.3f", "$$elem{INTERVALHIGH}");
+		printf (PE "\t\t\t%5d", "$ColorScale{$$elem{INTERVALLOWCOLOR}}");
+		printf (PE "%1s", ",");
+		printf (PE "%1d\t\t", "$ColorScale{$$elem{INTERVALHIGHCOLOR}}");
+		printf (PE "\t%3s", $Solv_Acc_Pred);
+		## FUNCT/STRUCT COL
+		if ($Solv_Acc_Pred eq "e"){
+			if ($$elem{COLOR} == 9 || $$elem{COLOR} == 8 ){
+				printf (PE "\t%8s", "f");
+			}
+			else {
+				printf (PE "\t%8s", " ");
+			}
+		}
+		else {
+			if (($$elem{COLOR} == 9) and ($Solv_Acc_Pred ne " ")){
+				printf (PE "\t%8s", "s");
+			}
+		}
+		
+		
+		printf (PE "\t%8s", "$$elem{MSA_NUM}\/$$elem{MSA_DENUM}");
+		for my $_aa (keys %{$ref_residue_freq->{($pos)}}){
+			$var.= "$_aa,";
+		}
+		chop($var) if ($var =~ /,$/);
+		print PE "\t$var\n";
+		# the amino-acid in that position, must be part of the residue variety in this column
+		if ($var !~ /$$elem{SEQ}/i){
+			close PE;
+			return ("create_gradesPE_ConSeq : in position $pos, the amino-acid ".$$elem{SEQ}." does not match the residue variety: $var.","PANIC");}
+		#printing the residue to the rasmol script
+		#assigning grades to $seq3d strings
+	}
+    print PE "\n\n*Below the confidence cut-off - The calculations for this site were performed on less than 6 non-gaped homologue sequences,\nor the confidence interval for the estimated score is equal to- or larger than- 4 color grades.\n";
+    close(PE);
+    return ("OK");
+}
 #************************************************************************************************
 #matches the position in the seqres/msa sequence to the position in the pdb
 sub match_seqres_pdb{

@@ -21,6 +21,17 @@ my %tr_aa;
     $tr_aa{GLN}="Q";$tr_aa{ALA}="A";$tr_aa{VAL}="V";$tr_aa{PRO}="P";$tr_aa{GLY}="G";
 
 my $CHIMERA_SAVING_FIGURE_LINK="http://www.cgl.ucsf.edu/chimera/current/docs/UsersGuide/print.html";
+
+my %consurf_html_colors=(       "1"=>"#10C8D1",		#less conserved
+                                "2"=>"#8CFFFF",
+                                "3"=>"#D7FFFF",
+                                "4"=>"#EAFFFF",
+                                "5"=>"#FFFFFF",		#average
+                                "6"=>"#FCEDF4",
+                                "7"=>"#FAC9DE",
+                                "8"=>"#F07DAB",
+                                "9"=>"#A02560",		#most conserved
+                                "ISD"=>"yellow");	#InSufficient Data
 #############
 #subroutines#
 #############
@@ -209,6 +220,88 @@ sub create_gradesPE{
     print PE "\n\n*Below the confidence cut-off - The calculations for this site were performed on less than 6 non-gaped homologue sequences,\nor the confidence interval for the estimated score is equal to- or larger than- 4 color grades.\n";
     close(PE);
 	return ("OK",$seq3d_grades_isd, $seq3d_grades);
+}
+#************************************************************************************************
+#printing the the ConSeq gradesPE file
+sub create_gradesPE_ConSeq{
+    my ($Output, $ref_residue_freq, $ref_Solv_Acc_Pred, $gradesPE_file) = @_;
+    # open file
+    unless (open PE, ">$gradesPE_file" ){
+        return ("create_gradesPE_Conseq : can't open '$gradesPE_file'","PANIC");}
+    print PE "\t Amino Acid Conservation Scores\n";
+    print PE "\t===============================\n\n";
+    print PE "- POS: The position of the AA in the SEQRES derived sequence.\n";
+    print PE "- SEQ: The SEQRES derived sequence in one letter code.\n";
+    print PE "- SCORE: The normalized conservation scores.\n";
+    print PE "- COLOR: The color scale representing the conservation scores (9 - conserved, 1 - variable).\n";
+    print PE "- CONFIDENCE INTERVAL: When using the bayesian method for calculating rates, a confidence interval is assigned to each of the inferred evolutionary conservation scores.\n";
+    print PE "- CONFIDENCE INTERVAL COLORS: When using the bayesian method for calculating rates. The color scale representing the lower and upper bounds of the confidence interval.\n";
+#    print PE "- B/E: Burried (b) or Exposed (e) residue.\n";
+#    print PE "- FUNCTION: functional (f) or structural (s) residue (f - highly conserved and exposed, s - highly conserved and burried).\n";
+    print PE "- MSA DATA: The number of aligned sequences having an amino acid (non-gapped) from the overall number of sequences at each position.\n";
+    print PE "- RESIDUE VARIETY: The residues variety at each position of the multiple sequence alignment.\n\n";
+#    print PE " POS\t SEQ\tSCORE\t\tCOLOR\tCONFIDENCE INTERVAL\tCONFIDENCE INTERVAL COLORS\tB\/E\tFUNCTION\tMSA DATA\tRESIDUE VARIETY\n";
+#    print PE "    \t    \t(normalized)\t        \t               \n";
+	print PE " POS\t SEQ\tSCORE\t\tCOLOR\tCONFIDENCE INTERVAL\tCONFIDENCE INTERVAL COLORS\tMSA DATA\tRESIDUE VARIETY\n";
+    print PE "    \t    \t(normalized)\t        \t               \n";
+    foreach my $elem (@$Output){
+		my $pos = $$elem{POS};
+		my $var = "";
+		my $Solv_Acc_Pred=" ";
+		if (exists $$ref_Solv_Acc_Pred{$pos})
+		{
+			$Solv_Acc_Pred=$$ref_Solv_Acc_Pred{$pos};
+		}
+		my $score = $$elem{COLOR};
+		
+		printf (PE "%4d", $pos);
+		printf (PE "\t%4s", "$$elem{SEQ}");
+		
+		printf (PE "\t%6.3f", "$$elem{GRADE}");
+		if($$elem{ISD}==1){
+			printf (PE "\t\t%3d", "$$elem{COLOR}");
+			printf (PE "%1s", "*");
+		}
+		else{printf (PE "\t\t%3d", "$$elem{COLOR}");}
+		printf (PE "\t%6.3f", "$$elem{INTERVALLOW}");
+		printf (PE "%1s", ",");
+		printf (PE "%6.3f", "$$elem{INTERVALHIGH}");
+		printf (PE "\t\t\t%5d", "$ColorScale{$$elem{INTERVALLOWCOLOR}}");
+		printf (PE "%1s", ",");
+		printf (PE "%1d\t\t", "$ColorScale{$$elem{INTERVALHIGHCOLOR}}");
+		printf (PE "\t%3s", $Solv_Acc_Pred);
+		## FUNCT/STRUCT COL
+		if ($Solv_Acc_Pred eq "e"){
+			if ($$elem{COLOR} == 9 || $$elem{COLOR} == 8 ){
+				printf (PE "\t%8s", "f");
+			}
+			else {
+				printf (PE "\t%8s", " ");
+			}
+		}
+		else {
+			if (($$elem{COLOR} == 9) and ($Solv_Acc_Pred ne " ")){
+				printf (PE "\t%8s", "s");
+			}
+		}
+		
+		
+		printf (PE "\t%8s", "$$elem{MSA_NUM}\/$$elem{MSA_DENUM}");
+		for my $_aa (keys %{$ref_residue_freq->{($pos)}}){
+			$var.= "$_aa,";
+		}
+		chop($var) if ($var =~ /,$/);
+		print PE "\t$var\n";
+		# the amino-acid in that position, must be part of the residue variety in this column
+		if ($var !~ /$$elem{SEQ}/i){
+			close PE;
+			return ("create_gradesPE_ConSeq : in position $pos, the amino-acid ".$$elem{SEQ}." does not match the residue variety: $var.","PANIC");}
+		#printing the residue to the rasmol script
+		#assigning grades to $seq3d strings
+	}
+    print PE "\n\n*Below the confidence cut-off - The calculations for this site were performed on less than 6 non-gaped homologue sequences,\nor the confidence interval for the estimated score is equal to- or larger than- 4 color grades.\n";
+    close(PE);
+    return ("OK");
 }
 
 #************************************************************************************************
@@ -2093,6 +2186,217 @@ EndOfHTML
 	return ("OK");
 }
 #************************************************************************************************
+#####################################################################
+# Print the results: the colored sequence and the B/E information
+#####################################################################
+sub ConSeq_HTML_Output { 
+    my $output = shift; # An array of Hashes that contains all the Scores data
+    my $ref_Solv_Acc_Pred=shift; # An hash that holds all the solvent accessibility prediction data
+    my $Out=shift;
+    my $Just_Seq_Flag=shift; # Optional, if equal to yes just colored seq is printed, default is no
+    unless ($Just_Seq_Flag eq "yes"){$Just_Seq_Flag="no";}
+    #print LOG "\ncreate_output: cd $WorkingDir ; touch $colors_file ; chmod oug+wrx $colors_file\n";
+    #system 'echo "(cd '.$WorkingDir.'; /bin/touch '.$colors_file.'; chmod oug+wrx '.$colors_file.')" | /bin/tcsh';
+    unless (open COLORS, ">$Out"){
+        return "cp_rasmol_gradesPE_and_pipe::ConSeq_HTML_Output: Can\'t open the file $Out";}
+	
+	print COLORS "<html>\n<title>ConSurf Results</title>\n"; 
+    print COLORS "<body bgcolor='white'>\n";
+    print COLORS "<H1 align=center><u>ConSurf Results</u></H1>\n\n";
+
+    print COLORS "\n<table border=0 width=750>\n";
+    print COLORS "<tr><td>\n";
+
+    ### print the colored sequence
+    my $count = 1;
+    my $letter_str = "";
+    my $pred_str = "";
+    my $func_str = "";
+    foreach my $elem (@{$output})
+	{
+		# print the counter above the beginning of each 10 characters
+		if (($count % 50) == 1)
+		{
+			my $output_size=scalar @{$output};
+			for (my $count_num = $count; $count_num < ($count+50);$count_num += 10)
+			{
+				if ($count_num <= $output_size)
+				{
+					my $space_num = 11 - length($count_num);
+					my $spaces="";
+					$spaces = "&nbsp;" x $space_num;
+					print COLORS "<font face='Courier New' color='black' size=+1>",$count_num,$spaces,"</font>";
+				}
+            }
+			print COLORS "<br>\n";
+		}
+		### print the colored letters and 'e' for the exposed residues
+		
+		# after 50 characters - print newline
+		if ($count % 50 == 0 or $count == @{$output})
+		{
+            if ($$elem{ISD}==1){ 	#INSUFFICIENT DATA
+				$letter_str .= "<b><font face='Courier New' color='$consurf_html_colors{ISD}' size=+1><span style='background: $consurf_html_colors{$$elem{COLOR}};'>$$elem{SEQ}</span></font></b><br>";
+            }
+            else{
+                if ($$elem{COLOR}==9){ # MOST CONSERVED
+                    $letter_str .= "<b><font face='Courier New' color='white' size=+1><span style='background: $consurf_html_colors{$$elem{COLOR}};'>$$elem{SEQ}</span></font></b><br>\n";
+                }
+                else {
+                    $letter_str .= "<b><font face='Courier New' color='black' size=+1><span style='background: $consurf_html_colors{$$elem{COLOR}};'>$$elem{SEQ}</span></font></b><br>\n";
+                }
+            }
+			if ($Just_Seq_Flag eq "no")
+			{
+				# exposed
+				if ($$ref_Solv_Acc_Pred{$$elem{POS}} eq "e")
+				{
+					$pred_str .= "<b><font face='Courier New' color='orange' size=+1>e</font></b><br>\n";
+					
+					# exposed & conserved = functional
+					if ($$elem{COLOR} == 9 || $$elem{COLOR} == 8)
+					{
+						$func_str .= "<b><font face='Courier New' color='red' size=+1>f</font></b>\n";
+					}
+					# not functional
+					else 
+					{
+						$func_str .= "<font face='Courier New' size=+1>&nbsp;</font>\n";
+					}
+				}
+				# burried
+				else {
+					$pred_str .= "<b><font face='Courier New' color='#00cc00' size=+1>b</font></b><br>\n";
+					# burried & conserved = structural
+					if ($$elem{COLOR} == 9 ){
+						$func_str .= "<b><font face='Courier New' color='#000099' size=+1>s</font></b>\n";
+					}
+					# not structural
+					else {
+						$func_str .= "<font face='Courier New' size=+1>&nbsp;</font>\n";
+					}
+				}
+			}
+            print COLORS $letter_str;
+            print COLORS $pred_str if ($Just_Seq_Flag eq "no");
+            print COLORS $func_str if ($Just_Seq_Flag eq "no");
+            print COLORS "</td></tr>\n";
+            print COLORS "<tr><td>\n";
+			
+            $letter_str = "";
+            $pred_str = "";
+            $func_str = "";
+        }
+        # after 10 characters - print a space ('&nbsp;')
+        elsif ($count % 10 == 0) {
+            if ($$elem{ISD} eq '1'){
+                $letter_str .= "<b><font face='Courier New' color='$consurf_html_colors{ISD}' size=+1><span style='background: $consurf_html_colors{$$elem{COLOR}};'>$$elem{SEQ}</span> </font></b>\n";
+            }
+            else{
+                if ($consurf_html_colors{$$elem{COLOR}} eq "#A02560"){
+                    $letter_str .= "<b><font face='Courier New' color='white' size=+1><span style='background: $consurf_html_colors{$$elem{COLOR}};'>$$elem{SEQ}</span> </font></b>\n";
+                }
+                else {
+					$letter_str .= "<b><font face='Courier New' color='black' size=+1><span style='background: $consurf_html_colors{$$elem{COLOR}};'>$$elem{SEQ}</span> </font></b>\n";
+                }
+            }
+            if ($Just_Seq_Flag eq "no")
+			{
+				# exposed
+				if ($$ref_Solv_Acc_Pred{$$elem{POS}} eq "e"){
+					$pred_str .= "<b><font face='Courier New' color='orange' size=+1>e&nbsp;</font></b>";
+					
+					# exposed & conserved = functional
+					if ($$elem{COLOR} == 9 || $$elem{COLOR} == 8){
+						$func_str .= "<b><font face='Courier New' color='red' size=+1>f&nbsp;</font></b>";
+					}
+					# not functional
+					else {
+						$func_str .= "<font face='Courier New' size=+1>&nbsp;&nbsp;</font>";
+					}
+				}
+				# burried
+				else {
+					$pred_str .= "<b><font face='Courier New' color='#00cc00' size=+1>b&nbsp;</font></b>";
+					# burried & conserved = structural
+					if ($$elem{COLOR} == 9) {
+						$func_str .= "<b><font face='Courier New' color='#000099' size=+1>s&nbsp;</font></b>";
+					}
+					# not structural
+					else {
+						$func_str .= "<font face='Courier New' size=+1>&nbsp;&nbsp;</font>";
+					}
+				}
+			}
+		}
+        else {
+            if ($$elem{ISD} eq '1'){
+                $letter_str .= "<b><font face='Courier New' color='$consurf_html_colors{ISD}' size=+1><span style='background: $consurf_html_colors{$$elem{COLOR}};'>$$elem{SEQ}</span></font></b>";
+            }
+            else{
+                if ($consurf_html_colors{$$elem{COLOR}} eq "#A02560"){
+                    $letter_str .= "<b><font face='Courier New' color='white' size=+1><span style='background: $consurf_html_colors{$$elem{COLOR}};'>$$elem{SEQ}</span></font></b>";
+                }
+                else {
+                    $letter_str .= "<b><font face='Courier New' color='black' size=+1><span style='background: $consurf_html_colors{$$elem{COLOR}};'>$$elem{SEQ}</span></font></b>";
+                }
+            }
+			if ($Just_Seq_Flag eq "no"){
+				# exposed
+				if ($$ref_Solv_Acc_Pred{$$elem{POS}} eq "e"){
+					$pred_str .= "<b><font face='Courier New' color='orange' size=+1>e</font></b>";
+					
+					# exposed & conserved = functional
+					if ($$elem{COLOR} == 9 || $$elem{COLOR} == 8 ){
+						$func_str .= "<b><font face='Courier New' color='red' size=+1>f</font></b>";
+					}
+					# not functional
+					else {
+						$func_str .= "<font face='Courier New' size=+1>&nbsp;</font>";
+					}
+				}
+				#burried
+				else {
+					$pred_str .= "<b><font face='Courier New' color='#00cc00' size=+1>b</font></b>";
+					# burried & conserved = structural
+					if ($$elem{COLOR} == 9 ){
+						$func_str .= "<b><font face='Courier New' color='#000099' size=+1>s</font></b>";
+					}
+					# not structural
+					else {
+						$func_str .= "<font face='Courier New' size=+1>&nbsp;</font>";
+					}
+				}
+			}
+		}
+        $count++;
+    }
+    print COLORS "</td></tr>\n</table><br>\n";
+	
+    # print the color scale
+    print COLORS "\n<br><b><u>Legend:</u><br><br>\nThe conservation scale:</b><br>\n<table border=0 cols=1 width=310>\n<tr><td align=center>\n<font face='Courier New' color='black' size=+1><center>\n";
+    for (my $i=1 ; $i<=9 ; $i++){
+		if ($i == 9){
+			print COLORS "<font color='white'><span style='background: $consurf_html_colors{$i};'>&nbsp;$i&nbsp;</span></font>";
+		}
+		else {
+			print COLORS "<span style='background: $consurf_html_colors{$i};'>&nbsp;$i&nbsp;</span>";
+		}
+    }
+    print COLORS "</font></center>\n<center><table border=0 cols=3 width=310>\n<tr>\n<td align=left><b>Variable</b></td>\n<td align=center><b>Average</b></td>\n<td align=right><b>Conserved</b></td>\n</tr>\n</table></center>\n</td>\n</tr>\n</table>\n";
+	if ($Just_Seq_Flag eq "no"){
+		print COLORS "<b><font face='Courier New' color='orange' size=+1>e</font> - An exposed residue according to the neural-network algorithm.</b><br>\n";
+		print COLORS "<b><font face='Courier New' color='#00cc00' size=+1>b</font> - A buried residue according to the neural-network algorithm.</b><br>\n";
+		print COLORS "<b><font face='Courier New' color='red' size=+1>f</font> - A predicted functional residue (highly conserved and exposed).</b><br>\n";
+		print COLORS "<b><font face='Courier New' color='#000099' size=+1>s</font> - A predicted structural residue (highly conserved and buried).</b><br>\n";
+	}
+	print COLORS "<b><font face='Courier New' color='$consurf_html_colors{ISD}' size=+1><span style='background: $consurf_html_colors{2};'>X</span></font> - Insufficient data - the calculation for this site was performed on less than 10% of the sequences.</font></b><br>\n"; 
+	
+    print COLORS "</body>\n</html>\n";
+	
+    close COLORS;
+    return ("ok");
+}
 
 #************************************************************************************************
 

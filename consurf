@@ -94,7 +94,7 @@ my $result = GetOptions(
 	    "PDB=s"=>\$VARS{pdb_file_name}, 		# PDB File
 	    "CHAIN=s"=>\$FORM{chain},			# Chain ID
 	    "Out_Dir=s"=>\$VARS{out_dir},		# Output Path
-	   
+	    "Seq_File=s"=>\$VARS{protein_seq},	# Seq File in FASTA format - For ConSeq mode
 	   # Given MSA mode parameters   
 	    "MSA:s"=>\$VARS{user_msa_file_name},	# <MSA File Name>	(MANDATORY IF -m NOT USED)
 	    "SEQ_NAME:s"=>\$FORM{msa_SEQNAME}, 		# <"Query sequence name in MSA file">  (MANDATORY IF -m NOT USED)
@@ -178,25 +178,49 @@ else {
 $VARS{working_dir} =~ s!/*$!/!; 
 warn ("Work dir: ".$VARS{working_dir}) if ($dbg);
 
-
-if (!defined $VARS{pdb_file_name} or !defined $FORM{chain} or ! defined $VARS{working_dir})
+if ((defined $VARS{protein_seq}) and (defined $VARS{protein_seq}) and (defined $VARS{pdb_file_name}))
 {
-	die "===[FATAL ERROR] Missing Arguments; -PDB,-CHAIN,-Out_Dir must be specified\n"
+
+    die "===[FATAL ERROR] Can't Give Both PDB and Seq\n";
+}
+if (!defined $VARS{user_msa_file_name})
+{
+ if ((!defined $VARS{pdb_file_name} or !defined $FORM{chain} or ! defined $VARS{working_dir}) and (!defined $VARS{protein_seq} or !defined $VARS{working_dir}))
+ {
+  	die "===[FATAL ERROR] Missing Arguments; If -m is used [-PDB with -CHAIN, or -Seq_File] and -Out_Dir must be specified\n"
+ } 
+}
+if (defined $VARS{pdb_file_name})
+{
+	$VARS{pdb_file_name} = glob($VARS{pdb_file_name});
+}
+if (defined $VARS{protein_seq})
+{
+	$VARS{protein_seq} = glob($VARS{protein_seq});
 }
 
-$VARS{pdb_file_name} = glob($VARS{pdb_file_name});
-
-if (! -e $VARS{pdb_file_name}){
+if (defined $VARS{pdb_file_name} and ! -e $VARS{pdb_file_name}){
     die "===[FATAL ERROR] Non existent input:".  $VARS{pdb_file_name} ."\n"; 
+}
+if (defined $VARS{protein_seq} and ! -e $VARS{protein_seq}){
+    die "===[FATAL ERROR] Non existent input:".  $VARS{protein_seq} ."\n"; 
 }
 
 # copy input file to temp dir
 use File::Copy;
 use File::Basename;
-my $t_file =  basename( $VARS{pdb_file_name} );;
-copy ($VARS{pdb_file_name}, $VARS{working_dir}. $t_file );
-$VARS{pdb_file_name}  = $VARS{working_dir}. $t_file;
-
+if (defined $VARS{pdb_file_name})
+{
+	my $t_file =  basename( $VARS{pdb_file_name} );
+	copy ($VARS{pdb_file_name}, $VARS{working_dir}. $t_file );
+	$VARS{pdb_file_name}  = $VARS{working_dir}. $t_file;
+}
+elsif (defined $VARS{protein_seq})
+{
+	my $t_file =  basename( $VARS{protein_seq} );
+	copy ($VARS{protein_seq}, $VARS{working_dir}. $t_file );
+	$VARS{protein_seq}  =  $t_file;
+}
 if (!$FORM{buildMSA}) 
 {
 	if (!defined $VARS{user_msa_file_name} or !$FORM{msa_SEQNAME})
@@ -236,10 +260,7 @@ if ((defined $VARS{user_tree_file_name}) and defined ($FORM{buildMSA}))
 	print "===[WARNNING] The given tree would be ignored in Building MSA mode\n";
 	$VARS{user_tree_file_name}="";
 }
-if ($VARS{pdb_file_name}=~/([A-Za-z0-9]{4})(.[A-Za-z0-9]+)?$/)
-{
-	$FORM{pdb_ID}=$1;
-}		    
+  
 
 # Defaults , NOTE SOME OF THEM ARE IGNORED DURING THE PROGRAM BY IF ELSE MECHANISM
 $FORM{iterations} = 1 if !defined($FORM{iterations});
@@ -284,11 +305,84 @@ if ( $VARS{out_dir} ) {
 
 print "Output files could be found in output directory: ".$VARS{out_dir}."\n" if (!$quiet);
 
-$VARS{run_log} = "$VARS{working_dir}/$FORM{pdb_ID}_$FORM{chain}_ConSurf.log";
-
+if (defined $VARS{pdb_file_name}) # ConSurf mode
+{	
+	if ($VARS{pdb_file_name}=~/([A-Za-z0-9]{4})(.[A-Za-z0-9]+)?$/)
+	{
+		$FORM{pdb_ID}=$1;
+	}
+	$VARS{run_log} = "$VARS{working_dir}/$FORM{pdb_ID}_$FORM{chain}_ConSurf.log";
+	$VARS{protein_seq} = "$FORM{pdb_ID}_$FORM{chain}_protein_seq.fas"; # a fasta file with the protein sequence - from PDB or from protein seq input
+	$VARS{CONSURF_CONSEQ}="CONSURF";
+}
+else # ConSeq mode
+{
+	if ($FORM{buildMSA}) # Build MSA mode
+	{
+		# check how many sequences in the file and extract seq_name
+		open (my $PROTEIN_SEQ,"$VARS{working_dir}$VARS{protein_seq}") || die "Can't open PROTEIN_SEQ: '$VARS{working_dir}$VARS{protein_seq}' $!";
+		my $NumOfInSeq=0;
+		while (my $line=<$PROTEIN_SEQ>)
+		{
+			if ($line=~/^>/)
+			{
+				$VARS{protein_query_seq}="";
+				$NumOfInSeq++;
+				if ($line=~/^>(\w+)\|(\w+)/) # NCBI style
+				{
+					$VARS{Seq_Name}=$2;
+				}
+				elsif ($line=~/^>(\w+)/) # FreeStyle
+				{
+					$VARS{Seq_Name}=$1;
+				}
+				$line=<$PROTEIN_SEQ>;
+				while ((defined $line) and (substr($line,0,1) ne ">" )) {
+					chomp $line;
+					$VARS{protein_query_seq}.= $line;
+					$line = <$PROTEIN_SEQ>;
+				}
+			}
+		}
+		close ($PROTEIN_SEQ);
+		if ($NumOfInSeq>1)
+		{
+			die "More than one sequence file was provided in '$VARS{protein_seq}' while only one is allowed...\b";
+		}
+		if (!exists $VARS{Seq_Name})
+		{
+			my ($name,$path,$suffix) = fileparse($VARS{Seq_Name});
+			$VARS{Seq_Name}=$name;
+		}
+	}
+	else # msa_mode
+	{
+		if ($FORM{msa_SEQNAME}=~/^(\w+)\|(\w+)/) # NCBI style
+		{
+			$VARS{Seq_Name}=$2;
+		}
+		elsif ($FORM{msa_SEQNAME}=~/^(\w+)/) # free style
+		{
+			$VARS{Seq_Name}=$1;
+		}
+		else
+		{
+			my ($name,$path,$suffix) = fileparse($VARS{user_msa_file_name});
+			$VARS{Seq_Name}=$name;
+		}
+	}
+	#mkdir "$VARS{working_dir}/$VARS{Seq_Name}" || die "Can't create dir: $VARS{working_dir}/$VARS{Seq_Name}$!"; # Seq Name
+#	$VARS{working_dir}="$VARS{working_dir}/$VARS{Seq_Name}";
+	$VARS{run_log} = "$VARS{working_dir}/$VARS{Seq_Name}_ConSurf.log";
+#	Validate_Seq(); # TO DO
+#    $VARS{protein_seq}="$VARS{working_dir}/$VARS{protein_seq_name}";
+    $VARS{running_mode}="_mode_no_pdb_no_msa";
+	$VARS{CONSURF_CONSEQ}="CONSEQ";
+}
+	
+	
 print "Debug log can be found in: ".$VARS{run_log}."\n" if ($dbg);
 
-$VARS{protein_seq} = "$FORM{pdb_ID}_$FORM{chain}_protein_seq.fas"; # a fasta file with the protein sequence - from PDB or from protein seq input
 
 # general vars
 $VARS{msa_format} = ""; # will be either: pir, fasta, nexus, clustalw, gcg, gde.
@@ -327,28 +421,54 @@ my $rate4s = $config->val( 'programs', 'RATE4SITE' );
 my $rate4s_slow = $config->val( 'programs', 'RATE4SITE_SLOW' ); 
 
 # outputs
-$VARS{r4s_log} = "$FORM{pdb_ID}_$FORM{chain}_r4s.log";
-$VARS{r4s_out} = "$FORM{pdb_ID}_$FORM{chain}_r4s.res";
-$VARS{r4s_slow_log} = "$FORM{pdb_ID}_$FORM{chain}_r4s_slow.log";
-$VARS{atom_positionFILE} = "$FORM{pdb_ID}_$FORM{chain}_atom_pos.txt";
-$VARS{gradesPE} =  $VARS{out_dir}."/$FORM{pdb_ID}_$FORM{chain}_consurf.grades";
-$VARS{r4s_tree} =  $FORM{pdb_ID}."_".$FORM{chain}."_Tree.txt";
-$VARS{insufficient_data_pdb} = "";
-
+if ($VARS{CONSURF_CONSEQ} eq "CONSURF")
+{
+	$VARS{r4s_log} = "$FORM{pdb_ID}_$FORM{chain}_r4s.log";
+	$VARS{r4s_out} = "$FORM{pdb_ID}_$FORM{chain}_r4s.res";
+	$VARS{r4s_slow_log} = "$FORM{pdb_ID}_$FORM{chain}_r4s_slow.log";
+	$VARS{atom_positionFILE} = "$FORM{pdb_ID}_$FORM{chain}_atom_pos.txt";
+	$VARS{gradesPE} =  $VARS{out_dir}."/$FORM{pdb_ID}_$FORM{chain}_consurf.grades";
+	$VARS{r4s_tree} =  $FORM{pdb_ID}."_".$FORM{chain}."_Tree.txt";
+	$VARS{insufficient_data_pdb} = "";
+	
+	if ($FORM{buildMSA})
+	{
+		$VARS{running_mode}="_mode_pdb_no_msa";
+	}
+	if ((!$FORM{buildMSA}) and ($VARS{user_tree_file_name} eq ""))
+	{
+		$VARS{running_mode}="_mode_pdb_msa";
+	}
+	elsif ((!$FORM{buildMSA}) and ($VARS{user_tree_file_name} ne ""))
+	{
+		$VARS{running_mode}="_mode_pdb_msa_tree";
+	}
+}
+elsif ($VARS{CONSURF_CONSEQ} eq "CONSEQ")
+{
+	if ($FORM{buildMSA})
+	{
+		$VARS{running_mode}="_mode_no_pdb_no_msa";
+	}
+	elsif ($VARS{user_tree_file_name} ne "")
+	{
+		$VARS{running_mode}="_mode_msa_tree";
+	}
+	else
+	{
+		$VARS{running_mode}="_mode_msa";
+	}
+	$VARS{r4s_log} = "$VARS{Seq_Name}_r4s.log";
+	$VARS{r4s_out} = "$VARS{Seq_Name}_r4s.res";
+	$VARS{r4s_slow_log} = "$VARS{Seq_Name}_r4s_slow.log";
+	$VARS{atom_positionFILE} = "$VARS{Seq_Name}_atom_pos.txt";
+	$VARS{gradesPE} = "$VARS{Seq_Name}_consurf.grades";
+	$VARS{r4s_tree}="$VARS{Seq_Name}_Tree.txt";
+	$VARS{Colored_Seq_HTML}="$VARS{Seq_Name}_ColoredSeq.html";
+}
 $VARS{insufficient_data}="no";
 
-if ($FORM{buildMSA})
-{
-	$VARS{running_mode}="_mode_pdb_no_msa";
-}
-if ((!$FORM{buildMSA}) and ($VARS{user_tree_file_name} eq ""))
-{
-	$VARS{running_mode}="_mode_pdb_msa";	
-}
-elsif ((!$FORM{buildMSA}) and ($VARS{user_tree_file_name} ne ""))
-{
-	$VARS{running_mode}="_mode_pdb_msa_tree";
-}
+print "Running mode is: $VARS{running_mode} (with ConSurf/ConSeq mode: $VARS{CONSURF_CONSEQ})\n" if ($dbg);
 
 #---------------------------------------------
 # mode : include pdb
@@ -367,20 +487,22 @@ if ($VARS{running_mode} eq "_mode_pdb_no_msa" or $VARS{running_mode} eq "_mode_p
 #---------------------------------------------
 # mode : no msa - with PDB or without PDB
 #---------------------------------------------
-
-print "No msa mode - with PDB or without PDB MODE\n" if ($dbg);
-
 if ($VARS{running_mode} eq "_mode_pdb_no_msa" or $VARS{running_mode} eq "_mode_no_pdb_no_msa"){
-    # if there is pdb : we compare the atom and seqres
+	print "No msa mode - with PDB or without PDB MODE\n" if ($dbg);    
+	# if there is pdb : we compare the atom and seqres
 
     if ($VARS{running_mode} eq "_mode_pdb_no_msa" and (defined($VARS{SEQRES_seq}) and length($VARS{SEQRES_seq}) > 0)){
         # align seqres and pdb sequences
-       &compare_atom_seqres_or_msa("SEQRES");
-
+		&compare_atom_seqres_or_msa("SEQRES");
+		$VARS{BLAST_out_file} = "$FORM{pdb_ID}_$FORM{chain}.protein_query.blast"; # file to hold blast output
+		$VARS{BLAST_last_round} = "$FORM{pdb_ID}_$FORM{chain}.last_round.blast"; # file to hold blast output, last round
 	}
-    
-    $VARS{BLAST_out_file} = "$FORM{pdb_ID}_$FORM{chain}.protein_query.blast"; # file to hold blast output
-    $VARS{BLAST_last_round} = "$FORM{pdb_ID}_$FORM{chain}.last_round.blast"; # file to hold blast output, last round
+    else
+	{	
+		$VARS{BLAST_out_file} = "$VARS{Seq_Name}.protein_query.blast"; # file to hold blast output
+		$VARS{BLAST_last_round} = "$VARS{Seq_Name}.last_round.blast"; # file to hold blast output, last round
+	}
+   
    # print "How many?".CONSURF_CONSTANTS::BLAST_MAX_HOMOLOGUES_TO_DISPLAY."\n";
    # $VARS{max_homologues_to_display}  = CONSURF_CONSTANTS::BLAST_MAX_HOMOLOGUES_TO_DISPLAY;
     $VARS{max_homologues_to_display} =
@@ -407,26 +529,34 @@ if ($VARS{running_mode} eq "_mode_pdb_no_msa" or $VARS{running_mode} eq "_mode_n
     # $VARS{low_num_of_hits} = CONSURF_CONSTANTS::LOW_NUM_FRAGMENTS_FOR_MSA;
     # $VARS{HITS_fasta_file} = "$FORM{pdb_ID}_$FORM{chain}.homolougs.fas";
     # $VARS{HITS_rejected_file} = "$FORM{pdb_ID}_$FORM{chain}.rejected_homolougs.fas";
-    $VARS{hit_redundancy} =
-      $config->val( 'params', 'FRAGMENT_REDUNDANCY_RATE' );
+    $VARS{hit_redundancy} = $config->val( 'params', 'FRAGMENT_REDUNDANCY_RATE' );
     $VARS{hit_overlap}    = $config->val( 'params', 'FRAGMENT_OVERLAP' );
     $VARS{hit_min_length} = $config->val( 'params', 'FRAGMENT_MINIMUM_LENGTH' );
-    $VARS{min_num_of_hits} =
-      $config->val( 'params', 'MINIMUM_FRAGMENTS_FOR_MSA' );
-    $VARS{low_num_of_hits} =
-      $config->val( 'params', 'LOW_NUM_FRAGMENTS_FOR_MSA' );
-    $VARS{HITS_fasta_file} =
-      "$FORM{pdb_ID}_$FORM{chain}.homolougs.fas";
-    $VARS{HITS_rejected_file} =
-      "$FORM{pdb_ID}_$FORM{chain}.rejected_homolougs.fas";
+    $VARS{min_num_of_hits} = $config->val( 'params', 'MINIMUM_FRAGMENTS_FOR_MSA' );
+    $VARS{low_num_of_hits} = $config->val( 'params', 'LOW_NUM_FRAGMENTS_FOR_MSA' );
+    
+	if ($VARS{CONSURF_CONSEQ} eq "CONSURF")
+	{
+		$VARS{HITS_fasta_file} = "$FORM{pdb_ID}_$FORM{chain}.homolougs.fas";
+		$VARS{HITS_rejected_file} = "$FORM{pdb_ID}_$FORM{chain}.rejected_homolougs.fas";
+		$VARS{cd_hit_out_file} = "$FORM{pdb_ID}_$FORM{chain}.cdhit.out";
+		$VARS{FINAL_sequences} = "$FORM{pdb_ID}_$FORM{chain}.final_homolougs.fas";
+		$VARS{protein_MSA} = "$FORM{pdb_ID}_$FORM{chain}_query_msa.aln";
+	}
+	else
+	{
+		$VARS{HITS_fasta_file} = "$VARS{Seq_Name}.homolougs.fas";
+		$VARS{HITS_rejected_file} = "$VARS{Seq_Name}.rejected_homolougs.fas";
+		$VARS{cd_hit_out_file} = "$VARS{Seq_Name}.cdhit.out";
+		$VARS{FINAL_sequences} = "$VARS{Seq_Name}.final_homolougs.fas";
+		$VARS{protein_MSA} = "$VARS{Seq_Name}_query_msa.aln";
+	}
     &choose_homologoues_from_blast(\%blast_hash);
     # screen homolougs by redundancy rate, according to clusters (CD-HIT)
-    $VARS{cd_hit_out_file} = "$FORM{pdb_ID}_$FORM{chain}.cdhit.out";
     my $num_of_unique_seq=cluster_homologoues(\%cd_hit_hash, \%blast_hash);
     $VARS{unique_seqs}=$num_of_unique_seq;	
-    $VARS{FINAL_sequences} = "$FORM{pdb_ID}_$FORM{chain}.final_homolougs.fas";
+    
     &choose_final_homologoues(\%cd_hit_hash, \%blast_hash);
-    $VARS{protein_MSA} = "$FORM{pdb_ID}_$FORM{chain}_query_msa.aln";
     &create_MSA;
     if ($VARS{running_mode} eq "_mode_pdb_no_msa")
     {
@@ -439,14 +569,22 @@ if ($VARS{running_mode} eq "_mode_pdb_no_msa" or $VARS{running_mode} eq "_mode_n
 #---------------------------------------------
 
 elsif ($VARS{running_mode} eq "_mode_pdb_msa" or $VARS{running_mode} eq "_mode_msa" or $VARS{running_mode} eq "_mode_pdb_msa_tree" or $VARS{running_mode} eq "_mode_msa_tree"){
-    # check that there are at least 5 sequecnes in the MSA
+    print "msa mode - with PDB or without PDB\n" if ($dbg);    
+	# check that there are at least 5 sequecnes in the MSA
     # extract the query sequence from the MSA
     # change the MSA sequences names to numbers
     # change the MSA format to clustalw
     # align the seqres/atom sequence with that of the query
     &determine_msa_format();
     my %MSA_sequences = (); # a hash to hold all the MSA sequences, : key - sequence id, value - sequence
-    $VARS{user_msa_fasta} = "$FORM{pdb_ID}_$FORM{chain}_msa_file.fas"; # if the file is not in fasta format, we create a fasa copy of it
+	if ($VARS{CONSURF_CONSEQ} eq "CONSURF")
+	{
+		$VARS{user_msa_fasta} = "$FORM{pdb_ID}_$FORM{chain}_msa_file.fas"; # if the file is not in fasta format, we create a fasa copy of it
+	}
+	else
+	{
+		$VARS{user_msa_fasta} = "$VARS{Seq_Name}_msa_file.fas"; # if the file is not in fasta format, we create a fasa copy of it
+	}
     &get_info_from_msa(\%MSA_sequences);
     $VARS{query_string} = $FORM{msa_SEQNAME};
     $VARS{MSA_query_seq} = $MSA_sequences{$VARS{query_string}};
@@ -492,6 +630,7 @@ if ($VARS{running_mode} eq "_mode_pdb_no_msa" or $VARS{running_mode} eq "_mode_p
 		$length_of_seqres=0;
     }
 
+
     &create_gradesPE(\%r4s2pdb);     
     $VARS{ATOMS_with_ConSurf_Scores} = $VARS{out_dir}. "ATOMS_section_With_ConSurf.pdb";
     $VARS{ATOMS_with_ConSurf_Scores_isd} =  $VARS{out_dir}. "ATOMS_section_With_ConSurf_isd.pdb";
@@ -525,20 +664,50 @@ if ($VARS{running_mode} eq "_mode_pdb_no_msa" or $VARS{running_mode} eq "_mode_p
         @ans2 = cp_rasmol_gradesPE_and_pipe::print_rasmol($VARS{rasmol_isdFILE}, "yes",\@isd_residue_color, $FORM{chain}, "no"); #With isd Residue Color
     	unless ($ans2[0] eq "OK") {print "cp_rasmol_gradesPE_and_pipe::print_rasmol FAILED: @ans2" if ($dbg);}
     }
-	
-	# 3. print a file that details percentage of each AA in the MSA - (&print_residue_precentage())
-	#------------------------------------------------------------------
-	####################################################################
-	$VARS{MSA_percentage_FILE}=$VARS{out_dir}."msa_aa_variety_percentage.csv";
-	print "Calling cp_rasmol_gradesPE_and_pipe::print_precentage(\%residue_freq, \%position_totalAA, $VARS{MSA_percentage_FILE},\@gradesPE_Output)\n" if ($dbg);
-	my @ans3 = cp_rasmol_gradesPE_and_pipe::print_precentage(\%residue_freq, \%position_totalAA, $VARS{MSA_percentage_FILE},\@gradesPE_Output);
-	unless ($ans3[0] eq "OK") {print "cp_rasmol_gradesPE_and_pipe::print_precentage FAILED: @ans3" if ($dbg);}
-	
-    copy ($VARS{working_dir}.'/'. $VARS{protein_MSA}, $VARS{out_dir}.'/'. $VARS{protein_MSA} );
-    copy ($VARS{working_dir}.'/'. $VARS{HITS_rejected_file}, $VARS{out_dir}.'/'. $VARS{HITS_rejected_file} );
-    copy ($VARS{working_dir}.'/'. $VARS{r4s_tree}, $VARS{out_dir}.'/'. $VARS{r4s_tree} );
-    $VARS{r4s_tree} = $VARS{out_dir}.$VARS{r4s_tree};
+}
+#---------------------------------------------
+# mode : ConSeq - NO PDB
+#---------------------------------------------
+if ($VARS{running_mode} eq "_mode_msa" or $VARS{running_mode} eq "_mode_no_pdb_no_msa" or $VARS{running_mode} eq "_mode_msa_tree") #ConSeq Mode
+{
+#	$VARS{Solv_ACC_Pred}="Solv_Acc_Pred.PACC"; # To Do: Buried exposed file to be predicted
+	my @msa_format=MSA_parser::determine_msa_format("$VARS{working_dir}/$VARS{protein_MSA}");
+	if ($msa_format[0] eq "err"){
+		my $msa_info_msg = "<a href =\"http://www.ebi.ac.uk/help/formats.html\">Read more on MSA formats</a><br />\n";
+		&exit_on_error('user_error',"The uploaded <a href=\"$VARS{user_msa_file_name}\">MSA file</a> is not in one of the formats supported by ConSurf: NBRF/PIR, Pearson (Fasta), Nexus, Clustal, GCG/MSF.<br /><br />\nPlease check the following items and try to run ConSurf again:<br />\n1. The file should be saved as plain text (e.g. file type 'txt' in windows or 'MS-Dos' from Word in Mac).<br />\n2. The file should not contain unnecessary characters (You can check it with 'Notepad' editor).<br />\n3. The same sequence name must not be repeated more then once.<br />\n".$msa_info_msg);
+	}
+	else{
+		print LOG "determine_msa_format : MSA format is : $msa_format[1]\n";
+		$VARS{msa_format} = $msa_format[1];
+	}
+	#predict_solvent_accesibility(); #To Do: run the algorithm to calculate burried/exposed
+	my %Pos_Solv_Acc_Pred = (); # To Do: fill the hash - key: poistion in SEQRES/MSA, value: PACC Solv Acc Pred (b/e)
+	#read_Solv_Acc_Pred(\%Pos_Solv_Acc_Pred); 
+	create_gradesPE_ConSeq(\%Pos_Solv_Acc_Pred);
+	print "Calling cp_rasmol_gradesPE_and_pipe::ConSeq_HTML_Output(\@gradesPE_Output,\%Pos_Solv_Acc_Pred,\"$VARS{working_dir}/$VARS{Colored_Seq_HTML}\",\"yes\")\n" if ($dbg);
+#	cp_rasmol_gradesPE_and_pipe::ConSeq_HTML_Output(\@gradesPE_Output,\%Pos_Solv_Acc_Pred,"$VARS{working_dir}/$VARS{Colored_Seq_HTML}"); # To use when buried exposed is available
+	cp_rasmol_gradesPE_and_pipe::ConSeq_HTML_Output(\@gradesPE_Output,\%Pos_Solv_Acc_Pred,"$VARS{working_dir}/$VARS{Colored_Seq_HTML}","yes"); 
+	my $Protein_Length=$#gradesPE_Output+1;
+}
 
+# print a file that details percentage of each AA in the MSA - (&print_residue_precentage())
+#------------------------------------------------------------------
+####################################################################
+$VARS{MSA_percentage_FILE}=$VARS{out_dir}."msa_aa_variety_percentage.csv";
+print "Calling cp_rasmol_gradesPE_and_pipe::print_precentage(\%residue_freq, \%position_totalAA, $VARS{MSA_percentage_FILE},\@gradesPE_Output)\n" if ($dbg);
+my @ans3 = cp_rasmol_gradesPE_and_pipe::print_precentage(\%residue_freq, \%position_totalAA, $VARS{MSA_percentage_FILE},\@gradesPE_Output);
+unless ($ans3[0] eq "OK") {print "cp_rasmol_gradesPE_and_pipe::print_precentage FAILED: @ans3" if ($dbg);}
+ 
+ 
+# Organize outputs	
+copy ($VARS{working_dir}.'/'. $VARS{protein_MSA}, $VARS{out_dir}.'/'. $VARS{protein_MSA} );
+if ($FORM{buildMSA}){copy ($VARS{working_dir}.'/'. $VARS{HITS_rejected_file}, $VARS{out_dir}.'/'. $VARS{HITS_rejected_file} );}
+copy ($VARS{working_dir}.'/'. $VARS{r4s_tree}, $VARS{out_dir}.'/'. $VARS{r4s_tree} );
+
+my $final_output_message="";
+
+if ($VARS{CONSURF_CONSEQ} eq "CONSURF")
+{
     $VARS{chimera_script_src} = $consurf_utildir.'/chimera_consurf.cmd';
     $VARS{pymol_script_src} = $consurf_utildir.'/consurf_new.py';
     $VARS{chimera_script_target} = $VARS{out_dir}.'chimera_consurf.cmd';
@@ -546,29 +715,48 @@ if ($VARS{running_mode} eq "_mode_pdb_no_msa" or $VARS{running_mode} eq "_mode_p
     copy ( $VARS{chimera_script_src},    $VARS{chimera_script_target} );
     copy ( $VARS{pymol_script_src}  ,    $VARS{pymol_script_target}  );
 
-    my $final_output_message = <<EOF;
-
+    $final_output_message = <<EOF;
 Consurf run completed successfuly!
  
 Here is a list of files that could be found in the output dir
     $VARS{out_dir}
     |
     |-- $VARS{out_dir}/$VARS{protein_MSA}\tMultiple Sequence Alignment
-    |-- $VARS{out_dir}/$VARS{HITS_rejected_file}\tRejected seqeunces
     |-- $VARS{gradesPE}\tAmino acid conservation scores, confidence intervals and conservation colors
     |-- $VARS{MSA_percentage_FILE}\tResidue variety per position in the MSA
-    |-- $VARS{r4s_tree}\tPhylogenetic tree.
-    |-- $VARS{ATOMS_with_ConSurf_Scores}\tPDB with conservation scores for presentation using the Chimera and Pymol viewers
+    |-- $VARS{r4s_tree}\tPhylogenetic tree
+	|-- $VARS{ATOMS_with_ConSurf_Scores}\tPDB with conservation scores for presentation using the Chimera and Pymol viewers
     |-- $VARS{ATOMS_with_ConSurf_Scores_isd}\tPDB with conservation scores for presentation using the Chimera and Pymol viewers (/without/ insufficient data annotations)
     |-- $VARS{rasmolFILE}\tRasMol script required to present the results using the RasMol viewer
     |-- $VARS{rasmol_isdFILE}\tRasMol script required to present the results using the RasMol viewer (without insufficient data annotations)
     |-- $VARS{chimera_script_target}\tChimera script required to present the results using the Chimera viewer
     |-- $VARS{pymol_script_target}\tPymol script required to present the results using the Pymol viewer (without insufficient data annotations)
-
 EOF
-
-print $final_output_message if (!$quiet);
 }
+if ($VARS{CONSURF_CONSEQ} eq "CONSEQ")
+{
+	copy ($VARS{working_dir}.'/'. $VARS{Colored_Seq_HTML}, $VARS{out_dir}.'/'. $VARS{Colored_Seq_HTML} );
+	copy ($VARS{working_dir}.'/'.$VARS{gradesPE}, $VARS{out_dir}.'/'.$VARS{gradesPE});
+	$VARS{MSA_percentage_FILE}="msa_aa_variety_percentage.csv";
+	$final_output_message = <<EOF;
+Consurf run completed successfuly!
+ 
+Here is a list of files that could be found in the output dir
+    $VARS{out_dir}
+    |
+    |-- $VARS{protein_MSA}\tMultiple Sequence Alignment
+    |-- $VARS{gradesPE}\tAmino acid conservation scores, confidence intervals and conservation colors
+    |-- $VARS{MSA_percentage_FILE}\tResidue variety per position in the MSA
+    |-- $VARS{r4s_tree}\tPhylogenetic tree
+    |-- $VARS{Colored_Seq_HTML}\tThe sequence colored by ConSurf scores
+EOF
+}
+if ($FORM{buildMSA})
+{
+	$final_output_message =$final_output_message ."    |-- $VARS{HITS_rejected_file}\tRejected seqeunces\n\n";
+}
+print $final_output_message if (!$quiet);
+
 
 exit (0);
 
@@ -1343,6 +1531,16 @@ sub create_gradesPE(){
     $seq3d_grades = $ans[2];
 }
 
+#---------------------------------------------
+sub create_gradesPE_ConSeq{
+# Create ConSeq gradesPE file
+#---------------------------------------------
+    my $ref_Solv_Acc_Pred = shift;
+    my @ans=CONSURF_FUNCTIONS::create_gradesPE_ConSeq(\@gradesPE_Output, \%residue_freq,$ref_Solv_Acc_Pred,"$VARS{working_dir}/$VARS{gradesPE}");
+    unless ($ans[0] eq "OK"){exit_on_error('sys_error', "create_gradesPE_ConSeq : CONSURF_FUNCTION::".$ans[0]);}
+    elsif(!-e "$VARS{working_dir}/$VARS{gradesPE}" or -z "$VARS{working_dir}/$VARS{gradesPE}") {
+        exit_on_error('sys_error', "create_gradesPE_ConSeq : the file $VARS{working_dir}/$VARS{gradesPE} was not found or empty");}
+}
 #---------------------------------------------
 sub trim{
 #---------------------------------------------
