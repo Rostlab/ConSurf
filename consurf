@@ -107,7 +107,8 @@ my $result = GetOptions(
 	    "MaxHomol:s"=>\$FORM{MAX_NUM_HOMOL},	#1 <Max Number of Homologs to use for ConSurf Calculation> (deafult: 50)
 	    "Iterat:s"=>\$FORM{iterations},		# <Number of PsiBlast iterataion> (default: 1)
 	    "ESCORE:s"=>\$FORM{ESCORE},    		# <Minimal E-value cutoff for Blast search> (default: 0.001)
-	    
+	    "BlastFile:s"=>\$VARS{usr_BLAST_out_file},  # pre-calculated blast file provided by the user
+         
 	   # Rate4Site Parameters 
 	    "Algorithm:s"=>\$FORM{algorithm}, 		# [LikelihoodML] or [Bayesian] (default: Bayesian)
 	    "Matrix:s"=>\$FORM{matrix},			# [JTT] or [mtREV] or [cpREV] or [WAG] or [Dayhoff] (default JTT)
@@ -516,8 +517,15 @@ if ($VARS{running_mode} eq "_mode_pdb_no_msa" or $VARS{running_mode} eq "_mode_n
     # create the seqres fasta file, run blast
     
     
-    
-    &run_blast();
+    if (defined $VARS{usr_BLAST_out_file})
+    {
+     print "Starting from predefined BLAST file: $VARS{usr_BLAST_out_file}\n" if ($dbg);
+     copy ($VARS{usr_BLAST_out_file},"$VARS{working_dir}/$VARS{BLAST_out_file}");
+    }
+    else
+    {
+     &run_blast();
+    }
     &extract_round_from_blast();
     # choosing homologs, create fasta file for all legal homologs
     my %blast_hash = ();

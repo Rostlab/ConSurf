@@ -1,3 +1,9 @@
+consurf (1.0.3) unstable; urgency=low
+
+  * Enhancment: can now take blast profiles to speed up processing
+
+ -- Guy Yachdav <gyachdav@rostlab.org>  Fri, 28 Feb 2014 20:09:34 +0100
+
 consurf (1.0.2) unstable; urgency=low
 
   * Enhancment: can now take proteins sequence as input (aka ConSeq)
