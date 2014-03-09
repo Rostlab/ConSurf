@@ -250,9 +250,9 @@ if ((defined $FORM{algorithm}) and ($FORM{algorithm} ne "LikelihoodML") and ($FO
       exit;
     }
 
-if ((defined $FORM{matrix}) and ($FORM{matrix} ne "JTT") and ($FORM{matrix} ne "mtREV") and ($FORM{matrix} ne "cpREV") and ($FORM{matrix} ne "WAG") and ($FORM{matrix} ne "Dayhoff"))
+if ((defined $FORM{matrix}) and ($FORM{matrix} ne "JTT") and ($FORM{matrix} ne "mtREV") and ($FORM{matrix} ne "cpREV") and ($FORM{matrix} ne "WAG") and ($FORM{matrix} ne "Dayhoff") and ($FORM{matrix} ne "LG"))
   {
-    print "-Matrix Can only be JTT or mtREV or cpREV or WAG or Dayhoff (default JTT) and not $FORM{matrix}\n";
+    print "-Matrix Can only be JTT or mtREV or cpREV or WAG or Dayhoff, or LG (default JTT) and not $FORM{matrix}\n";
     exit;
   }
 
