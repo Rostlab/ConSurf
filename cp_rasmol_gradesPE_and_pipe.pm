@@ -472,6 +472,7 @@ sub add_pdb_gradesPE{
 #************************************************************************************************
 sub print_rasmol{
     my ($out_file,$rasmol_isd,$ref_colors_array,$chain, $proteopedia) = @_;
+    $chain = '' if ($chain eq 'NONE');
     # print out new format of rasmol
     unless (open OUT, ">".$out_file) {return ("print_rasmol : Could not open the file $out_file for writing $!", "PANIC");}
     print OUT "select all\ncolor [200,200,200]\n\n" if $proteopedia ne "yes";

@@ -1337,7 +1337,7 @@ sub exit_on_error{
 sub run_rate4site{    
 #---------------------------------------------  
     my ($cmd, $algorithm, $tree_file_r4s, $query_name, $msa, $did_r4s_fail);    
-    my %MatrixHash = (JTT => '-Mj', mtREV => '-Mr', cpREV => '-Mc', WAG => '-Mw', Dayhoff => '-Md');
+    my %MatrixHash = (JTT => '-Mj', mtREV => '-Mr', cpREV => '-Mc', WAG => '-Mw', Dayhoff => '-Md', LG => '-Ml');
     # choose the algorithm
     if ($FORM{algorithm} eq "LikelihoodML"){
         $algorithm = "-im";
@@ -1739,7 +1739,7 @@ see L<http://consurf.tau.ac.il/overview.html#methodology> and L<http://consurf.t
 
 =item --Matrix 
 
-[JTT] or [mtREV] or [cpREV] or [WAG] or [Dayhoff]. default B<JTT>
+[JTT] or [LG] or [mtREV] or [cpREV] or [WAG] or [Dayhoff]. default B<JTT>
 
 =back
 

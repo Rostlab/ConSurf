@@ -1,3 +1,10 @@
+consurf (1.0.4) unstable; urgency=low
+
+  * Enhancment: running rate4site with the LG matrix
+  * Bugfix: correctly prints rasmol script when no chanin is specified
+
+ -- Guy Yachdav <gyachdav@rostlab.org>  Sun, 09 Mar 2014 01:06:59 +0100
+
 consurf (1.0.3) unstable; urgency=low
 
   * Enhancment: can now take blast profiles to speed up processing
