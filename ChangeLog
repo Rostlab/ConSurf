@@ -1,4 +1,4 @@
-consurf (1.0.4) unstable; urgency=low
+consurf (1.0.4-2) unstable; urgency=low
 
   * Enhancment: running rate4site with the LG matrix
   * Bugfix: correctly prints rasmol script when no chanin is specified
