@@ -1331,7 +1331,7 @@ sub exit_on_error{
     }    
     print LOG "\nExit Time: ".(CONSURF_FUNCTIONS::printTime)."\n";
     close LOG;
-    exit;
+    exit(254);
 }
 #---------------------------------------------
 sub run_rate4site{    
