@@ -40,16 +40,16 @@ The script is using the user provided MSA (and Phylogenetic tree if available) t
 
 When running in the first mode the scripts the MSA is automatically build the MSA for the given protein based on ConSurf protocol.
 
-Usage: `ConSurf -PDB <PDB FILE FULL PATH>  -CHAIN <PDB CHAIN ID> -Out_Dir <Output Directory>`
+Usage:  
+`ConSurf -PDB <PDB FILE FULL PATH>  -CHAIN <PDB CHAIN ID> -Out_Dir <Output Directory>`
 
 
 ## MANDATORY INPUTS
-`-PDB <PDB FILE FULL PATH> - PDB File`
-`-CHAIN <PDB CHAIN ID> - Chain ID`
+`-PDB <PDB FILE FULL PATH> - PDB File`  
+`-CHAIN <PDB CHAIN ID> - Chain ID`  
 `-Out_Dir <Output Directory> - Output Path`
 
 ## MSA Mode (Not Using -m)
-
 `-MSA <MSA File Name>`	(MANDATORY IF -m NOT USED)  
 `-SEQ_NAME <"Query sequence name in MSA file">`  (MANDATORY IF -m NOT USED)  
 `-Tree <Phylogenetic Tree (in Newick format)>` (optional, default building tree by Rate4Site).
