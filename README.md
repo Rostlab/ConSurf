@@ -36,7 +36,8 @@ The ConSurf work in several modes
 2. Given Multiple Sequence Alignment (MSA) and Protein PDB File.
 3. Given Multiple Sequence Alignment (MSA), Phylogenetic Tree, and PDB File.
 
-The script is using the user provided MSA (and Phylogenetic tree if available) to calculate the conservation score for each position in the MSA based on the Rate4Site algorithm (Mayrose, I., Graur, D., Ben-Tal, N., and Pupko, T. 2004. Comparison of site-specific rate-inference methods: Bayesian methods are superior. Mol Biol Evol 21: 1781-1791).
+The script is using the user provided MSA (and Phylogenetic tree if available) to calculate the conservation score for each position in the MSA based on the Rate4Site algorithm
+(Mayrose, I., Graur, D., Ben-Tal, N., and Pupko, T. 2004. Comparison of site-specific rate-inference methods: Bayesian methods are superior. Mol Biol Evol 21: 1781-1791).
 
 When running in the first mode the scripts the MSA is automatically build the MSA for the given protein based on ConSurf protocol.
 
