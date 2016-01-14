@@ -62,21 +62,23 @@ ConSurf -PDB <PDB FILE FULL PATH>  -CHAIN <PDB CHAIN ID> -Out_Dir <Output Direct
 
 ## Building MSA (Using -m)
 
-```
+```shell
 -m Builed MSA mode  
--MSAprogram ["CLUSTALW"] or ["MUSCLE"] (default: MUSCLE)	  
--DB ["SWISS-PROT"] or ["UNIPROT"] (default: UniProt)  
--MaxHomol <Max Number of Homologs to use for ConSurf Calculation> (deafult: 50)  
--Iterat <Number of PsiBlast iterataion> (default: 1)  
--ESCORE <Minimal E-value cutoff for Blast search> (default: 0.001)
+-MSAprogram ["CLUSTALW"] or ["MUSCLE"] # default: MUSCLE
+-DB ["SWISS-PROT"] or ["UNIPROT"] # default: UniProt
+-MaxHomol <Max Number of Homologs to use for ConSurf Calculation> #deafult: 50
+-Iterat <Number of PsiBlast iterataion> # default: 1
+-ESCORE <Minimal E-value cutoff for Blast search> # default: 0.001
 ```
 
 ## Rate4Site Parameter
 
 (see http://consurf.tau.ac.il/overview.html#methodology and http://consurf.tau.ac.il/overview.html#MODEL for details)
 
--Algorithm [LikelihoodML] or [Bayesian] (default: Bayesian)
--Matrix [JTT] or [mtREV] or [cpREV] or [WAG] or [Dayhoff] (default JTT)
+```shell
+-Algorithm [LikelihoodML] or [Bayesian] # default: Bayesian
+-Matrix [JTT] or [mtREV] or [cpREV] or [WAG] or [Dayhoff] # default JTT
+```
 
 
 ## Examples
