@@ -1,19 +1,21 @@
 # ConSurf
 
-## Dependencies
+## Installation
 
-ConSurf uses several programs to calculate the outputs. The Copyrights to these programs belongs to their owner. PLEASE MAKE SURE YOU FOLLOW THE LICENSE BY EACH OF THESE PROGRAMS. After installing these programs please update the relevant lines on the `CONSURF_CONSTANTS.pm` file accordingly.
+ConSurf uses several programs to calculate the outputs. The Copyrights to these programs belongs to their owner. PLEASE MAKE SURE YOU FOLLOW THE LICENSE BY EACH OF THESE PROGRAMS.
 
-0. **Rate4Site** - is the main algorithm behind ConSurf. please download the Rate4Site program from (http://www.tau.ac.il/~itaymay/cp/rate4site.html) and follow the installation instruction relevant to your operating system in order to install it on your system. Please install both Rate4Site_slow (using Makefile_slow) and Rate4Site (Makefile).
-  0. Update the line points to RATE4SITE on CONSURF_CONSTANTS.pm file with your path to Rate4Site by replacing /db1/Local/src/Rate4SiteSource/r4s_Nov_06_dev/rate4site.exe with the location of your rate4site location
-  0. Update the line points to RATE4SITE_SLOW by replacing /db1/Local/src/Rate4SiteSource/r4s_Nov_06_dev/rate4siteSlow.exe with the location of your rate4site_Slow installation
-0. **ClustalW** - please download ClustalW program from EBI ("ClustalW and ClustalX version 2. Larkin M.A., Blackshields G., Brown N.P., Chenna R., McGettigan P.A., McWilliam H., Valentin F., Wallace I.M., Wilm A., Lopez R., Thompson J.D., Gibson T.J. and Higgins D.G. (2007) Bioinformatics 2007 23(21): 2947-2948.)
-  0. please update the line `/usr/local/bin/clustalw` to point your installation.
-0. On ConSurf.pl please replace the "/usr/bin/perl" with the relevant perl command in your system on the line #!/usr/bin/perl -w. (please noticed that ConSurf requiered that perl version above 5 is installed)
-0. On ConSurf.pl please replace "/groups/bioseq.home/HAIM/ConSurf_Exec" with the location of ConSurf Script in your system
+After installing these programs please update the relevant lines on the `CONSURF_CONSTANTS.pm` file accordingly:
+
+0. **Rate4Site** - is the main algorithm behind ConSurf. Please download the [Rate4Site program](http://www.tau.ac.il/~itaymay/cp/rate4site.html) and follow the installation instructions relevant to your operating system. Please install both _Rate4Site_slow_ (using `Makefile_slow`) and _Rate4Site_ (Makefile).
+  0. Update the line that points to `RATE4SITE` in `CONSURF_CONSTANTS.pm` file; replace `/db1/Local/src/Rate4SiteSource/r4s_Nov_06_dev/rate4site.exe` with the location path to your  `Rate4Site` installation.
+  0. Update the line points to _RATE4SITE_SLOW_; `/db1/Local/src/Rate4SiteSource/r4s_Nov_06_dev/rate4siteSlow.exe` with the location of your `rate4site_Slow` installation
+0. **ClustalW** - please [download from EBI](ftp://ftp.ebi.ac.uk/pub/software/clustalw2/):
+  0. update the line `/usr/local/bin/clustalw` to point your installation.
+0. In `ConSurf.pl` please replace the `/usr/bin/perl` with the relevant perl command in your system on the line #!/usr/bin/perl -w. (please noticed that ConSurf requiered that perl version above 5 is installed)
+0. In `ConSurf.pl` please replace `/groups/bioseq.home/HAIM/ConSurf_Exec` with the location of ConSurf Script in your system
 0. The ConSurf system requiered BioPerl to be installed on your system
 
-**THE PROGRAMS BELOW ARE RQUIERD BY THE MODE THAT AUTOMATICALLY CREATES THE MSA**
+### (OPTONAL) The programs below are required by the mode that automatically created the MSA
 
 0. **blastpgp** - please download local version of the NIH blast system and install it locally.
   0. please update the line `/usr/local/bin/blastpgp` to point your installation
