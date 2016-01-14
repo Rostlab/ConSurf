@@ -9,7 +9,7 @@ After installing these programs please update the relevant lines on the `CONSURF
 0. **Rate4Site** - is the main algorithm behind ConSurf. Please download the [Rate4Site program](http://www.tau.ac.il/~itaymay/cp/rate4site.html) and follow the installation instructions relevant to your operating system. Please install both _Rate4Site_slow_ (using `Makefile_slow`) and _Rate4Site_ (Makefile).
   0. Update the line that points to `RATE4SITE` in `CONSURF_CONSTANTS.pm` file; replace `/db1/Local/src/Rate4SiteSource/r4s_Nov_06_dev/rate4site.exe` with the location path to your  `Rate4Site` installation.
   0. Update the line points to _RATE4SITE_SLOW_; `/db1/Local/src/Rate4SiteSource/r4s_Nov_06_dev/rate4siteSlow.exe` with the location of your `rate4site_Slow` installation
-0. **ClustalW** - please [download from EBI](ftp://ftp.ebi.ac.uk/pub/software/clustalw2/) :
+0. **ClustalW** - please [download from EBI; `ftp://ftp.ebi.ac.uk/pub/software/clustalw2/`](ftp://ftp.ebi.ac.uk/pub/software/clustalw2/) :
   0. update the line `/usr/local/bin/clustalw` to point your installation.
 0. In `ConSurf.pl` please replace the `/usr/bin/perl` with the relevant perl command in your system on the line #!/usr/bin/perl -w. (please noticed that ConSurf requiered that perl version above 5 is installed)
 0. In `ConSurf.pl` please replace `/groups/bioseq.home/HAIM/ConSurf_Exec` with the location of ConSurf Script in your system
