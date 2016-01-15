@@ -4,7 +4,7 @@
 
 ConSurf uses several programs to calculate the outputs. The Copyrights to these programs belongs to their owner. PLEASE MAKE SURE YOU FOLLOW THE LICENSE BY EACH OF THESE PROGRAMS.
 
-After installing these programs please update the relevant lines on the `CONSURF_CONSTANTS.pm` file accordingly:
+After installing these programs please copy the file `CONSURF_CONSTANTS.pm.template` to `CONSURF_CONSTANTS.pm` an change the relevant lines:
 
 0. **Rate4Site** - is the main algorithm behind ConSurf. Please download the Rate4Site program http://www.tau.ac.il/~itaymay/cp/rate4site.html and follow the installation instructions relevant to your operating system. Please install both _Rate4Site_slow_ (using `Makefile_slow`) and _Rate4Site_ (Makefile).
   0. Update the line that points to `RATE4SITE` in `CONSURF_CONSTANTS.pm` file; replace `/db1/Local/src/Rate4SiteSource/r4s_Nov_06_dev/rate4site.exe` with the location path to your  `Rate4Site` installation.
