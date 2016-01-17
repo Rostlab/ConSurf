@@ -18,7 +18,7 @@ use constant PDB_DIVIDED =>         "/mnt/project/rost_db/data/pdb/entries/";
 	# replace /biodb/BLAST/Proteins/swissprot with your location of SwissProt database
 use constant SWISSPROT_DB =>        "/mnt/project/rost_db/data/swissprot/uniprot_sprot";
 	# replace /biodb/BLAST/Proteins/uniprot with your location of UniProt Database
-use constant UNIPROT_DB =>       "/mnt/project/consurf/data/uniprot"; 
+use constant UNIPROT_DB =>       "/mnt/project/consurf/data/uniprot";
 
 use constant UNIREF90_DB =>	    "/mnt/project/rost_db/data/big/big_80";
 
@@ -28,10 +28,10 @@ use constant RCSB_WGET =>           "wget ftp://ftp.wwpdb.org/pub/pdb/data/struc
 
 #external programs
 	#replace /usr/local/bin/muscle with the location of your muscle instalation
-use constant MUSCLE =>              "muscle"; 
+use constant MUSCLE =>              "muscle";
 	# replace /usr/local/bin/clustalw with your locationion of your clustalw istalation
-#use constant CLUSTALW =>            "/mnt/home/gcelniker/ConSurf_TEST/DB/clustalw/"; 
-use constant CLUSTALW =>            "clustalw"; 
+#use constant CLUSTALW =>            "/mnt/home/gcelniker/ConSurf_TEST/DB/clustalw/";
+use constant CLUSTALW =>            "clustalw";
 	# replace /db1/Local/src/Rate4SiteSource/r4s_Nov_06_dev/rate4site.exe with the location of your rate4site instalation
 #use constant RATE4SITE =>           "/mnt/home/gcelniker/ConSurf_TEST/DB/r4s/rate4site";
 use constant RATE4SITE =>           "/mnt/project/consurf/bin/rate4site";
