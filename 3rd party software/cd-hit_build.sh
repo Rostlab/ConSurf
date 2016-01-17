@@ -1,0 +1,3 @@
+cd cdhit
+configure
+make

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<colorparam>
+    <rgbindex>
+        <color name = "WHITE" red = "255" green = "255" blue = "255"></color>    
+        <color name = "YELLOW" red = "255" green = "255" blue = "0"></color>    
+        <color name = "VIOLET" red = "102" green = "25" blue = "229"></color>      
+        <color name = "RED" red = "229" green = "127" blue = "102"></color>
+        <color name = "BLUE" red = "102" green = "229" blue = "229"></color>
+        <color name = "PURPLE" red = "178" green = "153" blue = "229"></color>
+        <color name = "BLACK" red = "0" green = "0" blue = "0"></color>
+        <color name = "GREY" red = "153" green = "178" blue = "178"></color>
+        <color name = "PINK" red = "204" green = "76" blue = "204"></color>
+        <color name = "ORANGE" red = "229" green = "178" blue = "76"></color>
+        <color name = "CYAN" red = "25" green = "178" blue = "178"></color>
+        <color name = "PINK" red = "229" green = "127" blue = "127"></color>
+        <color name = "MAGENTA" red = "204" green = "76" blue = "204"></color>
+        <color name = "ORANGE" red = "229" green = "153" blue = "76"></color>
+        <color name = "GREEN" red = "25" green = "204" blue = "25"></color>        
+    </rgbindex>    
+</colorparam>

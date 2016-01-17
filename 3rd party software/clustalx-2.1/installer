@@ -1,0 +1,224 @@
+#!/bin/sh
+
+###########################################################################
+# Installer for clustal.
+#
+# Changes:
+#
+# 25-05-07,Nigel Brown (EMBL): created.
+# 08-06-07,Nigel Brown (EMBL): added default link location.
+###########################################################################
+
+SAVEPATH=`echo $PATH | tr ':' ' '| sort -u`
+
+PATH=/bin:/usr/bin; export PATH
+
+INSTALLDIR=`pwd`
+BINDIR=
+SCRIPT=clustalx2
+BINARY=clustalx
+PROG=`basename $0`
+
+umask 022
+
+cleanup () {
+    rm -f "$SCRIPT" >/dev/null 2>&1
+    echo; echo Aborted. 1>&2
+    exit 1
+}
+
+trap cleanup 1 2 3 15
+
+msg ()   { echo $* 1>&2; }
+warn ()  { echo " + $*" 1>&2; }
+error () { echo $PROG: ERROR: $* 1>&2; }
+die ()   { echo $PROG: FATAL: $* 1>&2; exit 1; }
+
+makeLink () {
+    src="$1"; dest="$2"; file="$3"
+    [ "$dest" = . ] && return
+    [ "$src" = "$dest" ] && return
+    if [ -e "$dest/$file" ]; then
+        warn "Replacing existing file '$dest/$file'"
+        rmFile "$dest/$file"
+    fi
+    symLink "$src/$file" "$dest/$file"
+}
+
+rmFile () {
+    #warn "Deleting '$1'"
+    rm -f "$1" >/dev/null 2>&1 || die "Attempt to delete old '$1' failed"
+    warn "Deleted '$1'"
+}
+
+symLink () {
+    #warn "Symbolic linking '$1' to '$2'"
+    ln -s "$1" "$2" >/dev/null 2>&1 || die "Attempt to symlink '$1' to '$2' failed"
+    warn "Symlinked '$1' to '$2'"
+}
+
+mkDir () {
+    mkdir -p "$1" >/dev/null 2>&1
+    if [ $? -ne 0 ]; then
+        [ $# -lt 2 ] && die "Can't make directory '$1'"
+        warn  "Can't make directory '$1'"
+    fi
+    warn "Created directory '$1'"
+}
+
+guessBinDir () {
+    [ -n "$BINDIR" ] && return #already set/guessed
+    if [ -e /usr/bin/id ]; then
+        user=`/usr/bin/id -u`
+    elif [ -e /bin/id ]; then
+        user=`/bin/id -u`
+    elif [ "$USER" = "root" ]; then
+        user=0
+    fi
+    if [ "$user" -eq 0 ]; then
+        BINDIR=/usr/local/bin
+        msg "You have administrator/root permissions - good!"
+    else
+        BINDIR=$HOME/bin
+        msg "Note: you must have write permission for the chosen directory."
+    fi
+    #echo; msg "The suggested location will be: [$BINDIR]"
+    unset user
+}
+
+pauseAndContinue () {
+    echo
+    echo -n "Hit the 'return' or 'enter' key to continue. "
+    read x
+    unset x
+}
+
+readBinDir () {
+    dir=
+    while true; do
+        echo
+        echo -n "Choose a directory for the executable [$BINDIR]? "
+        read dir
+        echo
+        if [ -z "$dir" -a -n "$BINDIR" ]; then
+            dir=$BINDIR
+            break
+        fi
+        if [ "$dir" = "$SCRIPT" ]; then
+            warn "That name is reserved - please use something else!"
+            continue
+        fi
+        if [ ! -e "$dir" ]; then
+            mkDir "$dir" nofail
+        fi
+        if [ -e "$dir" ]; then
+            [ -w "$dir" ] && break
+            warn "Directory '$dir' exists, but is not writeable"
+        fi
+    done
+    BINDIR="$dir"
+    unset dir
+}
+
+checkBinDir () {
+    if [ -z "$BINDIR" ]; then
+        die "Directory '$BINDIR' was not specified - aborting"
+    fi
+    if [ "$BINDIR" = "$SCRIPT" ]; then
+        die "That name is reserved - please use something else!"
+    fi
+    if [ ! -d "$BINDIR" -a ! -h "$BINDIR" ]; then
+        mkDir "$BINDIR" nofail
+    fi
+    if [ -d "$BINDIR" -o -h "$BINDIR" ]; then
+        if [ -w "$BINDIR" ]; then
+            return
+        fi
+        die "Directory '$BINDIR' exists, but is not writeable"
+    fi
+    die "Directory '$BINDIR' does not exist and could not be created - aborting"
+}
+
+makeScript () {
+    cat<<EOT
+#!/bin/sh
+###########################################################################
+# Version: 1.0
+# Generated: `date`
+###########################################################################
+# Path to the clustal installation directory
+export CLU_INSTALL_DIR=$INSTALLDIR
+BINARY=$BINARY
+###########################################################################
+
+PROG=\`basename \$0\`
+
+# Debugging
+#echo CLU_INSTALL_DIR=\$CLU_INSTALL_DIR  1>&2
+#echo BINARY=\$BINARY  1>&2
+
+# Is there an executable binary file?
+binary=\$CLU_INSTALL_DIR/\$BINARY
+if [ ! -f \$binary ]; then
+    echo "\$PROG: Can't find executable '\$binary'"
+    exit 1
+fi
+if [ ! -x \$binary ]; then
+    echo "\$PROG: Binary '\$binary' is not executable"
+    exit 1
+fi
+
+# Exec the child over this one
+exec \$binary \$*
+###########################################################################
+EOT
+}
+
+###########################################################################
+if [ ! -f "$BINARY" ]; then
+    die "You must change into the unpacked clustal directory first!"
+fi
+rm -f "$SCRIPT" >/dev/null 2>&1
+
+if [ $# -gt 0 ]; then
+    BINDIR="$1"
+else 
+    cat<<EOT
+
+                            Clustal installer.
+
+A clustal installation consists of two parts: (1) the current directory which
+contains all the components that clustal needs to work, and (2) a link to the
+clustal executable, which must be placed in a directory on your (or the
+users') PATH.
+
+You have already completed step (1) simply by unpacking the archive in its
+final destination.
+
+Now complete step (2) by specifying a directory for the executable link. You
+can accept the default, or enter a directory from the following list of likely
+candidates taken from your PATH.
+
+[$SAVEPATH]
+
+EOT
+    #pauseAndContinue
+    guessBinDir
+    echo; msg "At any time, you may type ^C (ctrl-C) to abort."
+    readBinDir
+fi
+checkBinDir
+
+makeScript > "$SCRIPT"
+chmod 0755 "$SCRIPT"
+makeLink "$INSTALLDIR" "$BINDIR" "$SCRIPT"
+cat<<EOT
+
+Location of components:  $INSTALLDIR
+Location of executable:  $BINDIR
+
+Finished.
+EOT
+exit 0
+###########################################################################
+

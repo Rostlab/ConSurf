@@ -509,7 +509,8 @@ if ($VARS{running_mode} eq "_mode_pdb_no_msa" or $VARS{running_mode} eq "_mode_n
     $VARS{max_homologues_to_display} =
         $config->val( 'params', 'BLAST_MAX_HOMOLOGUES_TO_DISPLAY' );
 
-     $VARS{protein_db} = $config->val( 'databases', 'UNIPROT_DB' );
+	# USER CAN SPECIFY THE DB TO USE HERE!!!!
+    $VARS{protein_db} = $config->val( 'databases', 'SWISSPROT_DB' );
     # if ($FORM{database} eq "SWISS-PROT"){
     #     $VARS{protein_db} = CONSURF_CONSTANTS::SWISSPROT_DB;}
     # else{
@@ -901,8 +902,9 @@ sub run_blast{
         if (!-e "$VARS{working_dir}/$VARS{protein_seq}" or -z "$VARS{working_dir}/$VARS{protein_seq}"){
             exit_on_error('sys_error',"run_blast : the file $VARS{working_dir}/$VARS{protein_seq} was not created");
         }
-    }
+    }	
 
+	print "{protein_db}\n";
     my $cmd = $config->val( 'programs', 'BLASTPGP' )." -i $VARS{working_dir}/$VARS{protein_seq} -e $FORM{ESCORE} -d $VARS{protein_db} -o $VARS{working_dir}/$VARS{BLAST_out_file} -j $FORM{iterations} -v $VARS{max_homologues_to_display} -b $VARS{max_homologues_to_display} -F F";
     print LOG "run_blast : running: $cmd\n";
 
