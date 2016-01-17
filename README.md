@@ -2,34 +2,95 @@
 
 ## Installation
 
+Here You will find the guidline on how to succesfully install ConSirf on Your machine. Current manual is designed for Debian OS.
+
+### Installing libraries
+
+In order for ConSurf to work properly please install the following libraries:
+
+```
+autoconf
+g++
+libexpat-dev
+libtool
+perl
+```
+or simply run
+```
+sudo apt-get install autoconf g++ libexpat-dev libtool perl -y
+```
+
+### Perl and BioPerl
+
+It is mandatory to have perl installed on Your machine.
+After Perl is installed please run the following commands in order to download and install perl modules
+```
+cpan
+```
+in CPAN run the following commands
+```
+force install Bio::Perl
+force install Config::IniFiles
+force install List::Util
+```
+
+### 3rd Party Software
+
 ConSurf uses several programs to calculate the outputs. The Copyrights to these programs belongs to their owner. PLEASE MAKE SURE YOU FOLLOW THE LICENSE BY EACH OF THESE PROGRAMS.
 
-After installing these programs please copy the file `CONSURF_CONSTANTS.pm.template` to `CONSURF_CONSTANTS.pm` an change the relevant lines:
+The software can be found in the folder `3rd party software`. Here are the instructions to install the software itself.
 
-0. **Rate4Site** - is the main algorithm behind ConSurf. Please download the Rate4Site program http://www.tau.ac.il/~itaymay/cp/rate4site.html and follow the installation instructions relevant to your operating system. Please install both _Rate4Site_slow_ (using `Makefile_slow`) and _Rate4Site_ (Makefile).
-  0. Update the line that points to `RATE4SITE` in `CONSURF_CONSTANTS.pm` file; replace `/db1/Local/src/Rate4SiteSource/r4s_Nov_06_dev/rate4site.exe` with the location path to your  `Rate4Site` installation.
-  0. Update the line points to _RATE4SITE_SLOW_; `/db1/Local/src/Rate4SiteSource/r4s_Nov_06_dev/rate4siteSlow.exe` with the location of your `rate4site_Slow` installation
-0. **ClustalW** - please [download from EBI; `ftp://ftp.ebi.ac.uk/pub/software/clustalw2/`](ftp://ftp.ebi.ac.uk/pub/software/clustalw2/) :
-  0. update the line `/usr/local/bin/clustalw` to point your installation.
-0. In `ConSurf.pl` please replace the `/usr/bin/perl` with the relevant perl command in your system on the line #!/usr/bin/perl -w. (please noticed that ConSurf requiered that perl version above 5 is installed)
-0. In `ConSurf.pl` please replace `/groups/bioseq.home/HAIM/ConSurf_Exec` with the location of ConSurf Script in your system
-0. The ConSurf system requiered BioPerl to be installed on your system
+##### Rate4Site
 
-### (OPTONAL) The programs below are required by the mode that automatically created the MSA
+Rate4Site - is the main algorithm behind ConSurf.
 
-0. **blastpgp** - please download local version of the NIH blast system and install it locally.
-  0. please update the line `/usr/local/bin/blastpgp` to point your installation
-0. **cd-hit** - please download CD-Hit program and install it locally  
+**Installation**:
+The sources are already in the folder `3rd party software`. ConSurf requires the *fast* and *slow* versions. In order to obtain both of them simply run `rate4site_build.sh` script:
+
+```
+(optional) chmod +x rate4site_build.sh
+./rate4site_build.sh
+```
+
+##### ClustalW
+
+ClustalW - please [download from EBI; `ftp://ftp.ebi.ac.uk/pub/software/clustalw2/`](ftp://ftp.ebi.ac.uk/pub/software/clustalw2/)
+
+In `3rd paty software` folder You can already find the executable.
+
+##### blastpgp
+
+blastpgp can be found in `3rd aprty software/blast-2.2.26/bin`
+
+##### CD-HIT
+
+cd-hit can be found in `3rd aprty software/cdhit`
+
+To compile simply run:
+```
+(optional) chmod +x cd-hit_build.sh
+./cd-hit_build.sh
+```
 ("Cd-hit: a fast program for clustering and comparing large sets of protein or nucleotide sequences", Weizhong Li & Adam Godzik Bioinformatics, (2006) 22:1658-9)
-  0. please update the line `/db1/Local/src/cd-hit_redundency/` to point your local installation directory
-0. Please download **SwissProt and TrEMBL databases**
-  0. format the databases for Blast search (using blast formadb which is part of blast system)
-  0. update the location of `/biodb/BLAST/Proteins/swissprot` to point the locaation of swissprot
-  0. update the location of `/biodb/BLAST/Proteins/uniprot` to point the location of TrEMBL.
-0. Download **MUSCLE MSA program**
-("MUSCLE: a multiple sequence alignment method with reduced time and space complexity". Edgar R.C. (2004), BMC Bioinformatics 5: 113.) and install it on your system.
-  0. update `/usr/local/bin/muscle` to point your installation
 
+####MUSCLE MSA program
+
+can be found in `3rd aprty software`
+
+("MUSCLE: a multiple sequence alignment method with reduced time and space complexity". Edgar R.C. (2004), BMC Bioinformatics 5: 113.) 
+#####  Databases
+
+Please download **SwissProt and TrEMBL databases** and format the databases for Blast search (using blast formadb which is part of blast system [manual](http://www.ncbi.nlm.nih.gov/IEB/ToolBox/C_DOC/lxr/source/doc/blast/formatdb.html) )
+
+  0. update the location of *SwissProt* to point the location of `SWISSPROT_DB`
+  0. update the location of *TrEMBL* to point the location of `UNIPROT_DB`.
+
+##Configuration
+
+In order to run ConSurf is is necessary to update the configuration file - `consurfrc.default`
+
+1. In `[programs]` section please enter the full path to the executables of 3rd party software covered earlier  (Example: `MUSCLE=\home\path_to_ConSurf\3rd party software\muscle3.8.31`)
+2. in `[databases]` section please enter the full path to the DBs.   (Example:`SWISSPROT_DB=\home\path_to_DB_Folder\uniprot_sprot.fasta`)
 
 ##Usage
 
