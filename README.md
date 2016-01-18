@@ -204,3 +204,18 @@ Given the amino or nucleic acid sequence (can be extracted from the 3D structure
 6. Li,W. and Godzik,A. (2006) Bioinformatics, 22, 1658-1659.
 
 7. Pupko, T., Bell, R.E., Mayrose, I., Glaser, F. and Ben-Tal, N. (2002) Bioinformatics, 18, S71-77.
+
+## HOWTO Using Vagrant
+
+In the folder `vagrant_ConSurf` You can find the Vagrantfile, file necessary to run a Vagrant Box with consurf on it.
+Intallation of Vagrant will not be explained in here.
+
+In order to start the Box, execute the following:
+```shell
+cd /<path_to_dir>/vagrant_Consurf
+vagrant up --no-destroy-on-error
+vagrant ssh
+```
+
+After the box has been started and You are connected to the VM through SSH, run `export LC_ALL=C`.
+All dependencies libraires from section *Installing Libraries* should have been installed during execution of `vagrant up`, rest can be set up according to Installation guidelines presented earlier.
