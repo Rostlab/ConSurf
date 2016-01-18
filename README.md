@@ -1,5 +1,15 @@
 # ConSurf
 
+Taken from [http://consurf.tau.ac.il/overview.html](http://consurf.tau.ac.il/overview.html)
+
+The ConSurf server [1] is a bioinformatics tool for estimating the evolutionary conservation of amino/nucleic acid positions in a protein/DNA/RNA molecule based on the phylogenetic relations between homologous sequences. The degree to which an amino (or nucleic) acid position is evolutionarily conserved is strongly dependent on its structural and functional importance; rapidly evolving positions are variable while slowly evolving positions are conserved. Thus, conservation analysis of positions among members from the same family can often reveal the importance of each position for the protein (or nucleic acid)'s structure or function. In ConSurf, the evolutionary rate is estimated based on the evolutionary relatedness between the protein (DNA/RNA) and its homologues and considering the similarity between amino (nucleic) acids as reﬂected in the substitutions matrix [2,3]. One of the advantages of ConSurf in comparison to other methods is the accurate computation of the evolutionary rate by using either an empirical Bayesian method or a maximum likelihood (ML) method [3].
+
+1. Glaser, F., Pupko, T., Paz, I., Bell, R.E., Bechor-Shental, D., Martz, E. and Ben-Tal, N. (2003) Bioinformatics, 19, 163-164.
+
+2. Mayrose,I., Graur,D., Ben-Tal,N. and Pupko,T. (2004) Mol. Biol. Evol., 21, 1781-1791.
+
+3. Pupko,T., Bell,R.E., Mayrose,I., Glaser,F. and Ben-Tal,N. (2002) Bioinformatics, 18 S71-S77.
+
 ## HOWTO Install
 
 Below You will find the guidlines on how to succesfully install ConSirf on Your machine. Current manual is designed for Debian OS.
@@ -170,9 +180,27 @@ ConSurf -PDB <PDB FILE FULL PATH>  -CHAIN <PDB CHAIN ID> -Out_Dir <Output Direct
 	- The Rate4Site will use Maximum Liklihood algorithm (-Algorithm) and Dayhoff model (-Matrix)
 3. Simple Run With prepared MSA.
 	`perl ConSurf.pl -PDB MY_PDB_FILE.pdb -CHAIN A -Out_Dir /MY_DIR/ -MSA MY_MSA_FILE -SEQ_NAME MY_SEQ_NAME`
-
-For any questions or suggestions please contact: bioSequence@tauex.tau.ac.il
-
+	
+Example:
+```shell
+consurf -PDB /<path_to_dir>/ConSurf/example/1lk2.pdb -CHAIN A -Out_Dir /<path_to_dir>/ConSurf/output_test/ -m --workdir /<path_to_dir>/ConSurf/workdir -BlastFile /<path_to_dir>/ConSurf/output/_A.protein_query.blast
+```
 ## Method Description
 
-## Evaluation
+Taken from [http://consurf.tau.ac.il/overview.html](http://consurf.tau.ac.il/overview.html)
+
+Given the amino or nucleic acid sequence (can be extracted from the 3D structure), ConSurf carries out a search for close homologous sequences using BLAST (or PSI-BLAST) [4,5]. The user may select one of several databases and specify criteria for defining homologues. The user may also select the desired sequences from the BLAST results. The sequences are clustered and highly similar sequences are removed using CD-HIT [6]. A multiple sequence alignment (MSA) of the homologous sequences is constructed using MUSCLE(default) or CLUSTALW. The MSA is then used to build a phylogenetic tree using the neighbor-joining algorithm as implemented in the Rate4Site program [7]. Position-specific conservation scores are computed using the empirical Bayesian or ML algorithms [2,3]. The continuous conservation scores are divided into a discrete scale of nine grades for visualization, from the most variable positions (grade 1) colored turquoise, through intermediately conserved positions (grade 5) colored white, to the most conserved positions (grade 9) colored maroon. The conservation scores are projected onto the protein/nucleotide sequence and on the MSA.
+
+1. Glaser, F., Pupko, T., Paz, I., Bell, R.E., Bechor-Shental, D., Martz, E. and Ben-Tal, N. (2003) Bioinformatics, 19, 163-164.
+
+2. Mayrose,I., Graur,D., Ben-Tal,N. and Pupko,T. (2004) Mol. Biol. Evol., 21, 1781-1791.
+
+3. Pupko,T., Bell,R.E., Mayrose,I., Glaser,F. and Ben-Tal,N. (2002) Bioinformatics, 18 S71-S77.
+
+4. Altschul,S.F., Wootton,J.C., Gertz,E.M., Agarwala,R., Morgulis,A., Schaffer,A.A. and Yu,Y.K. (2005) FEBS J., 272, 5101-5109.
+
+5. Altschul,S.F., Madden,T.L., Schaffer,A.A., Zhang,J., Zhang,Z., Miller,W. and Lipman,D.J. (1997) Nucleic Acids Res., 25, 3389-3402.
+
+6. Li,W. and Godzik,A. (2006) Bioinformatics, 22, 1658-1659.
+
+7. Pupko, T., Bell, R.E., Mayrose, I., Glaser, F. and Ben-Tal, N. (2002) Bioinformatics, 18, S71-77.
