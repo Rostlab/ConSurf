@@ -1,34 +1,34 @@
 #!/usr/bin/perl -w
 #####################################################################################################
 #
-#   This Script implement the ConSurf system for Identification of Functional Regions in Proteins 
+#   This Script implement the ConSurf system for Identification of Functional Regions in Proteins
 #
 #   ConSurf: Using Evolutionary Data to Raise Testable Hypotheses about Protein Function
 #   Celniker G., Nimrod G., Ashkenazy H., Glaser F., Martz E., Mayrose I., Pupko T., and Ben-Tal N. 2013.
-#   Isr. J. Chem. 2013 March 10, doi: 10.1002/ijch.201200096 
-#   
-#   ConSurf 2010: calculating evolutionary conservation in sequence and structure of proteins and nucleic acids.
-#   Ashkenazy H., Erez E., Martz E., Pupko T. and Ben-Tal N. 2010 
-#   Nucl. Acids Res. 2010; DOI: 10.1093/nar/gkq399; PMID: 20478830 
+#   Isr. J. Chem. 2013 March 10, doi: 10.1002/ijch.201200096
 #
-#  ConSurf: the projection of evolutionary conservation scores of residues on protein structures                              
+#   ConSurf 2010: calculating evolutionary conservation in sequence and structure of proteins and nucleic acids.
+#   Ashkenazy H., Erez E., Martz E., Pupko T. and Ben-Tal N. 2010
+#   Nucl. Acids Res. 2010; DOI: 10.1093/nar/gkq399; PMID: 20478830
+#
+#  ConSurf: the projection of evolutionary conservation scores of residues on protein structures
 #        Landau M., Mayrose I., Rosenberg Y., Glaser F., Martz E., Pupko T., and Ben-Tal N.
 #				 Nucl. Acids Res. 33:W299-W302. (2005)
 #          			  Bioinformatics 19: 163-164. (2003)
 #				      http://consurf.tau.ac.il/
-# 
-#                              
-#   It is mainly Based on the Rate4Site Algorithm for detecting conserved amino-acid sites by computing 
+#
+#
+#   It is mainly Based on the Rate4Site Algorithm for detecting conserved amino-acid sites by computing
 #        the relative evolutionary rate for each site in the multiple sequence alignment (MSA).
 #
 #	  Comparison of site-specific rate-inference methods: Bayesian methods are superior
-#			Mayrose, I., Graur, D., Ben-Tal, N., and Pupko, T. 
-#     			        Mol Biol Evol. 21:1781-1791. (2004).  
+#			Mayrose, I., Graur, D., Ben-Tal, N., and Pupko, T.
+#     			        Mol Biol Evol. 21:1781-1791. (2004).
 #                        http://www.tau.ac.il/~itaymay/cp/rate4site.html
 #
 #	For any questions or suggestions please contact us: bioSequence@tauex.tau.ac.il
 #
-#   
+#
 #####################################################################################################
 
 use strict;
@@ -81,7 +81,7 @@ use prepareMSA;
 use MSA_parser;
 use TREE_parser;
 use pdbParser;
-use cp_rasmol_gradesPE_and_pipe;  
+use cp_rasmol_gradesPE_and_pipe;
 
 
 my %FORM=();
@@ -90,26 +90,26 @@ my ( $dbg, $quiet, $version, $help, $man );
 if (@ARGV < 1){ die "Usage: $0 [OPTIONS]\n";}
 
 my $result = GetOptions(
-          # Mandatory Argumants  
+          # Mandatory Argumants
 	    "PDB=s"=>\$VARS{pdb_file_name}, 		# PDB File
 	    "CHAIN=s"=>\$FORM{chain},			# Chain ID
 	    "Out_Dir=s"=>\$VARS{out_dir},		# Output Path
 	    "Seq_File=s"=>\$VARS{protein_seq},	# Seq File in FASTA format - For ConSeq mode
-	   # Given MSA mode parameters   
+	   # Given MSA mode parameters
 	    "MSA:s"=>\$VARS{user_msa_file_name},	# <MSA File Name>	(MANDATORY IF -m NOT USED)
 	    "SEQ_NAME:s"=>\$FORM{msa_SEQNAME}, 		# <"Query sequence name in MSA file">  (MANDATORY IF -m NOT USED)
-	    "Tree:s"=>\$VARS{user_tree_file_name},	# <Phylogenetic Tree (in Newick format)> (optional)	     
-	    
-	   # Building MSA mode 
+	    "Tree:s"=>\$VARS{user_tree_file_name},	# <Phylogenetic Tree (in Newick format)> (optional)
+
+	   # Building MSA mode
 	    "m"=>\$FORM{buildMSA},			# Builed MSA mode
 	    "MSAprogram:s"=>\$FORM{MSAprogram},		# ["CLUSTALW"] or ["MUSCLE"] (default: MUSCLE)
-	    "DB:s"=>\$FORM{database}, 			# ["SWISS-PROT"] or ["UNIPROT"] (default: UniProt)  
+	    "DB:s"=>\$FORM{database}, 			# ["SWISS-PROT"] or ["UNIPROT"] (default: UniProt)
 	    "MaxHomol:s"=>\$FORM{MAX_NUM_HOMOL},	#1 <Max Number of Homologs to use for ConSurf Calculation> (deafult: 50)
 	    "Iterat:s"=>\$FORM{iterations},		# <Number of PsiBlast iterataion> (default: 1)
 	    "ESCORE:s"=>\$FORM{ESCORE},    		# <Minimal E-value cutoff for Blast search> (default: 0.001)
 	    "BlastFile:s"=>\$VARS{usr_BLAST_out_file},  # pre-calculated blast file provided by the user
-         
-	   # Rate4Site Parameters 
+
+	   # Rate4Site Parameters
 	    "Algorithm:s"=>\$FORM{algorithm}, 		# [LikelihoodML] or [Bayesian] (default: Bayesian)
 	    "Matrix:s"=>\$FORM{matrix},			# [JTT] or [mtREV] or [cpREV] or [WAG] or [Dayhoff] (default JTT)
 	    "w|workdir:s" => \$VARS{working_dir} ,
@@ -169,14 +169,14 @@ print $welcome_message if (!$quiet);
 if ( $VARS{working_dir} ) {
     $VARS{working_dir} = glob($VARS{working_dir});
     if (! -e ($VARS{working_dir}) ){
-        make_path ($VARS{working_dir}) 
+        make_path ($VARS{working_dir})
             || die ("Cannot create non existing path:".$VARS{working_dir}." .".$!);
-    } 
+    }
 }
 else {
     $VARS{working_dir} = File::Temp::tempdir( CLEANUP => !$dbg );
 }
-$VARS{working_dir} =~ s!/*$!/!; 
+$VARS{working_dir} =~ s!/*$!/!;
 warn ("Work dir: ".$VARS{working_dir}) if ($dbg);
 
 if ((defined $VARS{protein_seq}) and (defined $VARS{protein_seq}) and (defined $VARS{pdb_file_name}))
@@ -189,7 +189,7 @@ if (!defined $VARS{user_msa_file_name})
  if ((!defined $VARS{pdb_file_name} or !defined $FORM{chain} or ! defined $VARS{working_dir}) and (!defined $VARS{protein_seq} or !defined $VARS{working_dir}))
  {
   	die "===[FATAL ERROR] Missing Arguments; If -m is used [-PDB with -CHAIN, or -Seq_File] and -Out_Dir must be specified\n"
- } 
+ }
 }
 if (defined $VARS{pdb_file_name})
 {
@@ -201,10 +201,10 @@ if (defined $VARS{protein_seq})
 }
 
 if (defined $VARS{pdb_file_name} and ! -e $VARS{pdb_file_name}){
-    die "===[FATAL ERROR] Non existent input:".  $VARS{pdb_file_name} ."\n"; 
+    die "===[FATAL ERROR] Non existent input:".  $VARS{pdb_file_name} ."\n";
 }
 if (defined $VARS{protein_seq} and ! -e $VARS{protein_seq}){
-    die "===[FATAL ERROR] Non existent input:".  $VARS{protein_seq} ."\n"; 
+    die "===[FATAL ERROR] Non existent input:".  $VARS{protein_seq} ."\n";
 }
 
 # copy input file to temp dir
@@ -222,17 +222,17 @@ elsif (defined $VARS{protein_seq})
 	copy ($VARS{protein_seq}, $VARS{working_dir}. $t_file );
 	$VARS{protein_seq}  =  $t_file;
 }
-if (!$FORM{buildMSA}) 
+if (!$FORM{buildMSA})
 {
 	if (!defined $VARS{user_msa_file_name} or !$FORM{msa_SEQNAME})
 	{
 		die "===[FATAL ERROR] Missing Arguments; -MSA,-SEQ_NAME must be given in MSA mode\n"
 	}
-	$VARS{protein_MSA}=$VARS{user_msa_file_name};	
+	$VARS{protein_MSA}=$VARS{user_msa_file_name};
 }
 
 if (defined $FORM{buildMSA}) # MSA Mode
-{ 
+{
   if ((defined $FORM{MSAprogram}) and ($FORM{MSAprogram} ne "") and ($FORM{MSAprogram} ne""))
     {
       print "-MSAprogram can be only CLUSTALW or MUSCLE (default: MUSCLE) and not $FORM{MSAprogram}\n";
@@ -261,7 +261,7 @@ if ((defined $VARS{user_tree_file_name}) and defined ($FORM{buildMSA}))
 	print "===[WARNNING] The given tree would be ignored in Building MSA mode\n";
 	$VARS{user_tree_file_name}="";
 }
-  
+
 
 # Defaults , NOTE SOME OF THEM ARE IGNORED DURING THE PROGRAM BY IF ELSE MECHANISM
 $FORM{iterations} = 1 if !defined($FORM{iterations});
@@ -290,24 +290,24 @@ if ( $VARS{out_dir} ) {
             $answer = <>;
         }
         if ($answer =~ m/y/i){
-            make_path ($VARS{out_dir}) 
+            make_path ($VARS{out_dir})
                 || die ("Cannot create output dir:".$VARS{out_dir}." .".$!);
         }else {
              $VARS{out_dir}  = $tmp_dir;
-             make_path ($VARS{out_dir}) 
+             make_path ($VARS{out_dir})
              || die ("Cannot create output dir:".$VARS{out_dir}." .\nSystem message: ".$!);
         }
     }
 }else{
     $VARS{out_dir}  = $tmp_dir;
-    make_path ($VARS{out_dir}) 
+    make_path ($VARS{out_dir})
         || die ("Cannot create output dir:".$VARS{out_dir}." .\nSystem message: ".$!);
-} 
+}
 
 print "Output files could be found in output directory: ".$VARS{out_dir}."\n" if (!$quiet);
 
 if (defined $VARS{pdb_file_name}) # ConSurf mode
-{	
+{
 	if ($VARS{pdb_file_name}=~/([A-Za-z0-9]{4})(.[A-Za-z0-9]+)?$/)
 	{
 		$FORM{pdb_ID}=$1;
@@ -380,8 +380,8 @@ else # ConSeq mode
     $VARS{running_mode}="_mode_no_pdb_no_msa";
 	$VARS{CONSURF_CONSEQ}="CONSEQ";
 }
-	
-	
+
+
 print "Debug log can be found in: ".$VARS{run_log}."\n" if ($dbg);
 
 
@@ -392,12 +392,12 @@ $VARS{msa_format} = ""; # will be either: pir, fasta, nexus, clustalw, gcg, gde.
 &open_log_file();
 
 ## This Script Run ConSurf Calculation Given MSA and PDB ID
-    
+
 my @gradesPE_Output = ();  # an array to hold all the information that should be printed to gradesPE
 # in each array's cell there is a hash for each line from r4s.res.
 # POS: position of that aa in the sequence ; SEQ : aa in one letter ;
 # GRADE : the given grade from r4s output ; COLOR : grade according to consurf's scale
-my %residue_freq = (); # for each position in the MSA, detail the residues 
+my %residue_freq = (); # for each position in the MSA, detail the residues
 my %position_totalAA = (); # for each position in the MSA, details the total number of residues
 
 # these arrays will hold for each grade, the residues which corresponds to it.
@@ -419,7 +419,7 @@ my ($length_of_seqres,$length_of_atom);
 # my $rate4s = CONSURF_CONSTANTS::RATE4SITE;
 # my $rate4s_slow = CONSURF_CONSTANTS::RATE4SITE_SLOW;
 my $rate4s = $config->val( 'programs', 'RATE4SITE' );
-my $rate4s_slow = $config->val( 'programs', 'RATE4SITE_SLOW' ); 
+my $rate4s_slow = $config->val( 'programs', 'RATE4SITE_SLOW' );
 
 # outputs
 if ($VARS{CONSURF_CONSEQ} eq "CONSURF")
@@ -431,7 +431,7 @@ if ($VARS{CONSURF_CONSEQ} eq "CONSURF")
 	$VARS{gradesPE} =  $VARS{out_dir}."/$FORM{pdb_ID}_$FORM{chain}_consurf.grades";
 	$VARS{r4s_tree} =  $FORM{pdb_ID}."_".$FORM{chain}."_Tree.txt";
 	$VARS{insufficient_data_pdb} = "";
-	
+
 	if ($FORM{buildMSA})
 	{
 		$VARS{running_mode}="_mode_pdb_no_msa";
@@ -480,7 +480,7 @@ if ($VARS{running_mode} eq "_mode_pdb_no_msa" or $VARS{running_mode} eq "_mode_p
     $VARS{pdb_file} = new pdbParser;
     $VARS{pdb_file}->read($VARS{pdb_file_name});
     print  $VARS{pdb_file}."\n" if ($dbg);
-    
+
     # FIRST check if there is no seqres
     ($VARS{SEQRES_seq}, $VARS{ATOM_seq}) = &get_seqres_atom_seq();
     &analyse_seqres_atom();
@@ -489,7 +489,7 @@ if ($VARS{running_mode} eq "_mode_pdb_no_msa" or $VARS{running_mode} eq "_mode_p
 # mode : no msa - with PDB or without PDB
 #---------------------------------------------
 if ($VARS{running_mode} eq "_mode_pdb_no_msa" or $VARS{running_mode} eq "_mode_no_pdb_no_msa"){
-	print "No msa mode - with PDB or without PDB MODE\n" if ($dbg);    
+	print "No msa mode - with PDB or without PDB MODE\n" if ($dbg);
 	# if there is pdb : we compare the atom and seqres
 
     if ($VARS{running_mode} eq "_mode_pdb_no_msa" and (defined($VARS{SEQRES_seq}) and length($VARS{SEQRES_seq}) > 0)){
@@ -499,11 +499,11 @@ if ($VARS{running_mode} eq "_mode_pdb_no_msa" or $VARS{running_mode} eq "_mode_n
 		$VARS{BLAST_last_round} = "$FORM{pdb_ID}_$FORM{chain}.last_round.blast"; # file to hold blast output, last round
 	}
     else
-	{	
+	{
 		$VARS{BLAST_out_file} = "$VARS{Seq_Name}.protein_query.blast"; # file to hold blast output
 		$VARS{BLAST_last_round} = "$VARS{Seq_Name}.last_round.blast"; # file to hold blast output, last round
 	}
-   
+
    # print "How many?".CONSURF_CONSTANTS::BLAST_MAX_HOMOLOGUES_TO_DISPLAY."\n";
    # $VARS{max_homologues_to_display}  = CONSURF_CONSTANTS::BLAST_MAX_HOMOLOGUES_TO_DISPLAY;
     $VARS{max_homologues_to_display} =
@@ -516,8 +516,8 @@ if ($VARS{running_mode} eq "_mode_pdb_no_msa" or $VARS{running_mode} eq "_mode_n
     # else{
     #     $VARS{protein_db} = CONSURF_CONSTANTS::UNIPROT_DB;}
     # create the seqres fasta file, run blast
-    
-    
+
+
     if (defined $VARS{usr_BLAST_out_file})
     {
      print "Starting from predefined BLAST file: $VARS{usr_BLAST_out_file}\n" if ($dbg);
@@ -543,7 +543,7 @@ if ($VARS{running_mode} eq "_mode_pdb_no_msa" or $VARS{running_mode} eq "_mode_n
     $VARS{hit_min_length} = $config->val( 'params', 'FRAGMENT_MINIMUM_LENGTH' );
     $VARS{min_num_of_hits} = $config->val( 'params', 'MINIMUM_FRAGMENTS_FOR_MSA' );
     $VARS{low_num_of_hits} = $config->val( 'params', 'LOW_NUM_FRAGMENTS_FOR_MSA' );
-    
+
 	if ($VARS{CONSURF_CONSEQ} eq "CONSURF")
 	{
 		$VARS{HITS_fasta_file} = "$FORM{pdb_ID}_$FORM{chain}.homolougs.fas";
@@ -563,13 +563,13 @@ if ($VARS{running_mode} eq "_mode_pdb_no_msa" or $VARS{running_mode} eq "_mode_n
     &choose_homologoues_from_blast(\%blast_hash);
     # screen homolougs by redundancy rate, according to clusters (CD-HIT)
     my $num_of_unique_seq=cluster_homologoues(\%cd_hit_hash, \%blast_hash);
-    $VARS{unique_seqs}=$num_of_unique_seq;	
-    
+    $VARS{unique_seqs}=$num_of_unique_seq;
+
     &choose_final_homologoues(\%cd_hit_hash, \%blast_hash);
     &create_MSA;
     if ($VARS{running_mode} eq "_mode_pdb_no_msa")
     {
-    	$VARS{msa_SEQNAME}="Input_pdb_SEQRES_A"; #CONSIDER TO CHANGE    
+    	$VARS{msa_SEQNAME}="Input_pdb_SEQRES_A"; #CONSIDER TO CHANGE
     }
 }
 
@@ -578,7 +578,7 @@ if ($VARS{running_mode} eq "_mode_pdb_no_msa" or $VARS{running_mode} eq "_mode_n
 #---------------------------------------------
 
 elsif ($VARS{running_mode} eq "_mode_pdb_msa" or $VARS{running_mode} eq "_mode_msa" or $VARS{running_mode} eq "_mode_pdb_msa_tree" or $VARS{running_mode} eq "_mode_msa_tree"){
-    print "msa mode - with PDB or without PDB\n" if ($dbg);    
+    print "msa mode - with PDB or without PDB\n" if ($dbg);
 	# check that there are at least 5 sequecnes in the MSA
     # extract the query sequence from the MSA
     # change the MSA sequences names to numbers
@@ -621,7 +621,7 @@ elsif ($VARS{running_mode} eq "_mode_pdb_msa" or $VARS{running_mode} eq "_mode_m
 #---------------------------------------------
 # mode : include pdb
 #---------------------------------------------
-# in order to create 3D outputs, we need to compare the ATOM to the sequence from rate4site 
+# in order to create 3D outputs, we need to compare the ATOM to the sequence from rate4site
 if ($VARS{running_mode} eq "_mode_pdb_no_msa" or $VARS{running_mode} eq "_mode_pdb_msa" or $VARS{running_mode} eq "_mode_pdb_msa_tree"){
     &create_atom_position_file; # this file will be used later to create the output which aligns rate4site sequence with the ATOM records
     my %r4s2pdb = (); # key: poistion in SEQRES/MSA, value: residue name with position in atom (i.e: ALA22:A)
@@ -640,7 +640,7 @@ if ($VARS{running_mode} eq "_mode_pdb_no_msa" or $VARS{running_mode} eq "_mode_p
     }
 
 
-    &create_gradesPE(\%r4s2pdb);     
+    &create_gradesPE(\%r4s2pdb);
     $VARS{ATOMS_with_ConSurf_Scores} = $VARS{out_dir}. "ATOMS_section_With_ConSurf.pdb";
     $VARS{ATOMS_with_ConSurf_Scores_isd} =  $VARS{out_dir}. "ATOMS_section_With_ConSurf_isd.pdb";
 
@@ -653,8 +653,8 @@ if ($VARS{running_mode} eq "_mode_pdb_no_msa" or $VARS{running_mode} eq "_mode_p
     $VARS{insufficient_data} = $ans1[1];
 	# 1. ATOM FILE WITH R4S scores - needed for pymol
 	# $VARS{ATOMS_with_R4S_Scores}= $VARS{out_dir}. "ATOMS_section_With_R4S.pdb";
-	
-	# my %Rate4Site_Grades=();	
+
+	# my %Rate4Site_Grades=();
 	# print "\nCalling:cp_rasmol_gradesPE_and_pipe::read_Rate4Site_gradesPE($VARS{gradesPE},\%Rate4Site_Grades)\n" if ($dbg);
 	# cp_rasmol_gradesPE_and_pipe::read_Rate4Site_gradesPE($VARS{gradesPE},\%Rate4Site_Grades);
 	# # print "Calling:cp_rasmol_gradesPE_and_pipe::replace_tempFactor($VARS{pdb_file_name},$FORM{chain},\%Rate4Site_Grades,$VARS{ATOMS_with_R4S_Scores})\n" if ($dbg);
@@ -691,11 +691,11 @@ if ($VARS{running_mode} eq "_mode_msa" or $VARS{running_mode} eq "_mode_no_pdb_n
 	}
 	#predict_solvent_accesibility(); #To Do: run the algorithm to calculate burried/exposed
 	my %Pos_Solv_Acc_Pred = (); # To Do: fill the hash - key: poistion in SEQRES/MSA, value: PACC Solv Acc Pred (b/e)
-	#read_Solv_Acc_Pred(\%Pos_Solv_Acc_Pred); 
+	#read_Solv_Acc_Pred(\%Pos_Solv_Acc_Pred);
 	create_gradesPE_ConSeq(\%Pos_Solv_Acc_Pred);
 	print "Calling cp_rasmol_gradesPE_and_pipe::ConSeq_HTML_Output(\@gradesPE_Output,\%Pos_Solv_Acc_Pred,\"$VARS{working_dir}/$VARS{Colored_Seq_HTML}\",\"yes\")\n" if ($dbg);
 #	cp_rasmol_gradesPE_and_pipe::ConSeq_HTML_Output(\@gradesPE_Output,\%Pos_Solv_Acc_Pred,"$VARS{working_dir}/$VARS{Colored_Seq_HTML}"); # To use when buried exposed is available
-	cp_rasmol_gradesPE_and_pipe::ConSeq_HTML_Output(\@gradesPE_Output,\%Pos_Solv_Acc_Pred,"$VARS{working_dir}/$VARS{Colored_Seq_HTML}","yes"); 
+	cp_rasmol_gradesPE_and_pipe::ConSeq_HTML_Output(\@gradesPE_Output,\%Pos_Solv_Acc_Pred,"$VARS{working_dir}/$VARS{Colored_Seq_HTML}","yes");
 	my $Protein_Length=$#gradesPE_Output+1;
 }
 
@@ -706,9 +706,9 @@ $VARS{MSA_percentage_FILE}=$VARS{out_dir}."msa_aa_variety_percentage.csv";
 print "Calling cp_rasmol_gradesPE_and_pipe::print_precentage(\%residue_freq, \%position_totalAA, $VARS{MSA_percentage_FILE},\@gradesPE_Output)\n" if ($dbg);
 my @ans3 = cp_rasmol_gradesPE_and_pipe::print_precentage(\%residue_freq, \%position_totalAA, $VARS{MSA_percentage_FILE},\@gradesPE_Output);
 unless ($ans3[0] eq "OK") {print "cp_rasmol_gradesPE_and_pipe::print_precentage FAILED: @ans3" if ($dbg);}
- 
- 
-# Organize outputs	
+
+
+# Organize outputs
 copy ($VARS{working_dir}.'/'. $VARS{protein_MSA}, $VARS{out_dir}.'/'. $VARS{protein_MSA} );
 if ($FORM{buildMSA}){copy ($VARS{working_dir}.'/'. $VARS{HITS_rejected_file}, $VARS{out_dir}.'/'. $VARS{HITS_rejected_file} );}
 copy ($VARS{working_dir}.'/'. $VARS{r4s_tree}, $VARS{out_dir}.'/'. $VARS{r4s_tree} );
@@ -726,7 +726,7 @@ if ($VARS{CONSURF_CONSEQ} eq "CONSURF")
 
     $final_output_message = <<EOF;
 Consurf run completed successfuly!
- 
+
 Here is a list of files that could be found in the output dir
     $VARS{out_dir}
     |
@@ -749,7 +749,7 @@ if ($VARS{CONSURF_CONSEQ} eq "CONSEQ")
 	$VARS{MSA_percentage_FILE}="msa_aa_variety_percentage.csv";
 	$final_output_message = <<EOF;
 Consurf run completed successfuly!
- 
+
 Here is a list of files that could be found in the output dir
     $VARS{out_dir}
     |
@@ -806,10 +806,10 @@ sub analyse_seqres_atom{
             &exit_on_error('user_error', "Too many modified residues were found in SEQRES field.");
         }
         print LOG "analyse_seqres_atom : modified residues found\n";
-        
+
     }
     # print "The Atoms are fine !!!\n ".$VARS{ATOM_seq} if ($dbg);
-    
+
 }
 #---------------------------------------------
 sub compare_atom_seqres_or_msa{
@@ -817,8 +817,8 @@ sub compare_atom_seqres_or_msa{
     my $what_to_compare = shift;
     # in case there are both seqres and atom fields, checks the similarity between the 2 sequences.
     my $atom_length = length($VARS{ATOM_seq});
-    # print "\n".$atom_length."\n" if ($dbg); 
-    
+    # print "\n".$atom_length."\n" if ($dbg);
+
     my ($other_query_length, $other_query_seq, %query_line);
     my $two_fastas = "PDB_$what_to_compare"."_$FORM{pdb_ID}_$FORM{chain}.fasta2"; #CHANGHING THE NAMES
     my $clustalw_out = "PDB_$what_to_compare"."_$FORM{pdb_ID}_$FORM{chain}.out";
@@ -860,9 +860,9 @@ sub compare_atom_seqres_or_msa{
     print FAS ">".$what_to_compare."_$FORM{chain}\n$other_query_seq\n>ATOM_$FORM{chain}\n$VARS{ATOM_seq}\n";
     close FAS;
 
-  
+
     my $command = $config->val( 'programs', 'MUSCLE' )." -in ".$VARS{working_dir}."/".$two_fastas." -out $VARS{working_dir}/$VARS{pairwise_aln} -clwstrict -quiet";
-   
+
     print LOG "compare_atom_seqres_or_msa : run $command\n";
     warn $command if ($dbg);
     `$command`;
@@ -902,7 +902,7 @@ sub run_blast{
         if (!-e "$VARS{working_dir}/$VARS{protein_seq}" or -z "$VARS{working_dir}/$VARS{protein_seq}"){
             exit_on_error('sys_error',"run_blast : the file $VARS{working_dir}/$VARS{protein_seq} was not created");
         }
-    }	
+    }
 
 	print "{protein_db}\n";
     my $cmd = $config->val( 'programs', 'BLASTPGP' )." -i $VARS{working_dir}/$VARS{protein_seq} -e $FORM{ESCORE} -d $VARS{protein_db} -o $VARS{working_dir}/$VARS{BLAST_out_file} -j $FORM{iterations} -v $VARS{max_homologues_to_display} -b $VARS{max_homologues_to_display} -F F";
@@ -1228,7 +1228,7 @@ sub check_msa_tree_match{
         unless (exists $ref_msa_seqs->{$node}){
             &exit_on_error('user_error', "The TREE file $VARS{user_tree_file_name} is inconsistant with the MSA file $VARS{user_msa_file_name}.\nThe node '$node' is found in the TREE file, but there is no sequence in the MSA file with that exact name. ".$err_msg);
         }
-       
+
     }
     print LOG "check_msa_tree_match : check if all the sequences in the MSA are also in the tree\n";
     #check that all the msa nodes are in the tree
@@ -1236,7 +1236,7 @@ sub check_msa_tree_match{
         unless (exists $ref_tree_nodes->{$seq_name}){
             &exit_on_error('user_error', "The MSA file $VARS{protein_MSA} is inconsistant with the TREE file $VARS{user_tree_file_name}.The Sequence name '$seq_name' is found in the MSA file, but there is no node with that exact name in the TREE file. $err_msg");
         }
-       
+
     }
 }
 #---------------------------------------------
@@ -1288,7 +1288,7 @@ sub create_MSA{
     if($FORM{MSAprogram} eq 'CLUSTALW'){
         # $cmd = CONSURF_CONSTANTS::CLUSTALW." -infile=$VARS{FINAL_sequences} -outfile=$VARS{protein_MSA}";
         $cmd = $config->val( 'programs', 'CLUSTALW' )." -infile=$VARS{working_dir}/$VARS{FINAL_sequences} -outfile=$VARS{working_dir}/$VARS{protein_MSA}";
-         
+
     }
     else{
          # $cmd = CONSURF_CONSTANTS::MUSCLE." -in $VARS{FINAL_sequences} -out $VARS{protein_MSA} -clwstrict -quiet";
@@ -1320,7 +1320,7 @@ sub exit_on_error{
 #---------------------------------------------
     my $which_error = shift;
     my $error_msg = shift;
-    
+
     if ($which_error eq 'user_error'){
         print LOG "\nEXIT on error:\n$error_msg\n";
         print "\nEXIT on error:\n$error_msg\n";
@@ -1330,15 +1330,15 @@ sub exit_on_error{
         print LOG "\n$error_msg\n";
         #print $error_msg to the log file
 	print "\n$error_msg\n";
-    }    
+    }
     print LOG "\nExit Time: ".(CONSURF_FUNCTIONS::printTime)."\n";
     close LOG;
     exit(254);
 }
 #---------------------------------------------
-sub run_rate4site{    
-#---------------------------------------------  
-    my ($cmd, $algorithm, $tree_file_r4s, $query_name, $msa, $did_r4s_fail);    
+sub run_rate4site{
+#---------------------------------------------
+    my ($cmd, $algorithm, $tree_file_r4s, $query_name, $msa, $did_r4s_fail);
     my %MatrixHash = (JTT => '-Mj', mtREV => '-Mr', cpREV => '-Mc', WAG => '-Mw', Dayhoff => '-Md', LG => '-Ml');
     # choose the algorithm
     if ($FORM{algorithm} eq "LikelihoodML"){
@@ -1387,14 +1387,14 @@ sub run_rate4site{
         `$r4s_comm`;
          chdir($orig_cwd);
         $did_r4s_fail = &check_if_rate4site_failed("$VARS{working_dir}/$VARS{r4s_out}", "$VARS{working_dir}/$VARS{r4s_slow_log}");
-        if ($did_r4s_fail eq "yes"){            
+        if ($did_r4s_fail eq "yes"){
             my $err = "The run $r4s_comm for $VARS{run_number} failed.\nThe MSA $msa was too large.\n";
             exit_on_error('user_error', "The calculation could not be completed due to memory problem, since the MSA is too large. Please run ConSurf again with fewer sequences.")
         }
-    }    
+    }
 
 }
-#---------------------------------------------    
+#---------------------------------------------
 sub check_if_rate4site_failed{
 # There are some tests to see if rate4site failed.
 # Since I can't trust only one of them, I do all of them. If onw of them is tested to be true - than a flag will get TRUE value
@@ -1406,11 +1406,11 @@ sub check_if_rate4site_failed{
 #---------------------------------------------
     my ($res_flag, $r4s_log) = @_;
     my $ret = "no";
-    my @did_r4s_failed = &CONSURF_FUNCTIONS::check_if_rate4site_failed($res_flag, $r4s_log);    
+    my @did_r4s_failed = &CONSURF_FUNCTIONS::check_if_rate4site_failed($res_flag, $r4s_log);
     if ($did_r4s_failed[0] eq "yes"){
         $ret = "yes";
         print LOG "check_if_rate4site_failed : ".$did_r4s_failed[1];
-        $VARS{r4s_process_id} = $did_r4s_failed[2];        
+        $VARS{r4s_process_id} = $did_r4s_failed[2];
         &remove_core();
         # if there was an error in user input which rate4site reported: we output a message to the user and exit
         if (exists $did_r4s_failed[3] and $did_r4s_failed[3] ne ""){
@@ -1452,8 +1452,8 @@ sub read_residue_variety{
         exit_on_error('sys_error',$ans[0]);}
     if (keys %$ref_to_res_freq<1 or (keys %$ref_to_positionAA <1)){
         exit_on_error('sys_error',"could not extract information from MSA $VARS{protein_MSA} in routine MSA_parser::read_residue_variety");}
-    
-    $VARS{num_of_seqs_in_MSA} = $ans[1];    
+
+    $VARS{num_of_seqs_in_MSA} = $ans[1];
 }
 #---------------------------------------------
 sub create_atom_position_file{
@@ -1467,7 +1467,7 @@ sub create_atom_position_file{
     print LOG "create_atom_position_file : calling CONSURF_FUNCTIONS::create_atom_position_file($VARS{pdb_file_name},$VARS{working_dir}/$VARS{atom_positionFILE},$chain,\%output)\n";
     CONSURF_FUNCTIONS::create_atom_position_file("$VARS{pdb_file_name}","$VARS{working_dir}/$VARS{atom_positionFILE}", $chain, \%output);
     #rasmol_gradesPE_and_pipe::create_atom_position_file("$VARS{pdb_file_name}","$VARS{working_dir}/$VARS{atom_positionFILE}", $chain, \%output);
-    if (exists $output{ERROR}) {exit_on_error('sys_error',$output{ERROR});}	
+    if (exists $output{ERROR}) {exit_on_error('sys_error',$output{ERROR});}
 	if (exists $output{INFO}) {print LOG "create_atom_position_file : $output{INFO}";}
 	if (exists $output{WARNING}) {print LOG "create_atom_position_file : $output{WARNING}";}
     if (!-e "$VARS{working_dir}/$VARS{atom_positionFILE}" or -z "$VARS{working_dir}/$VARS{atom_positionFILE}"){
@@ -1493,13 +1493,13 @@ print "got to match_pdb_to_seq" if ($dbg);
     print  "match_pdb_to_seq : Total residues in the msa sequence: $ans[1]. Total residues in the ATOM : $ans[2]\n" if (!$quiet);
     $length_of_seqres = $ans[1];
     $length_of_atom = $ans[2];
-  
+
 }
 #---------------------------------------------
 sub fill_r4s2pdb{
 #---------------------------------------------
 	print "got to fill_r4s2pdb" if ($dbg);
-	
+
 	my $ref_r4s2pdb = shift; # key: poistion in SEQRES/MSA, value: residue name with position in atom (i.e: ALA22:A)
 	my $chain;
 	unless ($FORM{chain} =~ /none/i){
@@ -1518,7 +1518,7 @@ sub fill_r4s2pdb{
 		$ATOM_pos=trim($ATOM_pos);
 		$FAS_Pos=trim($FAS_Pos);
 		$Residue_Name=trim($Residue_Name);
-		
+
 		$ref_r4s2pdb->{$FAS_Pos}=$Residue_Name.$ATOM_pos.":$chain";
 		$length_of_atom++;
 	}
@@ -1568,7 +1568,7 @@ print <<EndOfHelp;
            ConSurf - Identification of Functional Regions in Proteins
 =========================================================================================
 Usage
-=#=#=#=#	
+=#=#=#=#
 The ConSurf work in several modes
 1. Given Protein PDB File.
 2. Given Multiple Sequence Alignment (MSA) and Protein PDB File.
@@ -1596,12 +1596,12 @@ MSA Mode (Not Using -m)
 Building MSA (Using -m)
 ===============================
 -m       		Builed MSA mode
-	-MSAprogram ["CLUSTALW"] or ["MUSCLE"] (default: MUSCLE)		
-	-DB ["SWISS-PROT"] or ["UNIPROT"] (default: UniProt)  
+	-MSAprogram ["CLUSTALW"] or ["MUSCLE"] (default: MUSCLE)
+	-DB ["SWISS-PROT"] or ["UNIPROT"] (default: UniProt)
 	-MaxHomol <Max Number of Homologs to use for ConSurf Calculation> (deafult: 50)
 	-Iterat <Number of PsiBlast iterataion> (default: 1)
 	-ESCORE <Minimal E-value cutoff for Blast search> (default: 0.001)
-	
+
 
 Rate4Site Parameter (see http://consurf.tau.ac.il/overview.html#methodology and http://consurf.tau.ac.il/overview.html#MODEL for detains)
 ===========================================================================================================================================
@@ -1613,13 +1613,13 @@ Help Me!!
 -h - Shows this help screen
 
 Examples:
-1. Basic Build MSA mode (using defaults parameters) 
+1. Basic Build MSA mode (using defaults parameters)
 	consurf -PDB  MY_PDB_FILE.pdb -CHAIN MY_CHAIN_ID -Out_Dir /MY_DIR/ -m
-2. using build MSA mode and advanced options: 
+2. using build MSA mode and advanced options:
 	consurf -PDB MY_PDB.pdb -CHAIN A -Out_Dir /MY_DIR/ -m -MSAprogram CLUSTALW -DB "SWISS-PROT" -MaxHomol 100 -Iterat 2 -ESCORE 0.00001 -Algorithm LikelihoodML -Matrix Dayhoff
 		Will run Consurf in: building MSA mode (-m) for Chain A (-CHAIN) of PDB file: /groups/bioseq.home/1ENV.pdb (-PDB). The sequences for the MSA will be chosen according 2  iterations of PSI-Blast (-Iterat) against SwissProt Database (-DB "SWISS-PROT"), with E value cutoff of 0.00001 (-ESCORE), considering maximum 100 homologues (MaxHomol). The Rate4Site will use Maximum Liklihood algorithm (-Algorithm) and Dayhoff model (-Matrix)
-3. Simple Run With prepared MSA. 
-	perl ConSurf.pl -PDB MY_PDB_FILE.pdb -CHAIN A -Out_Dir /MY_DIR/ -MSA MY_MSA_FILE -SEQ_NAME MY_SEQ_NAME	
+3. Simple Run With prepared MSA.
+	perl ConSurf.pl -PDB MY_PDB_FILE.pdb -CHAIN A -Out_Dir /MY_DIR/ -MSA MY_MSA_FILE -SEQ_NAME MY_SEQ_NAME
 
 EndOfHelp
 print "For any questions or suggestions please contact us: bioSequence\@tauex.tau.ac.il\n";
@@ -1633,7 +1633,7 @@ __END__
 
 =head1 NAME
 
-consurf - Identification of Functional Regions in Proteins. 
+consurf - Identification of Functional Regions in Proteins.
 
 =head1 SYNOPSIS
 
@@ -1681,11 +1681,11 @@ TBD
 
 Qualified path to PDB File
 
-=item --CHAIN 
+=item --CHAIN
 
-PDB Chain ID 
+PDB Chain ID
 
-=item --Out_Dir 
+=item --Out_Dir
 
 Output Path
 
@@ -1697,17 +1697,17 @@ MSA File Name.  B<MANDATORY IF -m NOT USED>
 
 Query sequence name in MSA file. B<MANDATORY IF -m NOT USED>
 
-=item --Tree 
+=item --Tree
 
 Phylogenetic Tree (in Newick format). default building tree by Rate4Site, optional.
 
-=item  --m 
+=item  --m
 
 build MSA mode
 
-=item --MSAprogram 
+=item --MSAprogram
 
-<CLUSTALW|MUSCLE>. default = MUSCLE     
+<CLUSTALW|MUSCLE>. default = MUSCLE
 
 =item --help
 
@@ -1727,7 +1727,7 @@ Print program version
 
 Working directory. Use this option to force program reuse intermediate processing results.  Default: a new temporary directory that is removed automatically.
 
-=back 
+=back
 
 =head2 Parameters passed to Rate4Site
 
@@ -1735,11 +1735,11 @@ see L<http://consurf.tau.ac.il/overview.html#methodology> and L<http://consurf.t
 
 =over
 
-=item --Algorithm 
+=item --Algorithm
 
 [LikelihoodML] or [Bayesian]. default = B<Bayesian>
 
-=item --Matrix 
+=item --Matrix
 
 [JTT] or [LG] or [mtREV] or [cpREV] or [WAG] or [Dayhoff]. default B<JTT>
 
@@ -1749,19 +1749,19 @@ see L<http://consurf.tau.ac.il/overview.html#methodology> and L<http://consurf.t
 
 =over
 
-=item --DB 
+=item --DB
 
-SWISS-PROT|UNIPROT. default = B<UNIPROT>  
+SWISS-PROT|UNIPROT. default = B<UNIPROT>
 
-=item --MaxHomol 
+=item --MaxHomol
 
 Max Number of Homologs to use for ConSurf Calculation. deafult = B<150>
 
-=item --Iterat 
+=item --Iterat
 
 Number of PsiBlast iterataion. default =  B<1>
 
-=item --ESCORE 
+=item --ESCORE
 
 Minimal E-value cutoff for Blast search. default = B<0.001>
 
@@ -1769,21 +1769,21 @@ Minimal E-value cutoff for Blast search. default = B<0.001>
 
 =head1 EXAMPLES
 
-=over   
+=over
 
-=item Basic Build MSA mode (using defaults parameters) 
+=item Basic Build MSA mode (using defaults parameters)
 
 C<consurf --PDB  __pkgdatadir__/example/1lk2.pdb --CHAIN A --Out_Dir /tmp/$USER/consurf -m>
 
-=item using build MSA mode and advanced options: 
+=item using build MSA mode and advanced options:
 
 C<consurf --PDB __pkgdatadir__/example/1lk2.pdb --CHAIN A --Out_Dir /tmp/$USER/consurf --m --MSAprogram CLUSTALW --DB "SWISS-PROT" --MaxHomol 100 --Iterat 2 --ESCORE 0.00001 --Algorithm LikelihoodML --Matrix Dayhoff>
 
 Will run Consurf in: building MSA mode (--m) for Chain A (--CHAIN) of PDB file: /groups/bioseq.home/1ENV.pdb (--PDB). The sequences for the MSA will be chosen according 2  iterations of PSI-Blast (--Iterat) against SwissProt Database (--DB "SWISS-PROT"), with E value cutoff of 0.00001 (--ESCORE), considering maximum 100 homologues (MaxHomol). The Rate4Site will use Maximum Liklihood algorithm (--Algorithm) and Dayhoff model (--Matrix)
 
-=item Simple Run With prepared MSA. 
+=item Simple Run With prepared MSA.
 
-C<consurf --PDB __pkgdatadir__/example/1lk2.pdb --CHAIN A --Out_Dir /tmp/$USER/consurf --MSA MY_MSA_FILE --SEQ_NAME MY_SEQ_NAME> 
+C<consurf --PDB __pkgdatadir__/example/1lk2.pdb --CHAIN A --Out_Dir /tmp/$USER/consurf --MSA MY_MSA_FILE --SEQ_NAME MY_SEQ_NAME>
 
 =back
 
@@ -1847,24 +1847,22 @@ THE TERMS OF THIS LICENSE APPLY TO NON-PROFIT ORGANZIATIONS AND USERS WHO ARE EM
 
 a. Licensor hereby grants to Licensee, and Licensee hereby accepts, a personal, Non-exclusive and non-transferable license to Use the Licensed Software at the Licensed Site during the term hereof, and to use the Licensed Documentation during such term in support of the Use of the Licensed Software. Additionally individuals who are employees or contractors of Licensee who log into computers at the Licensed Site from their personal home or while traveling, are entitled to Use the Licensed Software at such remote locations, provided that such Use is undertaken for and on behalf of the Licensee and that such employees or contractors report directly to employees of the Licensee whose usual and regular place of work is the Licensed Site.
 
-b. Other than as set forth in paragraph 3(a) above, a separate license shall be required, together with the payment of additional annual license fees and charges, to use the Licensed Software at any location other than the Licensed Site. 
+b. Other than as set forth in paragraph 3(a) above, a separate license shall be required, together with the payment of additional annual license fees and charges, to use the Licensed Software at any location other than the Licensed Site.
 
-4. REPRODUCTION OF LICENSED PRODUCT. 
+4. REPRODUCTION OF LICENSED PRODUCT.
 
-Licensee may reproduce the Software for Use in accordance with the terms of the limited License granted to the Licensee in Section 2.   Reproduction of the Licensed Software for any other reason is strictly prohibited.  All copies of the Software, in whole or in part, shall contain the Licensor's restrictive and proprietary notices as they appear on the copies of Software provided by Licensor. 
+Licensee may reproduce the Software for Use in accordance with the terms of the limited License granted to the Licensee in Section 2.   Reproduction of the Licensed Software for any other reason is strictly prohibited.  All copies of the Software, in whole or in part, shall contain the Licensor's restrictive and proprietary notices as they appear on the copies of Software provided by Licensor.
 
 5. LIMITATION OF LIABILITY.
 
-a. IN NO EVENT SHALL LICENSOR BE LIABLE TO LICENSEE FOR ANY INDIRECT, SPECIAL OR CONSEQUENTIAL DAMAGES OR LOST PROFITS, ARISING OUT OF OR RELATED TO THIS LICENSE AGREEMENT OR THE PERFORMANCE OR BREACH THEREOF, EVEN IF THE LICENSOR HAS BEEN ADVISED OF THE POSSIBILITY THEREOF. 
+a. IN NO EVENT SHALL LICENSOR BE LIABLE TO LICENSEE FOR ANY INDIRECT, SPECIAL OR CONSEQUENTIAL DAMAGES OR LOST PROFITS, ARISING OUT OF OR RELATED TO THIS LICENSE AGREEMENT OR THE PERFORMANCE OR BREACH THEREOF, EVEN IF THE LICENSOR HAS BEEN ADVISED OF THE POSSIBILITY THEREOF.
 
 b. IN NO EVENT SHALL LICENSOR BE LIABLE TO LICENSEE FOR ANY DAMAGES RESULTING FROM OR RELATED TO ANY FAILURE OF THE SOFTWARE PRODUCTS, INCLUDING, BUT NOT LIMITED TO LOSS OF DATA, OR DELAY OF THE LICENSOR IN THE DELIVERY OF THE LICENSED PRODUCT OR IN THE PERFORMANCE OF SERVICES UNDER THIS LICENSE AGREEMENT.
 
-c. IN NO EVENT SHALL LICENSEE BE LIABLE TO LICENSOR FOR ANY LOST PROFITS, LOST OPPORTUNITY COSTS OR ANY SPECIAL, INDIRECT, CONSEQUENTIAL OR INCIDENTAL DAMAGES, HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY. 
+c. IN NO EVENT SHALL LICENSEE BE LIABLE TO LICENSOR FOR ANY LOST PROFITS, LOST OPPORTUNITY COSTS OR ANY SPECIAL, INDIRECT, CONSEQUENTIAL OR INCIDENTAL DAMAGES, HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY.
 
 =head1 SEE ALSO
 
 rate4site(1), clustalw(1), muscle(1)
 
 =cut
-
-
