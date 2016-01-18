@@ -218,4 +218,4 @@ vagrant ssh
 ```
 
 After the box has been started and You are connected to the VM through SSH, run `export LC_ALL=C`.
-All dependencies libraires from section *Installing Libraries* should have been installed during execution of `vagrant up`, rest can be set up according to Installation guidelines presented earlier.
+All dependency libraires from section *Installing Libraries* should have been installed during execution of `vagrant up`, rest can be set up according to *Installation* guidelines presented earlier.
