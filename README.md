@@ -16,7 +16,7 @@ Below You will find the guidlines on how to succesfully install ConSirf on Your 
 
 ### Installing libraries
 
-In order for ConSurf to work properly please install the following libraries:
+In order for ConSurf to work properly please, install the following libraries:
 
 ```shell
 autoconf
@@ -91,14 +91,14 @@ can be found in `3rd aprty software`
 
 ####  Databases
 
-Please download **SwissProt and TrEMBL databases** and format the databases for Blast search (using blast formadb which is part of blast system [manual](http://www.ncbi.nlm.nih.gov/IEB/ToolBox/C_DOC/lxr/source/doc/blast/formatdb.html) )
+Please download **SwissProt and TrEMBL databases** and format the databases for Blast search (using blast formadb which is part of blast system. [manual](http://www.ncbi.nlm.nih.gov/IEB/ToolBox/C_DOC/lxr/source/doc/blast/formatdb.html) )
 
   0. update the location of *SwissProt* to point the location of `SWISSPROT_DB`
   0. update the location of *TrEMBL* to point the location of `UNIPROT_DB`.
 
 ### Configuration
 
-In order to run ConSurf is is necessary to update the configuration file - `consurfrc.default`
+In order to run ConSurf is necessary to update the configuration file - `consurfrc.default`
 
 1. In `[programs]` section please enter the full path to the executables of 3rd party software covered earlier  (Example: `MUSCLE=\home\path_to_ConSurf\3rd party software\muscle3.8.31`)
 2. in `[databases]` section please enter the full path to the DBs.   (Example:`SWISSPROT_DB=\home\path_to_DB_Folder\uniprot_sprot.fasta`)

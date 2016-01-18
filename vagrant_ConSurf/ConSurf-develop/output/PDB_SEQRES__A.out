@@ -1,0 +1,24 @@
+
+
+
+ CLUSTAL 2.1 Multiple Sequence Alignments
+
+
+Sequence format is Pearson
+Sequence 1: SEQRES_A     274 aa
+Sequence 2: ATOM_A       274 aa
+Start of Pairwise alignments
+Aligning...
+
+Sequences (1:2) Aligned. Score:  100
+Guide tree file created:   [/mnt/project/consurf/package/ConSurf_TEST/output//PDB_SEQRES__A.dnd]
+
+There are 1 groups
+Start of Multiple Alignment
+
+Aligning...
+Group 1: Sequences:   2      Score:6042
+Alignment Score 1797
+
+CLUSTAL-Alignment file created  [/mnt/project/consurf/package/ConSurf_TEST/output//PDB_SEQRES__A.aln]
+

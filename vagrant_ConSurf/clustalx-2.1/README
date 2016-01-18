@@ -1,0 +1,27 @@
+Please see also ftp://ftp.ebi.ac.uk/pub/software/clustalw2/README
+
+HOWTO COMPILE THE SOURCE AND INSTALL
+----------------------------------------------------------------------
+
+You will need a Unix environment with a working C++ compiler  and the
+Qt developer kit (>=version 4.3) to compile the ClustalX source.
+
+For compilation under Windows you will also need to install mingw and
+cygwin.
+
+Type
+$ qmake
+and then
+$ make
+This will create the clustalX binary.
+
+
+HOWTO INSTALL AFTER COMPILATION
+----------------------------------------------------------------------
+
+Put colprot.xml, coldna.xml, colprint.xml, clustalx.hlp and
+clustalX[.exe] into one folder. Add a link to the binary to your Desktop for
+example.
+
+On Linux you can use the installer script.
+

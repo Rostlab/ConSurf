@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<colorparam>
+    <rgbindex>
+        <color name = "RED" red = "229" green = "51" blue = "25"></color>    
+        <color name = "BLUE" red = "25" green = "127" blue = "229"></color>    
+        <color name = "GREEN" red = "25" green = "204" blue = "25"></color>    
+        <color name = "CYAN" red = "25" green = "178" blue = "178"></color>    
+        <color name = "PINK" red = "229" green = "127" blue = "127"></color>
+        <color name = "MAGENTA" red = "204" green = "76" blue = "204"></color>
+        <color name = "YELLOW" red = "204" green = "204" blue = "0"></color>   
+        <color name = "ORANGE" red = "229" green = "153" blue = "76"></color>
+    </rgbindex>
+    <consensus>
+        <condition name = "%" cutoffpercent = "60" residues = "wlvimafcyhp"></condition> 
+        <condition name = "#" cutoffpercent = "80" residues = "wlvimafcyhp"></condition>
+        <condition name = "-" cutoffpercent = "50" residues = "ed"></condition>
+        <condition name = "+" cutoffpercent = "60" residues = "kr"></condition>
+        <condition name = "g" cutoffpercent = "50" residues = "g"></condition>        
+        <condition name = "n" cutoffpercent = "50" residues = "n"></condition>
+        <condition name = "q" cutoffpercent = "50" residues = "qe"></condition>
+        <condition name = "p" cutoffpercent = "50" residues = "p"></condition>
+        <condition name = "t" cutoffpercent = "50" residues = "ts"></condition>
+        <condition name = "A" cutoffpercent = "85" residues = "a"></condition>        
+        <condition name = "C" cutoffpercent = "85" residues = "c"></condition>        
+        <condition name = "D" cutoffpercent = "85" residues = "d"></condition>        
+        <condition name = "E" cutoffpercent = "85" residues = "e"></condition>
+        <condition name = "F" cutoffpercent = "85" residues = "f"></condition>
+        <condition name = "G" cutoffpercent = "85" residues = "g"></condition>        
+        <condition name = "H" cutoffpercent = "85" residues = "h"></condition>       
+        <condition name = "I" cutoffpercent = "85" residues = "i"></condition>        
+        <condition name = "K" cutoffpercent = "85" residues = "k"></condition>
+        <condition name = "L" cutoffpercent = "85" residues = "l"></condition>        
+        <condition name = "M" cutoffpercent = "85" residues = "m"></condition>        
+        <condition name = "N" cutoffpercent = "85" residues = "n"></condition>       
+        <condition name = "P" cutoffpercent = "85" residues = "p"></condition>        
+        <condition name = "Q" cutoffpercent = "85" residues = "q"></condition>        
+        <condition name = "R" cutoffpercent = "85" residues = "r"></condition>        
+        <condition name = "S" cutoffpercent = "85" residues = "s"></condition>        
+        <condition name = "T" cutoffpercent = "85" residues = "t"></condition>
+        <condition name = "V" cutoffpercent = "85" residues = "v"></condition>
+        <condition name = "W" cutoffpercent = "85" residues = "w"></condition>
+        <condition name = "Y" cutoffpercent = "85" residues = "y"></condition>
+    </consensus>
+    <colorrules>
+        <resrule residue = "g" colorname = "ORANGE" conditions = ""></resrule>
+        <resrule residue = "p" colorname = "YELLOW" conditions = ""></resrule>
+        <resrule residue = "t" colorname = "GREEN" conditions = "tST%#"></resrule>
+        <resrule residue = "s" colorname = "GREEN" conditions = "tST#"></resrule>
+        <resrule residue = "n" colorname = "GREEN" conditions = "nND"></resrule>
+        <resrule residue = "q" colorname = "GREEN" conditions = "qQE+KR"></resrule>
+        <resrule residue = "w" colorname = "BLUE" conditions = "%#ACFHILMVWYPp"></resrule>
+        <resrule residue = "l" colorname = "BLUE" conditions = "%#ACFHILMVWYPp"></resrule>
+        <resrule residue = "v" colorname = "BLUE" conditions = "%#ACFHILMVWYPp"></resrule>
+        <resrule residue = "i" colorname = "BLUE" conditions = "%#ACFHILMVWYPp"></resrule>
+        <resrule residue = "m" colorname = "BLUE" conditions = "%#ACFHILMVWYPp"></resrule>
+        <resrule residue = "a" colorname = "BLUE" conditions = "%#ACFHILMVWYPpTSsG"></resrule>
+        <resrule residue = "f" colorname = "BLUE" conditions = "%#ACFHILMVWYPp"></resrule>
+        <resrule residue = "c" colorname = "BLUE" conditions = "%#AFHILMVWYSPp"></resrule>
+        <resrule residue = "c" colorname = "PINK" conditions = "C"></resrule>
+        <resrule residue = "h" colorname = "CYAN" conditions = "%#ACFHILMVWYPp"></resrule>
+        <resrule residue = "y" colorname = "CYAN" conditions = "%#ACFHILMVWYPp"></resrule>
+        <resrule residue = "e" colorname = "MAGENTA" conditions = "-DEqQ"></resrule>
+        <resrule residue = "d" colorname = "MAGENTA" conditions = "-DEnN"></resrule>
+        <resrule residue = "k" colorname = "RED" conditions = "+KRQ"></resrule> 
+        <resrule residue = "r" colorname = "RED" conditions = "+KRQ"></resrule>       
+    </colorrules>      
+</colorparam>

@@ -1,0 +1,34 @@
+[consurf]
+# consurf_utildir=path to package utilities, default: __pkgdatadir__
+consurf_utildir=__pkgdatadir__
+# set to 1 to supress runtime output
+quiet=0
+
+[databases]
+# path to PDB divided. see ftp://ftp.wwpdb.org/pub/pdb/data/structures/divided
+PDB_DIVIDED =
+# path to Swiss-Prot database. see http://www.uniprot.org/downloads
+#SWISSPROT_DB=/vagrant/DB/swissprot
+SWISSPROT_DB=/vagrant/DB/uniprot_sprot.fasta 
+#swissprot/
+# path to UniRef90 database. see ftp://ftp.uniprot.org/pub/databases/uniprot/uniref/uniref90/README
+UNIPROT_DB=
+RCSB_WGET=wget ftp://ftp.wwpdb.org/pub/pdb/data/structures/all/pdb/
+
+[params]
+BLAST_MAX_HOMOLOGUES_TO_DISPLAY=500
+MAXIMUM_MODIFIED_PERCENT=0.15
+FRAGMENT_REDUNDANCY_RATE=95
+FRAGMENT_OVERLAP=0.10
+FRAGMENT_MINIMUM_LENGTH=0.60
+MINIMUM_FRAGMENTS_FOR_MSA=5
+LOW_NUM_FRAGMENTS_FOR_MSA=10
+BAYES_INTERVAL=3
+
+[programs]
+MUSCLE=/vagrant/muscle3.8.31
+CLUSTALW=/vagrant/clustalw-2.1/clustalw2
+RATE4SITE=/vagrant/rate4site.3.2.source_slow/sourceMar09/rate4site
+RATE4SITE_SLOW=/vagrant/rate4site.3.2.source_slow/sourceMar09/rate4site
+CD_HIT=/vagrant/cdhit/cd-hit
+BLASTPGP=/vagrant/blast-2.2.26/bin/blastpgp

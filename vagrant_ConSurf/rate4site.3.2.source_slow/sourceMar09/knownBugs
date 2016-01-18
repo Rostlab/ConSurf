@@ -1,0 +1,4 @@
+tree:1031 - tree::rootToUnrootedTree
+the node-id numbers will end up with a "hole" where the removed root use to be, and this may couse problems later on.
+	Wed May 31 11:32:03 IDT 2006, by Matan
+						 
