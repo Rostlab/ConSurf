@@ -70,11 +70,11 @@ In `3rd paty software` folder You can already find the executable.
 
 #### blastpgp
 
-blastpgp can be found in `3rd aprty software/blast-2.2.26/bin`
+blastpgp can be found in `3rd party software/blast-2.2.26/bin`
 
 #### CD-HIT
 
-cd-hit can be found in `3rd aprty software/cdhit`
+cd-hit can be found in `3rd party software/cdhit`
 
 To compile simply run:
 ```shell
@@ -87,7 +87,7 @@ To compile simply run:
 
 can be found in `3rd aprty software`
 
-("MUSCLE: a multiple sequence alignment method with reduced time and space complexity". Edgar R.C. (2004), BMC Bioinformatics 5: 113.) 
+("MUSCLE: a multiple sequence alignment method with reduced time and space complexity". Edgar R.C. (2004), BMC Bioinformatics 5: 113.)
 
 ####  Databases
 
@@ -180,7 +180,7 @@ ConSurf -PDB <PDB FILE FULL PATH>  -CHAIN <PDB CHAIN ID> -Out_Dir <Output Direct
 	- The Rate4Site will use Maximum Liklihood algorithm (-Algorithm) and Dayhoff model (-Matrix)
 3. Simple Run With prepared MSA.
 	`perl ConSurf.pl -PDB MY_PDB_FILE.pdb -CHAIN A -Out_Dir /MY_DIR/ -MSA MY_MSA_FILE -SEQ_NAME MY_SEQ_NAME`
-	
+
 Example:
 ```shell
 consurf -PDB /<path_to_dir>/ConSurf/example/1lk2.pdb -CHAIN A -Out_Dir /<path_to_dir>/ConSurf/output_test/ -m --workdir /<path_to_dir>/ConSurf/workdir -BlastFile /<path_to_dir>/ConSurf/output/_A.protein_query.blast
