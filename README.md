@@ -12,7 +12,7 @@ The ConSurf server [1] is a bioinformatics tool for estimating the evolutionary 
 
 ## HOWTO Install
 
-Below You will find the guidlines on how to succesfully install ConSirf on Your machine. Current manual is designed for Debian OS.
+Below You will find the guidlines on how to succesfully install ConSurf on your machine. Current manual is designed for Debian OS.
 
 ### Installing libraries
 
@@ -32,7 +32,7 @@ sudo apt-get install autoconf g++ libexpat-dev libtool perl -y
 
 #### Perl and BioPerl
 
-It is mandatory to have perl installed on Your machine.
+It is mandatory to have perl installed on your machine.
 After Perl is installed please run the following commands in order to download and install perl modules
 ```shell
 cpan
@@ -124,10 +124,9 @@ The ConSurf works in several modes
 2. Given Multiple Sequence Alignment (MSA) and Protein PDB File.
 3. Given Multiple Sequence Alignment (MSA), Phylogenetic Tree, and PDB File.
 
-The script is using the user provided MSA (and Phylogenetic tree if available) to calculate the conservation score for each position in the MSA based on the Rate4Site algorithm
-(Mayrose, I., Graur, D., Ben-Tal, N., and Pupko, T. 2004. Comparison of site-specific rate-inference methods: Bayesian methods are superior. Mol Biol Evol 21: 1781-1791).
+The script is using the user provided MSA (and Phylogenetic tree if available) to calculate the conservation score for each position in the MSA based on the Rate4Site algorithm [2].
 
-When running in the first mode the scripts the MSA is automatically build the MSA for the given protein based on ConSurf protocol.
+When running in the first mode, the script builds the MSA for the given protein based on the ConSurf protocol.
 
 Usage:
 
@@ -204,6 +203,7 @@ Given the amino or nucleic acid sequence (can be extracted from the 3D structure
 6. Li,W. and Godzik,A. (2006) Bioinformatics, 22, 1658-1659.
 
 7. Pupko, T., Bell, R.E., Mayrose, I., Glaser, F. and Ben-Tal, N. (2002) Bioinformatics, 18, S71-77.
+
 
 ## HOWTO Using Vagrant
 
