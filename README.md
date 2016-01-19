@@ -66,7 +66,7 @@ The sources are already in the folder `3rd party software`. ConSurf requires the
 
 ClustalW - please [download from EBI; `ftp://ftp.ebi.ac.uk/pub/software/clustalw2/`](ftp://ftp.ebi.ac.uk/pub/software/clustalw2/)
 
-In `3rd paty software` folder You can already find the executable.
+In `3rd party software` folder You can already find the executable.
 
 #### blastpgp
 
