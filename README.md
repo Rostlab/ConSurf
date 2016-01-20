@@ -12,7 +12,7 @@ The ConSurf server [1] is a bioinformatics tool for estimating the evolutionary 
 
 ## HOWTO Install
 
-Below You will find the guidlines on how to succesfully install ConSirf on Your machine. Current manual is designed for Debian OS.
+Below You will find the guidlines on how to succesfully install ConSurf on your machine. Current manual is designed for Debian OS.
 
 ### Installing libraries
 
@@ -32,7 +32,7 @@ sudo apt-get install autoconf g++ libexpat-dev libtool perl -y
 
 #### Perl and BioPerl
 
-It is mandatory to have perl installed on Your machine.
+It is mandatory to have perl installed on your machine.
 After Perl is installed please run the following commands in order to download and install perl modules
 ```shell
 cpan
@@ -66,15 +66,15 @@ The sources are already in the folder `3rd party software`. ConSurf requires the
 
 ClustalW - please [download from EBI; `ftp://ftp.ebi.ac.uk/pub/software/clustalw2/`](ftp://ftp.ebi.ac.uk/pub/software/clustalw2/)
 
-In `3rd paty software` folder You can already find the executable.
+In `3rd party software` folder You can already find the executable.
 
 #### blastpgp
 
-blastpgp can be found in `3rd aprty software/blast-2.2.26/bin`
+blastpgp can be found in `3rd party software/blast-2.2.26/bin`
 
 #### CD-HIT
 
-cd-hit can be found in `3rd aprty software/cdhit`
+cd-hit can be found in `3rd party software/cdhit`
 
 To compile simply run:
 ```shell
@@ -87,7 +87,7 @@ To compile simply run:
 
 can be found in `3rd aprty software`
 
-("MUSCLE: a multiple sequence alignment method with reduced time and space complexity". Edgar R.C. (2004), BMC Bioinformatics 5: 113.) 
+("MUSCLE: a multiple sequence alignment method with reduced time and space complexity". Edgar R.C. (2004), BMC Bioinformatics 5: 113.)
 
 ####  Databases
 
@@ -124,10 +124,9 @@ The ConSurf works in several modes
 2. Given Multiple Sequence Alignment (MSA) and Protein PDB File.
 3. Given Multiple Sequence Alignment (MSA), Phylogenetic Tree, and PDB File.
 
-The script is using the user provided MSA (and Phylogenetic tree if available) to calculate the conservation score for each position in the MSA based on the Rate4Site algorithm
-(Mayrose, I., Graur, D., Ben-Tal, N., and Pupko, T. 2004. Comparison of site-specific rate-inference methods: Bayesian methods are superior. Mol Biol Evol 21: 1781-1791).
+The script is using the user provided MSA (and Phylogenetic tree if available) to calculate the conservation score for each position in the MSA based on the Rate4Site algorithm [2].
 
-When running in the first mode the scripts the MSA is automatically build the MSA for the given protein based on ConSurf protocol.
+When running in the first mode, the script builds the MSA for the given protein based on the ConSurf protocol.
 
 Usage:
 
@@ -180,7 +179,7 @@ ConSurf -PDB <PDB FILE FULL PATH>  -CHAIN <PDB CHAIN ID> -Out_Dir <Output Direct
 	- The Rate4Site will use Maximum Liklihood algorithm (-Algorithm) and Dayhoff model (-Matrix)
 3. Simple Run With prepared MSA.
 	`perl ConSurf.pl -PDB MY_PDB_FILE.pdb -CHAIN A -Out_Dir /MY_DIR/ -MSA MY_MSA_FILE -SEQ_NAME MY_SEQ_NAME`
-	
+
 Example:
 ```shell
 cd ConSurf
@@ -205,6 +204,7 @@ Given the amino or nucleic acid sequence (can be extracted from the 3D structure
 6. Li,W. and Godzik,A. (2006) Bioinformatics, 22, 1658-1659.
 
 7. Pupko, T., Bell, R.E., Mayrose, I., Glaser, F. and Ben-Tal, N. (2002) Bioinformatics, 18, S71-77.
+
 
 ## HOWTO Using Vagrant
 
