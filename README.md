@@ -95,6 +95,14 @@ Please download **SwissProt and TrEMBL databases** and format the databases for 
 
   0. update the location of *SwissProt* to point the location of `SWISSPROT_DB`
   0. update the location of *TrEMBL* to point the location of `UNIPROT_DB`.
+  
+Databases can be FASTA format from [here] (http://www.uniprot.org/downloads) or just run the following commands:
+```shell
+wget ftp://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/complete/uniprot_sprot.fasta.gz
+gunzip uniprot_sprot.fasta.gz
+wget ftp://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/complete/uniprot_trembl.fasta.gz
+gunzip uniprot_trembl.fasta.gz
+```
 
 ### Configuration
 
@@ -174,7 +182,7 @@ ConSurf -PDB <PDB FILE FULL PATH>  -CHAIN <PDB CHAIN ID> -Out_Dir <Output Direct
 	`perl ConSurf.pl -PDB  MY_PDB_FILE.pdb -CHAIN MY_CHAIN_ID -Out_Dir /MY_DIR/ -m`
 2. using build MSA mode and advanced options:
 	`perl ConSurf.pl -PDB MY_PDB.pdb -CHAIN A -Out_Dir /MY_DIR/ -m -MSAprogram CLUSTALW -DB "SWISS-PROT" -MaxHomol 100 -Iterat 2 -ESCORE 0.00001 -Algorithm LikelihoodML -Matrix Dayhoff`  
-	- This will run Consurf in building MSA mode (-m) for Chain A (-CHAIN) of PDB file: `/groups/bioseq.home/1ENV.pdb` (-PDB).  
+	- This will run ConSurf in building MSA mode (-m) for Chain A (-CHAIN) of PDB file: `/groups/bioseq.home/1ENV.pdb` (-PDB).  
 	- The sequences for the MSA will be chosen according to iterations of PSI-Blast (-Iterat) against SwissProt Database (-DB "SWISS-PROT"), with E value cutoff of 0.00001 (-ESCORE), considering maximum 100 homologues (MaxHomol).  
 	- The Rate4Site will use Maximum Liklihood algorithm (-Algorithm) and Dayhoff model (-Matrix)
 3. Simple Run With prepared MSA.
@@ -208,12 +216,12 @@ Given the amino or nucleic acid sequence (can be extracted from the 3D structure
 
 ## HOWTO Using Vagrant
 
-In the folder `vagrant_ConSurf` You can find the Vagrantfile, file necessary to run a Vagrant Box with consurf on it.
+In the folder `vagrant_ConSurf` You can find the Vagrantfile, file necessary to run a Vagrant Box with ConSurf on it.
 Intallation of Vagrant will not be explained in here.
 
 In order to start the Box, execute the following:
 ```shell
-cd /<path_to_dir>/vagrant_Consurf
+cd /<path_to_dir>/vagrant_ConSurf
 vagrant up --no-destroy-on-error
 vagrant ssh
 ```
