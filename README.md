@@ -183,7 +183,8 @@ ConSurf -PDB <PDB FILE FULL PATH>  -CHAIN <PDB CHAIN ID> -Out_Dir <Output Direct
 	
 Example:
 ```shell
-consurf -PDB /<path_to_dir>/ConSurf/example/1lk2.pdb -CHAIN A -Out_Dir /<path_to_dir>/ConSurf/output_test/ -m --workdir /<path_to_dir>/ConSurf/workdir -BlastFile /<path_to_dir>/ConSurf/output/_A.protein_query.blast
+cd ConSurf
+consurf -PDB example/1lk2.pdb -CHAIN A -Out_Dir output_test/ -m --workdir workdir -BlastFile workdir/1lk2_A.protein_query.blast
 ```
 ## Method Description
 
