@@ -180,13 +180,6 @@ ConSurf -PDB <PDB FILE FULL PATH>  -CHAIN <PDB CHAIN ID> -Out_Dir <Output Direct
 
 1. Basic Build MSA mode (using defaults parameters)
 	`consurf -PDB  example/1lk2.pdb -CHAIN A -Out_Dir output -m`
-2. using build MSA mode and advanced options:
-	`consurf -PDB 1lk2.pdb -CHAIN A -Out_Dir output -m -MSAprogram CLUSTALW -DB "SWISS-PROT" -MaxHomol 100 -Iterat 2 -ESCORE 0.00001 -Algorithm LikelihoodML -Matrix Dayhoff`  
-	- This will run ConSurf in building MSA mode (-m) for Chain A (-CHAIN) of PDB file: `/groups/bioseq.home/1ENV.pdb` (-PDB).  
-	- The sequences for the MSA will be chosen according to iterations of PSI-Blast (-Iterat) against SwissProt Database (-DB "SWISS-PROT"), with E value cutoff of 0.00001 (-ESCORE), considering maximum 100 homologues (MaxHomol).  
-	- The Rate4Site will use Maximum Liklihood algorithm (-Algorithm) and Dayhoff model (-Matrix)
-3. Simple Run With prepared MSA.
-	`consurf -PDB 1lk2.pdb -CHAIN A -Out_Dir output -MSA MY_MSA_FILE -SEQ_NAME MY_SEQ_NAME`
 
 Example:
 ```shell
