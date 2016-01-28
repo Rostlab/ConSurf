@@ -139,7 +139,7 @@ When running in the first mode, the script builds the MSA for the given protein 
 Usage:
 
 ```shell
-ConSurf -PDB <PDB FILE FULL PATH>  -CHAIN <PDB CHAIN ID> -Out_Dir <Output Directory>
+consurf -PDB <PDB FILE FULL PATH>  -CHAIN <PDB CHAIN ID> -Out_Dir <Output Directory>
 ```
 
 ### MANDATORY INPUTS
