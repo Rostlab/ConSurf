@@ -96,7 +96,7 @@ Please download **SwissProt and TrEMBL databases** and format the databases for 
   0. update the location of *SwissProt* to point the location of `SWISSPROT_DB`
   0. update the location of *TrEMBL* to point the location of `UNIPROT_DB`.
   
-Databases can be dwonloaded in FASTA format from [here] (http://www.uniprot.org/downloads) or just run the following commands:
+Databases can be downloaded in FASTA format from [here] (http://www.uniprot.org/downloads) or just run the following commands:
 ```shell
 wget ftp://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/complete/uniprot_sprot.fasta.gz
 gunzip uniprot_sprot.fasta.gz
