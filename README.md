@@ -1,5 +1,5 @@
 # ConSurf
-
+[Link to Elixir](https://bio.tools/tool/mytum.de/ConSurf/1.0.6)  
 Taken from [http://consurf.tau.ac.il/overview.html](http://consurf.tau.ac.il/overview.html)
 
 The ConSurf server [1] is a bioinformatics tool for estimating the evolutionary conservation of amino/nucleic acid positions in a protein/DNA/RNA molecule based on the phylogenetic relations between homologous sequences. The degree to which an amino (or nucleic) acid position is evolutionarily conserved is strongly dependent on its structural and functional importance; rapidly evolving positions are variable while slowly evolving positions are conserved. Thus, conservation analysis of positions among members from the same family can often reveal the importance of each position for the protein (or nucleic acid)'s structure or function. In ConSurf, the evolutionary rate is estimated based on the evolutionary relatedness between the protein (DNA/RNA) and its homologues and considering the similarity between amino (nucleic) acids as reﬂected in the substitutions matrix [2,3]. One of the advantages of ConSurf in comparison to other methods is the accurate computation of the evolutionary rate by using either an empirical Bayesian method or a maximum likelihood (ML) method [3].
