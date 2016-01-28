@@ -143,8 +143,9 @@ consurf -PDB <PDB FILE FULL PATH>  -CHAIN <PDB CHAIN ID> -Out_Dir <Output Direct
 ```
 
 Requirements for successful run: 
-1. User must have `<PDB_ID>_<CHAIN_ID>_protein_seq.fas` in the directory specified as `-workdir`. The file should contain the protein sequence in FASTA format. More information availbale in [Issue #14](https://github.com/Rostlab/ConSurf/issues/14)  
-2. User is strongly encouraged to specify the `<PDB_ID>_<CHAIN_ID>.protein_query.blast` file. It is created in the directory specified as `-workdir` by the ConSurf, but sometimes ConSurf might fail to find it. More information can be found in [Issue 17](https://github.com/Rostlab/ConSurf/issues/17)
+
+1. User must have `<PDB_ID>_<CHAIN_ID>_protein_seq.fas` in the directory specified as `-workdir`. The file should contain the protein sequence in FASTA format. More information and the solution is available in [Issue #14](https://github.com/Rostlab/ConSurf/issues/14)  
+2. User is strongly encouraged to specify the `<PDB_ID>_<CHAIN_ID>.protein_query.blast` file. It is created in the directory specified as `-workdir` by the ConSurf, but sometimes ConSurf might fail to find it. More information and the solution is available in [Issue #17](https://github.com/Rostlab/ConSurf/issues/17)
 
 ### MANDATORY INPUTS
 
