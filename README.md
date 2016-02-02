@@ -56,7 +56,6 @@ Rate4Site - is the main algorithm behind ConSurf.
 The sources are already in the folder `3rd party software`. ConSurf requires the *fast* and *slow* versions. In order to obtain both of them simply run `rate4site_build.sh` script:
 
 ```shell
-(optional) chmod +x rate4site_build.sh
 ./rate4site_build.sh
 ```
 
@@ -76,7 +75,6 @@ cd-hit can be found in `3rd party software/cdhit`
 
 To compile simply run:
 ```shell
-(optional) chmod +x cd-hit_build.sh
 ./cd-hit_build.sh
 ```
 ("Cd-hit: a fast program for clustering and comparing large sets of protein or nucleotide sequences", Weizhong Li & Adam Godzik Bioinformatics, (2006) 22:1658-9)
