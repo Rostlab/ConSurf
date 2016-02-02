@@ -39,9 +39,9 @@ cpan
 ```
 in CPAN run the following commands
 ```shell
-force install Bio::Perl
-force install Config::IniFiles
-force install List::Util
+cpan force install Bio::Perl
+cpan force install Config::IniFiles
+cpan force install List::Util
 ```
 
 ### 3rd Party Software
