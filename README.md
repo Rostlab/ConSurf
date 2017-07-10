@@ -112,7 +112,6 @@ In order to run ConSurf is necessary to update the configuration file - `consurf
 To install ConSurf run the following commands in ConSurf folder:
 ```shell
 aclocal
-autoheader
 automake --force-missing --add-missing
 autoconf
 ./configure
