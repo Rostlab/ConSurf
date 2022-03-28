@@ -8,9 +8,9 @@ quiet=0
 # path to PDB divided. see ftp://ftp.wwpdb.org/pub/pdb/data/structures/divided
 PDB_DIVIDED =
 # path to Swiss-Prot database. see http://www.uniprot.org/downloads
-SWISSPROT_DB=
+SWISSPROT_DB=/app/ConSurf/3rd party software/uniprot_sprot.fasta
 # path to UniRef90 database. see ftp://ftp.uniprot.org/pub/databases/uniprot/uniref/uniref90/README
-UNIPROT_DB=
+UNIPROT_DB=/app/ConSurf/3rd party software/uniprot_trembl.fasta
 RCSB_WGET=wget ftp://ftp.wwpdb.org/pub/pdb/data/structures/all/pdb/
 
 [params]
