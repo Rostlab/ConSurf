@@ -10,7 +10,7 @@ CXX= g++
 CC=$(CXX)
 
 #LDFLAGS =  -mips4 -Wl,-rpath,/opt/lib
-CXXFLAGS += -O3 -Wno-deprecated -DDOUBLEREP
+CXXFLAGS += -O3 -std=c++03 -Wno-deprecated -DDOUBLEREP
 Libsources= AddLog.cpp NNiProp.cpp NNiSep.cpp Nni.cpp aaJC.cpp						\
 allTrees.cpp allTreesSeparateModel.cpp alphabet.cpp amino.cpp						\
    bestAlpha.cpp bestAlphaManyTrees.cpp bestHKYparam.cpp bootstrap.cpp					\
